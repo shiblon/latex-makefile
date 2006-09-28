@@ -64,6 +64,9 @@ svninfo		:= $$Id: Makefile 3783 2006-06-01 20:19:25Z chris $$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2006-09-28):
+# 	* Bumped version to 2.0.9
+# 	* Added ability to parse more than one bibliography
 # Chris Monson (2006-06-01):
 # 	* Bumped version to 2.0.8
 # 	* Added .vrb to the list of cleaned files
@@ -783,10 +786,20 @@ endef
 
 # Outputs all bibliography files to stdout.  Arg 1 is the source stem, arg 2 is
 # a list of targets for each dependency found.
+#
+# The script kills all lines that do not contain bibdata.  Remaining lines have
+# the \bibdata macro and delimiters removed to create a dependency list.  A
+# trailing comma is added, then all adjacent commas are collapsed into a single
+# comma.  Then commas are replaced with the string .bib[space], and the
+# trailing space is killed off.  This produces a list of space-delimited .bib
+# filenames, which is what the make dep file expects to see.
 define get-bibs
 $(SED) \
 -e '/^\\bibdata/!d' \
--e 's/\\bibdata{\([^}]*\)}/$2: \1.bib/' \
+-e 's/\\bibdata{\([^}]*\)}/$2: \1,/' \
+-e 's/,\{2,\}/,/g' \
+-e 's/,/.bib /g' \
+-e 's/ \{1,\}$$//' \
 $1 | $(SORT) | $(UNIQ)
 endef
 

@@ -1,0 +1,55 @@
+\documentclass[
+    letterpaper % use letter paper
+]{article}
+
+\includeonly{test1._include_,test4._include_}
+
+\usepackage{graphicx}
+
+\usepackage{apalike}\bibliographystyle{apalike}
+%\usepackage{named}\bibliographystyle{named}
+
+\begin{document}
+
+\tableofcontents
+\listoffigures
+
+\section{first section}
+
+\nocite{testentry3}
+
+\begin{figure}
+\centering
+    \includegraphics[width=0.7\textwidth]{test1.eps}
+\caption{This is a figure}
+\label{fig:test1}
+\end{figure}
+
+\section{second section}
+
+\begin{figure}
+\centering
+    \includegraphics[width=0.7\textwidth]{test2.eps}
+\caption{This is another figure}
+\label{fig:test2}
+\end{figure}
+
+\begin{figure}
+\centering
+    \includegraphics[width=\textwidth]{graph.eps}
+\caption{This is another figure}
+\label{fig:test3}
+\end{figure}
+
+A Citation: \cite{testentry}
+
+This is an input: {\input{test3._include_.tex}}
+
+\include{test1._include_}
+\include{test2._include_}
+
+Now referring to Figures~\ref{fig:test1} and~\ref{fig:test2}.
+
+\end{document}
+
+% vim: lbr
