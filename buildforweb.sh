@@ -2,7 +2,6 @@
 
 files=(\
 Makefile \
-convert.sh \
 )
 
 version=`sed -e '
