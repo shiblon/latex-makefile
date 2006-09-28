@@ -30,7 +30,7 @@
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
 version		:= 2.0.8
-svninfo		:= $$Id: Makefile 3783 2006-06-01 20:19:25Z chris $$
+svninfo		:= $$Id$$
 #
 # TODO:
 # 	* Sometimes we get
