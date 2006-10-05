@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.0.9
+version		:= 2.1.0
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2006-10-05):
+# 	* Bumped version to 2.1.0 (pretty serious new feature added)
+# 	* New feature: bib files can now be anywhere on the BIBINPUTS path
+# 	* New programs: kpsewhich (with tetex) and xargs (BSD)
 # Chris Monson (2006-09-28):
 # 	* Bumped version to 2.0.9
 # 	* Added ability to parse more than one bibliography
@@ -258,10 +262,12 @@ SORT		:= sort
 TOUCH		:= touch
 UNIQ		:= uniq
 WHICH		:= which
+XARGS		:= xargs
 # == LaTeX (tetex-provided) ==
 BIBTEX		:= bibtex
 DVIPS		:= dvips
 LATEX		:= latex
+KPSEWHICH	:= kpsewhich
 PS2PDF_NORMAL	:= ps2pdf
 PS2PDF_EMBED	:= ps2pdf13
 # = OPTIONAL PROGRAMS =
@@ -793,14 +799,19 @@ endef
 # comma.  Then commas are replaced with the string .bib[space], and the
 # trailing space is killed off.  This produces a list of space-delimited .bib
 # filenames, which is what the make dep file expects to see.
+#
+# $(call get-bibs,<aux file>,<targets>)
 define get-bibs
 $(SED) \
 -e '/^\\bibdata/!d' \
--e 's/\\bibdata{\([^}]*\)}/$2: \1,/' \
+-e 's/\\bibdata{\([^}]*\)}/\1,/' \
 -e 's/,\{2,\}/,/g' \
 -e 's/,/.bib /g' \
 -e 's/ \{1,\}$$//' \
-$1 | $(SORT) | $(UNIQ)
+$1 | $(XARGS) $(KPSEWHICH) | \
+$(SED) \
+-e 's/^/$2: /' | \
+\$(SORT) | $(UNIQ)
 endef
 
 # Makes a an aux file that only has stuff relevant to the dvi in it
