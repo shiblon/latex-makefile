@@ -808,7 +808,7 @@ $(SED) \
 -e 's/,\{2,\}/,/g' \
 -e 's/,/.bib /g' \
 -e 's/ \{1,\}$$//' \
-$1 | $(XARGS) $(KPSEWHICH) | \
+$1 | $(XARGS) $(KPSEWHICH) - | \
 $(SED) \
 -e 's/^/$2: /' | \
 \$(SORT) | $(UNIQ)
