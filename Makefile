@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.0
+version		:= 2.1.1
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2006-10-17):
+# 	* Bumped version to 2.1.1
+# 	* Fixed includes from subdirectories (sed-to-sed slash escape problem)
 # Chris Monson (2006-10-05):
 # 	* Bumped version to 2.1.0 (pretty serious new feature added)
 # 	* New feature: bib files can now be anywhere on the BIBINPUTS path
@@ -927,9 +930,9 @@ define flatten-aux
 $(SED) \
 -e '/\\@input{\(.*\)}/{' \
 -e     's//\1/' \
+-e     's![.:]!\\&!g' \
 -e     'h' \
--e     's!.*!/\\\\@input{&}/{!' \
--e     's!\.!\\.!g' \
+-e     's!.*!\\:\\\\@input{&}:{!' \
 -e     'p' \
 -e     'x' \
 -e     's/.*/r &/p' \
