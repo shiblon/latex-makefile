@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.1
+version		:= 2.1.2
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-02-23):
+# 	* Bumped version to 2.1.2
+# 	* Added the ability to generate .tex files from .rst files
 # Chris Monson (2006-10-17):
 # 	* Bumped version to 2.1.1
 # 	* Fixed includes from subdirectories (sed-to-sed slash escape problem)
@@ -276,6 +279,8 @@ PS2PDF_EMBED	:= ps2pdf13
 # = OPTIONAL PROGRAMS =
 # == Makefile Color Output ==
 TPUT		:= tput
+# == TeX Generation
+RST2LATEX	:= rst2latex.py
 # == EPS Generation ==
 DOT		:= dot		# GraphViz
 FIG2DEV		:= fig2dev	# XFig
@@ -485,6 +490,7 @@ GNUPLOT_GLOBAL	:= global._include_.gpi gnuplot.global
 # Files of interest
 all_files.tex		:= $(wildcard *.tex)
 all_files.tex.sh	:= $(wildcard *.tex.sh)
+all_files.rst		:= $(wildcard *.rst)
 all_files.fig		:= $(wildcard *.fig)
 all_files.gpi		:= $(wildcard *.gpi)
 all_files.dot		:= $(wildcard *.dot)
@@ -510,6 +516,7 @@ filter-default		= \
 # Top level sources that can be built even when they are not by default
 files.tex	:= $(filter-out %._gray_.tex,$(call filter-buildable,tex))
 files.tex.sh	:= $(call filter-buildable,tex.sh)
+files.rst	:= $(call filter-buildable,rst)
 files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
 files.fig	:= $(call filter-buildable,fig)
@@ -518,6 +525,7 @@ files.eps.gz	:= $(call filter-buildable,eps.gz)
 # Top level sources that are built by default targets
 default_files.tex	:= $(filter-out %._gray_.tex,$(call filter-default,tex))
 default_files.tex.sh	:= $(call filter-default,tex.sh)
+default_files.rst	:= $(call filter-default,rst)
 default_files.gpi	:= $(call filter-default,gpi)
 default_files.dot	:= $(call filter-default,dot)
 default_files.fig	:= $(call filter-default,fig)
@@ -529,15 +537,15 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
-all_files_scripts	:= $(call concat-files,tex.sh,all)
+all_files_scripts	:= $(call concat-files,tex.sh rst,all)
 all_files_graphics	:= $(call concat-files,fig gpi eps.gz dot,all)
 
 default_files_source	:= $(call concat-files,tex,default)
-default_files_scripts	:= $(call concat-files,tex.sh,default)
+default_files_scripts	:= $(call concat-files,tex.sh rst,default)
 default_files_graphics	:= $(call concat-files,fig gpi eps.gz dot,default)
 
 files_source	:= $(call concat-files,tex)
-files_scripts	:= $(call concat-files,tex.sh)
+files_scripts	:= $(call concat-files,tex.sh rst)
 files_graphics	:= $(call concat-files,fig gpi eps.gz dot)
 
 # Utility function for obtaining stems
@@ -547,6 +555,7 @@ get-stems	= $(sort $($(if $2,$2_,)files.$1:%.$1=%))
 # List of all stems (including ._include_ and ._nobuild_ file stems)
 all_stems.tex		:= $(call get-stems,tex,all)
 all_stems.tex.sh	:= $(call get-stems,tex.sh,all)
+all_stems.rst		:= $(call get-stems,rst,all)
 all_stems.fig		:= $(call get-stems,fig,all)
 all_stems.gpi		:= $(call get-stems,gpi,all)
 all_stems.dot		:= $(call get-stems,dot,all)
@@ -556,6 +565,7 @@ all_stems.eps		:= $(call get-stems,eps,all)
 # List of all default stems (all default PDF targets):
 default_stems.tex		:= $(call get-stems,tex,default)
 default_stems.tex.sh		:= $(call get-stems,tex.sh,default)
+default_stems.rst		:= $(call get-stems,rst,default)
 default_stems.fig		:= $(call get-stems,fig,default)
 default_stems.gpi		:= $(call get-stems,gpi,default)
 default_stems.dot		:= $(call get-stems,dot,default)
@@ -564,6 +574,7 @@ default_stems.eps.gz		:= $(call get-stems,eps.gz,default)
 # List of all stems (all possible bare PDF targets created here):
 stems.tex		:= $(call get-stems,tex)
 stems.tex.sh		:= $(call get-stems,tex.sh)
+stems.rst		:= $(call get-stems,rst)
 stems.fig		:= $(call get-stems,fig)
 stems.gpi		:= $(call get-stems,gpi)
 stems.dot		:= $(call get-stems,dot)
@@ -574,7 +585,7 @@ stems.eps.gz		:= $(call get-stems,eps.gz)
 concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 
 all_stems_source	:= $(call concat-stems,tex,all)
-all_stems_script	:= $(call concat-stems,tex.sh,all)
+all_stems_script	:= $(call concat-stems,tex.sh rst,all)
 all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz dot,all)
 all_stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(all_stems_graphic) $(all_stems.eps) \
@@ -587,7 +598,7 @@ all_stems_sg		:= $(sort $(all_stems_script) $(all_stems_gray))
 all_stems_ssg		:= $(sort $(all_stems_ss) $(all_stems_gray))
 
 default_stems_source	:= $(call concat-stems,tex,default)
-default_stems_script	:= $(call concat-stems,tex.sh,default)
+default_stems_script	:= $(call concat-stems,tex.sh rst,default)
 default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz dot,default)
 default_stems_gray_graphic	:= $(addsuffix ._gray_,$(default_stems_graphic))
 default_stems_gg	:= $(sort \
@@ -599,7 +610,7 @@ default_stems_sg	:= $(sort $(default_stems_script) $(default_stems_gray))
 default_stems_ssg	:= $(sort $(default_stems_ss) $(default_stems_gray))
 
 stems_source		:= $(call concat-stems,tex)
-stems_script		:= $(call concat-stems,tex.sh)
+stems_script		:= $(call concat-stems,tex.sh rst)
 stems_graphic		:= $(call concat-stems,fig gpi eps.gz dot)
 stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(stems_graphic) $(all_stems.eps))
@@ -825,7 +836,7 @@ $(SED) \
 $1 > $2
 endef
 
-# Makes a an aux file that only has stuff relevant to the bbl in it
+# Makes an aux file that only has stuff relevant to the bbl in it
 # $(call make-auxbbl-file,<flattened-aux>,<new-aux>)
 define make-auxbbl-file
 $(SED) \
@@ -1408,6 +1419,10 @@ endif
 %.tex:	%.tex.sh
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(SHELL) $< $@
+
+%.tex:	%.rst
+	$(QUIET)$(call echo-build,$<,$@)
+	$(QUIET)$(RST2LATEX) $< $@
 
 #
 # GRAYSCALE LaTeX TARGETS
