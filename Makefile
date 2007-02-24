@@ -279,7 +279,7 @@ PS2PDF_EMBED	:= ps2pdf13
 # = OPTIONAL PROGRAMS =
 # == Makefile Color Output ==
 TPUT		:= tput
-# == TeX Generation
+# == TeX Generation ==
 RST2LATEX	:= rst2latex.py
 # == EPS Generation ==
 DOT		:= dot		# GraphViz
