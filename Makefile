@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.2
+version		:= 2.1.3
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-03-01):
+# 	* Bumped version to 2.1.3
+# 	* Added reST to the included documentation
+# 	* Fixed graphics and script generation to be settable in the
+# 		environment.
 # Chris Monson (2007-02-23):
 # 	* Bumped version to 2.1.2
 # 	* Added the ability to generate .tex files from .rst files
@@ -280,14 +285,14 @@ PS2PDF_EMBED	:= ps2pdf13
 # == Makefile Color Output ==
 TPUT		:= tput
 # == TeX Generation ==
-RST2LATEX	:= rst2latex.py
+RST2LATEX	?= rst2latex.py
 # == EPS Generation ==
-DOT		:= dot		# GraphViz
-FIG2DEV		:= fig2dev	# XFig
-GNUPLOT		:= gnuplot	# GNUplot
-GUNZIP		:= gunzip	# GZipped EPS
+DOT		?= dot		# GraphViz
+FIG2DEV		?= fig2dev	# XFig
+GNUPLOT		?= gnuplot	# GNUplot
+GUNZIP		?= gunzip	# GZipped EPS
 # == Beamer Enlarged Output ==
-PSNUP		:= psnup
+PSNUP		?= psnup
 # == Viewing Stuff ==
 VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
@@ -2066,37 +2071,43 @@ define help_text
 #	 The colors can be customized very simply by setting any of the
 #	 LATEX_COLOR_<CONTEXT> variables in your environment (see above).
 #
-#    Scripted TeX Files:
+#    Predecessors to TeX Files:
 #        Given a target <target>, if no <target>.tex file exists but a
-#        corresponding script file exists, then that script will be called to
-#        generate the tex file.
+#        corresponding script or predecessor file exists, then appropriate
+#        action will be taken to generate the tex file.
 #
-#        Currently supported script languages are:
+#        Currently supported script or predecessor languages are:
 #
 #        sh:     %.tex.sh
 #
-#        Of course, your .sh file can call another script to do its work.  Go
-#        wild!
+#        	Calls the script using sh, assuming that its output is a .tex
+#        	file.  Of course, your .sh file can call another script to do
+#        	its work.  Go wild!
 #
-#        The script is called thus:
+#        	The script is called thus:
 #
-#	 <interpreter> <script file name> <target tex file>
+#	 	<interpreter> <script file name> <target tex file>
 #
-#        and therefore sees exactly one parameter: the name of the .tex file
-#        that it is to create.
+#        	and therefore sees exactly one parameter: the name of the .tex
+#        	file that it is to create.
 #
-#        Why does this feature exist?  I ran into this while working on my
-#        paper dissertation.  I wrote a huge bash script that used a lot of sed
-#        to bring together existing papers in LaTeX.  It would have been nice
-#        had I had something like this to make my life easier, since as it
-#        stands I have to run the script and then build the document with make.
-#        This feature provides hooks for complicated stuff that you may want to
-#        do, but that I have not considered.
+#        	Why does this feature exist?  I ran into this while working on
+#        	my paper dissertation.  I wrote a huge bash script that used a
+#        	lot of sed to bring together existing papers in LaTeX.  It
+#        	would have been nice had I had something like this to make my
+#        	life easier, since as it stands I have to run the script and
+#        	then build the document with make.  This feature provides hooks
+#        	for complicated stuff that you may want to do, but that I have
+#        	not considered.
 #
-#        This approach does not work for included .tex files.  If you want to
-#        do something special with those, you should wrap all of that
-#        functionality into a top-level source script that creates the
-#        necessary includes as well.
+#        	This approach does not work for included .tex files.  If you
+#        	want to do something special with those, you should wrap all of
+#        	that functionality into a top-level source script that creates
+#        	the necessary includes as well.
+#
+#        reST:	 %.rst
+#
+#        	Runs the reST to LaTeX converter to generate a .tex file
 #
 #    Dependencies:
 #
@@ -2240,6 +2251,7 @@ endef
 #    fls [label="%.fls"]
 #    log [label="%.log"]
 #    tex_sh [label="%.tex.sh"]
+#    rst -> [label="%.rst"]
 #    tex [
 #        shape=record
 #        label="<tex> %.tex|<include> _include_.tex"
@@ -2257,6 +2269,7 @@ endef
 #
 #    gpi_files [shape=point]
 #
+#    rst -> tex:tex [label="reST"]
 #    tex_sh -> tex:tex [label="sh"]
 #    tex -> tex_outputs [label="latex"]
 #    tex_outputs -> dvi
