@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.3
+version		:= 2.1.4
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-03-28):
+# 	* Bumped version to 2.1.4
+# 	* Fixed syntax error in dot output
 # Chris Monson (2007-03-01):
 # 	* Bumped version to 2.1.3
 # 	* Added reST to the included documentation
@@ -2251,7 +2254,7 @@ endef
 #    fls [label="%.fls"]
 #    log [label="%.log"]
 #    tex_sh [label="%.tex.sh"]
-#    rst -> [label="%.rst"]
+#    rst [label="%.rst"]
 #    tex [
 #        shape=record
 #        label="<tex> %.tex|<include> _include_.tex"
