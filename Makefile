@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.4
+version		:= 2.1.5
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-04-02):
+# 	* Bumped version to 2.1.5
+# 	* Addressed Issue 7, incorrect .gpi.d generation in subdirectories
 # Chris Monson (2007-03-28):
 # 	* Bumped version to 2.1.4
 # 	* Fixed syntax error in dot output
@@ -357,6 +360,14 @@ GRAY	?= $(call get-default,$(GREY),)
 # original script:
 #
 # 0i	-e :s/\$/$$/eg:s/'/'"'"'/eg^Ela'A' \:nohj
+
+# Create an identifier from a file name
+# $(call cleanse-filename,filename)
+cleanse-filename	= $(subst .,_,$(subst /,__,$1))
+
+# Escape dots
+# $(call escape-dots,str)
+escape-dots		= $(subst .,\\.,$1)
 
 # Test that a file exists
 # $(call test-exists,file)
@@ -856,8 +867,8 @@ endef
 # $(call make-gpi-d,<.gpi>,<.gpi.d>)
 define make-gpi-d
 $(ECHO) '# vim: ft=make' > $2; \
-$(ECHO) 'ifndef INCLUDED_$(subst .,_,$2)' >> $2; \
-$(ECHO) 'INCLUDED_$(subst .,_,$2) = 1' >> $2; \
+$(ECHO) 'ifndef INCLUDED_$(call cleanse-filename,$2)' >> $2; \
+$(ECHO) 'INCLUDED_$(call cleanse-filename,$2) = 1' >> $2; \
 $(call get-gpi-deps,$1,$(addprefix $(2:%.gpi.d=%).,eps gpi.d)) >> $2; \
 $(ECHO) 'endif' >> $2;
 endef
@@ -886,7 +897,7 @@ $(SED) \
 -e '  s/[[:space:]]*\(['\''"][^'\''"]*['\''"]\)\{0,1\}[^,]*/\1/g' \
 -e '  s/,['\''"]-\{0,1\}['\''"]//g' \
 -e '  s/[,'\''"]\{1,\}/ /g' \
--e '  s/.*/$2: &/' \
+-e '  s!.*!$2: &!' \
 -e '  p' \
 -e ' }' \
 -e ' d' \
@@ -1025,7 +1036,7 @@ test-run-again	= $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.)$$' $1.log
 # $(call test-log-for-need-to-run,<source stem>)
 define test-log-for-need-to-run
 $(SED) \
--e '/^No file $(subst .,\\.,$1)\.aux\./d' \
+-e '/^No file $(call escape-dots,$1)\.aux\./d' \
 $1.log \
 | $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*)$$'
 endef
