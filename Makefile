@@ -64,6 +64,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-05-20):
+# 	* Bumped version to 2.1.6
+# 	* Changed default paper size for rst files
+# 	* Added todo item: fix paper size for rst files
+# 	* Added todo item: allow other comment directives for rst conversion
 # Chris Monson (2007-04-02):
 # 	* Bumped version to 2.1.5
 # 	* Addressed Issue 7, incorrect .gpi.d generation in subdirectories
@@ -1092,6 +1097,16 @@ endef
 # $(call convert-fig,<fig file>,<eps file>,[gray])
 convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
 
+# Creation of .tex files from .rst files
+# TODO: Fix paper size so that it can be specified in the file itself
+# TODO: Allow other conversion options as comments in the file
+# $(call convert-rst,<rst file>,<tex file>)
+define convert-rst
+$(RST2LATEX) \
+  --documentoptions='letterpaper' \
+  $1 $2
+endef
+
 # Converts .eps.gz files into .eps files
 #
 # $(call convert-epsgz,<eps.gz file>,<eps file>,[gray])
@@ -1441,7 +1456,7 @@ endif
 
 %.tex:	%.rst
 	$(QUIET)$(call echo-build,$<,$@)
-	$(QUIET)$(RST2LATEX) $< $@
+	$(QUIET)$(call convert-rst,$<,$@)
 
 #
 # GRAYSCALE LaTeX TARGETS
