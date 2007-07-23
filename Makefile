@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.5
+version		:= 2.1.6
 svninfo		:= $$Id$$
 #
 # TODO:
