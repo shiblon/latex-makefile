@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.6
+version		:= 2.1.7
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-10-16):
+# 	* Bumped version to 2.1.7
+# 	* Removed todo item: allow other comment directives for rst conversion
+# 	* Added ability to use global rst style file _rststyle_._include_.tex
+# 	* Added help text to that effect
 # Chris Monson (2007-05-20):
 # 	* Bumped version to 2.1.6
 # 	* Changed default paper size for rst files
@@ -1099,12 +1104,13 @@ convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
 
 # Creation of .tex files from .rst files
 # TODO: Fix paper size so that it can be specified in the file itself
-# TODO: Allow other conversion options as comments in the file
 # $(call convert-rst,<rst file>,<tex file>)
+rst_style_file=$(wildcard _rststyle_._include_.tex)
 define convert-rst
 $(RST2LATEX) \
-  --documentoptions='letterpaper' \
-  $1 $2
+	--documentoptions=letterpaper \
+	$(if $(rst_style_file),--stylesheet=$(rst_style_file),) \
+	$1 $2
 endef
 
 # Converts .eps.gz files into .eps files
@@ -1454,7 +1460,7 @@ endif
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(SHELL) $< $@
 
-%.tex:	%.rst
+%.tex:	%.rst $(rst_style_file)
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call convert-rst,$<,$@)
 
@@ -2137,6 +2143,8 @@ define help_text
 #        reST:	 %.rst
 #
 #        	Runs the reST to LaTeX converter to generate a .tex file
+#        	If it finds a file names _rststyle_._include_.tex, uses it as
+#        	the "stylesheet" option to rst2latex.
 #
 #    Dependencies:
 #
