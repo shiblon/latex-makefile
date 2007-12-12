@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.8
+version		:= 2.1.9
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2007-12-12):
+# 	* Bumped version to 2.1.9
+# 	* Fixed documentation and dependency graph for pstex files
 # Chris Monson (2007-12-12):
 # 	* Bumped version to 2.1.8
 # 	* Added basic pstex_t support for fig files (Issue 9 by favonia)
