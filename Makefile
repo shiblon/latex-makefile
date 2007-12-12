@@ -1779,7 +1779,7 @@ _dependency_graph:
 	$(QUIET)$(ECHO) "/* LaTeX Dependency Graph */"
 	$(QUIET)$(call output-dependency-graph)
 
-.PHONY: _show_dependency_shart
+.PHONY: _show_dependency_graph
 _show_dependency_graph:
 	$(QUIET)$(call output-dependency-graph,$(graph_stem).dot)
 	$(QUIET)$(DOT) -Tps -o $(graph_stem).eps $(graph_stem).dot
@@ -2103,6 +2103,9 @@ define help_text
 #       The behavior of this makefile with each type is described in
 #       its own section below.
 #
+#    %.pstex{,_t}:
+#    	Build a .pstex_t file from a .fig file.
+#
 #    All targets have a corresponding %._gray_.suffix form, which creates
 #    everything in monochrome.  This is useful for creating both color and
 #    grayscale versions of the same document, and they can coexist happily in
@@ -2337,8 +2340,10 @@ endef
 #
 #    eps [
 #        shape=Mrecord
-#        label="{{<gpi> GNUplot|<fig> XFig|<epsgz> GZip|<dot> Dot}|<eps> eps}"
+#        label="{{<gpi> GNUplot|<epsgz> GZip|<dot> Dot|<fig> XFig}|<eps> eps}"
 #        ]
+#    pstex [label="%.pstex"]
+#    pstex_t [label="%.pstex_t"]
 #    tex_outputs [shape=point]
 #    extra_tex_files [shape=point]
 #    gpi_data [label="<data>"]
@@ -2384,6 +2389,11 @@ endef
 #    gpi_includes -> gpi_files
 #    eps_gz -> eps:epsgz [label="gunzip"]
 #    fig -> eps:fig [label="fig2dev"]
+#    fig -> pstex [label="fig2dev"]
+#    fig -> pstex_t [label="fig2dev"]
+#    pstex -> pstex_t [label="fig2dev"]
+#    pstex -> extra_tex_files
+#    pstex_t -> extra_tex_files
 #    dot -> eps:dot [label="dot"]
 #    dvi -> ps [label="dvips"]
 #    include_aux -> bbl [label="bibtex"]
