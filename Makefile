@@ -817,11 +817,6 @@ rm_tex := \
 	$(foreach e,$(rm_ext) tex,$(addsuffix .$e,$(all_stems_sg))) \
 	$(addsuffix .log,$(all_ps_targets) $(all_pdf_targets)) \
 	$(addsuffix .*.log,$(stems_graphic))
-#rm_tex		:= \
-#	$(addsuffix .{$(rm_ext)},$(all_stems_source)) \
-#	$(addsuffix .{$(rm_ext)$(comma)tex},$(all_stems_sg)) \
-#	$(addsuffix .log,$(all_ps_targets) $(all_pdf_targets)) \
-#	$(addsuffix .*.log,$(stems_graphic)) \
 
 # These are the files that will affect .gpi transformation for all .gpi files.
 #
