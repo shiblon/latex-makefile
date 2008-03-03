@@ -1513,7 +1513,7 @@ endif
 		exit 1; \
 	fi; \
 	$(call make-auxdvi-file,$*.aux.make,$*.auxdvi.cookie); \
-	run=0; 
+	run=0; \
 	for i in 1; do \
 		if $(call test-exists,$*.bbl.cookie); then \
 			run=1; \
