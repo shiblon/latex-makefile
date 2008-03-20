@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.12
+version		:= 2.1.13
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,7 +64,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2008-03-03):
+# Chris Monson (2008-03-20):
+# 	* Bumped version to 2.1.13
+# 	* Changed error output colorization to show errors for missing files
+# 		that are not graphics files.
+# Chris Monson (2008-03-20):
 # 	* Bumped version to 2.1.12
 # 	* Fixed a regression introduced in r28 that makes bibtex fail when
 # 		there is no index file present
@@ -1013,10 +1017,16 @@ endef
 # Colorizes real, honest-to-goodness LaTeX errors that can't be overcome with
 # recompilation.
 #
+# Note that we only ignore file not found errors for things that we know how to
+# build, like graphics files.
+#
 # $(call colorize-latex-errors,<log file>)
 define colorize-latex-errors
 $(SED) \
--e '/^! LaTeX Error: File/d' \
+-e '/^! LaTeX Error: File/{' \
+-e '  /eps'"'"' not found$$/d' \
+-e '  /pstex.*'"'"' not found$$/d' \
+-e '}' \
 -e '/^! LaTeX Error: Cannot determine size/d' \
 -e '/^! /,/^$$/{' \
 -e '  H' \
