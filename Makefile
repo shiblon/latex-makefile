@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.11
+version		:= 2.1.12
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-03-03):
+# 	* Bumped version to 2.1.12
+# 	* Fixed a regression introduced in r28 that makes bibtex fail when
+# 		there is no index file present
 # Chris Monson (2008-03-03):
 # 	* Bumped version to 2.1.11
 # 	* Fixed issue 11 (handle index files, reported by abachn)
@@ -1505,7 +1509,7 @@ endif
 #	routine.
 #
 .SECONDARY: $(all_dvi_targets)
-%.dvi: %.bbl %.ind %.aux
+%.dvi: %.bbl %.aux
 	$(QUIET)\
 	fatal=`$(call colorize-latex-errors,$*.log)`; \
 	if [ x"$$fatal" != x"" ]; then \
