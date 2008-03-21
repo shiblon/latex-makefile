@@ -1024,8 +1024,8 @@ endef
 define colorize-latex-errors
 $(SED) \
 -e '/^! LaTeX Error: File/{' \
--e '  /eps'"'"' not found$$/d' \
--e '  /pstex.*'"'"' not found$$/d' \
+-e '  /eps'"'"' not found\.$$/d' \
+-e '  /pstex.*'"'"' not found\.$$/d' \
 -e '}' \
 -e '/^! LaTeX Error: Cannot determine size/d' \
 -e '/^! /,/^$$/{' \
@@ -1090,6 +1090,7 @@ $(SED) \
 -e     's!.*!\\:\\\\@input{&}:{!' \
 -e     'p' \
 -e     'x' \
+-e     's/\\././g' \
 -e     's/.*/r &/p' \
 -e     's/.*/d/p' \
 -e     's/.*/}/p' \
