@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.13
+version		:= 2.1.14
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-03-21):
+# 	* Bumped version to 2.1.14
+# 	* Fixed broken aux file flattening, which caused included bibs to be
+# 		missed.
 # Chris Monson (2008-03-20):
 # 	* Bumped version to 2.1.13
 # 	* Changed error output colorization to show errors for missing files
