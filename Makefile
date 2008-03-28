@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.14
+version		:= 2.1.15
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-03-27):
+# 	* Bumped version to 2.1.15
+# 	* issue 18: Favors binary echo over builtin, as binary understands -n
+# 	* issue 16: Fixed handling of missing pstex_t files in the log
+# 	* issue 9: Added .SECONDARY target for .pstex files
 # Chris Monson (2008-03-21):
 # 	* Bumped version to 2.1.14
 # 	* Fixed broken aux file flattening, which caused included bibs to be
@@ -341,6 +346,11 @@ VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
 
+# This ensures that even when echo is a shell builtin, we still use the binary
+# (the builtin doesn't always understand -n)
+FIXED_ECHO	:= $(if $(findstring shell builtin,$(shell type $(ECHO))),$(shell which echo),$(ECHO))
+ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
+
 # SH NOTES
 #
 # On some systems, /bin/sh, which is the default shell, is not linked to
@@ -608,6 +618,13 @@ files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
 files.fig	:= $(call filter-buildable,fig)
 files.eps.gz	:= $(call filter-buildable,eps.gz)
+
+# Make all pstex targets secondary.  The pstex_t target requires the pstex
+# target, and nothing else really depends on it, so it often gets deleted.
+# This avoids that by allowing *all* fig files to be pstex targets, which is
+# perfectly valid and causes no problems even if they're going to become eps
+# files in the end.
+.SECONDARY:	$(patsubst %.fig,%.pstex,$(files.fig))
 
 # Top level sources that are built by default targets
 default_files.tex	:= $(filter-out %._gray_.tex,$(call filter-default,tex))
@@ -1027,9 +1044,20 @@ endef
 # $(call colorize-latex-errors,<log file>)
 define colorize-latex-errors
 $(SED) \
--e '/^! LaTeX Error: File/{' \
--e '  /eps'"'"' not found\.$$/d' \
--e '  /pstex.*'"'"' not found\.$$/d' \
+-e '/^! LaTeX Error: File .*eps'"'"' not found\.$$/d' \
+-e '/^! LaTeX Error: File .*pstex_t'"'"' not found\.$$/{' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  N' \
+-e '  d' \
 -e '}' \
 -e '/^! LaTeX Error: Cannot determine size/d' \
 -e '/^! /,/^$$/{' \
@@ -1168,7 +1196,7 @@ define test-log-for-need-to-run
 $(SED) \
 -e '/^No file $(call escape-dots,$1)\.aux\./d' \
 $1.log \
-| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*)$$'
+| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*|! LaTeX Error.*\.pstex_t'"'"' not found.*)$$'
 endef
 
 # LaTeX invocations
@@ -1234,11 +1262,11 @@ convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
 
 # Creation of .pstex files from .fig files
 # $(call convert-fig-pstex,<fig file>,<pstex file>,[gray])
-convert-fig-pstex	= $(FIG2DEV) -L pstex $(if $3,-N,) $1 $2
+convert-fig-pstex	= $(FIG2DEV) -L pstex $(if $3,-N,) $1 $2 > /dev/null 2>&1
 
 # Creation of .pstex_t files from .fig files
 # $(call convert-fig-pstex-t,<fig file>,<pstex file>,<pstex_t file>,[gray])
-convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $(if $4,-N,) $1 $2
+convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $(if $4,-N,) $1 $2 > /dev/null 2>&1
 
 # Creation of .tex files from .rst files
 # TODO: Fix paper size so that it can be specified in the file itself
@@ -1624,6 +1652,7 @@ endif
 		$(SED) \
 		-e 's/\.eps/._gray_&/' \
 		-e 's/\.pstex/._gray_&/' \
+		-e 's/\.pstex_t/._gray_&/' \
 		-e 's/_include_/&._gray_/g' \
 		$$f.tex > $$f._gray_.tex; \
 	done;
