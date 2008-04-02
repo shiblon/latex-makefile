@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.15
+version		:= 2.1.16
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-04-02):
+# 	* Bumped version to 2.1.16
+# 	* issue 19: Removed the use of "type" to fix broken "echo" settings
 # Chris Monson (2008-03-27):
 # 	* Bumped version to 2.1.15
 # 	* issue 18: Favors binary echo over builtin, as binary understands -n
@@ -348,7 +351,7 @@ VIEW_GRAPHICS	?= display
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
-FIXED_ECHO	:= $(if $(findstring shell builtin,$(shell type $(ECHO))),$(shell which echo),$(ECHO))
+FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 
 # SH NOTES
