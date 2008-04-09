@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.16
+version		:= 2.1.17
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-04-09):
+# 	* Bumped version to 2.1.17
+# 	* issue 20: fixed accumulation of <pid>*.make files - wildcard was
+#		refusing to work on files that are very recently created.
 # Chris Monson (2008-04-02):
 # 	* Bumped version to 2.1.16
 # 	* issue 19: Removed the use of "type" to fix broken "echo" settings
@@ -427,6 +431,14 @@ remove-files-helper	= $(if $1,$(RM) $1,:)
 
 # $(call remove-files,file1 file2)
 remove-files		= $(call remove-files-helper,$(wildcard $1))
+
+# This removes files without checking whether they are there or not.  This
+# sometimes has to be used when the file is created by a series of shell
+# commands, but there ends up being a race condition: make doesn't know about
+# the file generation as quickly as the system does, so $(wildcard ...) doesn't
+# work right.  Blech.
+# $(call remove-temporary-files,filenames)
+remove-temporary-files	= $(if $1,$(RM) $1,:)
 
 # Create an identifier from a file name
 # $(call cleanse-filename,filename)
@@ -1139,7 +1151,7 @@ $(SED) \
 -e '/^\\bibcite/d' \
 -e 's/^\(\\newlabel{[^}]\{1,\}}\).*/\1/' \
 "$1.$$$$.make" | $(SORT) > '$2'; \
-$(call remove-files,$1.$$$$.make $1.$$$$.sed.make)
+$(call remove-temporary-files,$1.$$$$.make $1.$$$$.sed.make)
 endef
 
 # Generate pdf from postscript
@@ -1254,8 +1266,8 @@ if ! $(GNUPLOT) $$fnames 2>$1.log; then \
 	$(call colorize-gnuplot-errors,$1.log); \
 	success=0; \
 fi; \
-$(if $(gpi_sed),$(call remove-files,$1.temp.make);,) \
-$(call remove-files,$1head.make); \
+$(if $(gpi_sed),$(call remove-temporary-files,$1.temp.make);,) \
+$(call remove-temporary-files,$1head.make); \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
 endef
 
@@ -1496,7 +1508,7 @@ endif
 	    $(MV) '$@.temp' '$@'; \
 	else \
 	    $(CAT) $@.log; \
-	    $(call remove-files,'$@.temp'); \
+	    $(call remove-temporary-files,'$@.temp'); \
 	    $(sh_false); \
 	fi
 
@@ -1510,7 +1522,7 @@ endif
 	    $(MV) '$@.temp' '$@'; \
 	else \
 	    $(CAT) $@.log; \
-	    $(call remove-files,'$@.temp'); \
+	    $(call remove-temporary-files,'$@.temp'); \
 	    $(sh_false); \
 	fi
 
@@ -1584,7 +1596,7 @@ endif
 			break; \
 		fi; \
 	done; \
-	$(call remove-files,$*.bbl.cookie $*.run.cookie); \
+	$(call remove-temporary-files,$*.bbl.cookie $*.run.cookie); \
 	$(MV) $*.auxdvi.cookie $*.auxdvi.make; \
 	if [ x"$$run" = x"1" ]; then \
 		$(call remove-files,$@.1st.make); \
@@ -1922,7 +1934,7 @@ _show_dependency_graph:
 	$(QUIET)$(call output-dependency-graph,$(graph_stem).dot)
 	$(QUIET)$(DOT) -Tps -o $(graph_stem).eps $(graph_stem).dot
 	$(QUIET)$(VIEW_POSTSCRIPT) $(graph_stem).eps
-	$(QUIET)$(call remove-files,$(graph_stem).*)
+	$(QUIET)$(call remove-temporary-files,$(graph_stem).*)
 
 .PHONY: _sources
 _sources:
