@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.17
+version		:= 2.1.18
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-04-09):
+# 	* Bumped version to 2.1.18
+# 	* issue 16: fixed pstex build problems, seems nondeterministic.  Added
+# 		gratuitious hack for testing: set PSTEX_BUILD_ALL_HACK=1.
 # Chris Monson (2008-04-09):
 # 	* Bumped version to 2.1.17
 # 	* issue 20: fixed accumulation of <pid>*.make files - wildcard was
@@ -317,6 +321,7 @@ svninfo		:= $$Id$$
 # == Basic Shell Utilities ==
 CAT		:= cat
 CP		:= cp -f
+LS		:= ls
 DIFF		:= diff
 ECHO		:= echo
 EGREP		:= egrep
@@ -938,6 +943,17 @@ endef
 # thing as a dependency right here).
 #
 # $(call get-pstexs,<parsed file>,<target files>)
+ifdef PSTEX_BUILD_ALL_HACK
+define get-pstexs
+if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
+	$(ECHO) "Failed to build because of a missing pstex_t file: " 1>&2; \
+	$(ECHO) "  Building all such files:" 1>&2; \
+	for s in $(stems.fig); do \
+		$(ECHO) '$2: '"$$s.pstex_t"; \
+	done | $(SORT) | $(UNIQ); \
+fi
+endef
+else
 define get-pstexs
 $(SED) \
 -e '/^! LaTeX Error: File/!d' \
@@ -947,12 +963,13 @@ $(SED) \
 -e '/^\(.*\)\(\.[^.]*\)$$/{' \
 -e   's//$2: \1\2/' \
 -e   'p' \
--e   's/^\([^:]*: \)\(.*\)\(\.[^.]*\)_t$$/\1\2\3/' \
+-e   's/^\([^:]*: \)\(.*\)\(\.[^.]*\)$$/\1\2\3/' \
 -e   'p' \
 -e   'd' \
 -e '}' \
 $1 | $(SORT) | $(UNIQ)
 endef
+endif
 
 # Outputs all index files to stdout.  Arg 1 is the source stem, arg 2 is the
 # list of targets for the discovered dependency.
