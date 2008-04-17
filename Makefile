@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.18
+version		:= 2.1.19
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-04-17):
+# 	* Bumped version to 2.1.19
+# 	* Changed the pstex build hack to be on by default
 # Chris Monson (2008-04-09):
 # 	* Bumped version to 2.1.18
 # 	* issue 16: fixed pstex build problems, seems nondeterministic.  Added
@@ -943,17 +946,7 @@ endef
 # thing as a dependency right here).
 #
 # $(call get-pstexs,<parsed file>,<target files>)
-ifdef PSTEX_BUILD_ALL_HACK
-define get-pstexs
-if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
-	$(ECHO) "Failed to build because of a missing pstex_t file: " 1>&2; \
-	$(ECHO) "  Building all such files:" 1>&2; \
-	for s in $(stems.fig); do \
-		$(ECHO) '$2: '"$$s.pstex_t"; \
-	done | $(SORT) | $(UNIQ); \
-fi
-endef
-else
+ifdef NO_PSTEX_BUILD_ALL_HACK
 define get-pstexs
 $(SED) \
 -e '/^! LaTeX Error: File/!d' \
@@ -968,6 +961,16 @@ $(SED) \
 -e   'd' \
 -e '}' \
 $1 | $(SORT) | $(UNIQ)
+endef
+else
+define get-pstexs
+if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
+	$(ECHO) "Failed to build because of a missing pstex_t file: " 1>&2; \
+	$(ECHO) "  Building all such files:" 1>&2; \
+	for s in $(stems.fig); do \
+		$(ECHO) '$2: '"$$s.pstex_t"; \
+	done | $(SORT) | $(UNIQ); \
+fi
 endef
 endif
 
