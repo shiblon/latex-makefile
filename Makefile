@@ -936,6 +936,14 @@ $(SED) \
 $1 | $(SORT) | $(UNIQ)
 endef
 
+# This next section depends on the setting of the NO_PSTEX_BUILD_ALL_HACK
+# variable.  If it is set, then pstex files will be built one at a time, and
+# latex will have to be invoked at least once for each one (because it stops
+# after one of them is not found, so that's the only one that it knows about).
+# Note that if you set this variable, then tex files with pstex dependencies
+# may not build correctly at all, since there are some strange
+# race-condition-like issues on some architectures (still nailing this down).
+
 # Outputs all of the pstex (\include-ed) dependencies to stdout.  The first
 # argument is the stem of the source file being built, the second is a list of
 # suffixes that will show up as dependencies in the generated .d file.  Note
