@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.19
+version		:= 2.1.20
 svninfo		:= $$Id$$
 #
 # TODO:
@@ -64,6 +64,13 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-05-21):
+# 	* Bumped version to 2.1.20
+# 	* Added manual pstex compilation support (run make all-pstex first)
+# 	* Removed all automatic pstex support.  It was totally breaking
+# 		everything and is very hard to incorporate into the makefile
+# 		concept because it requires LaTeX to *fail* before it can
+# 		determine that it needs the files.
 # Chris Monson (2008-04-17):
 # 	* Bumped version to 2.1.19
 # 	* Changed the pstex build hack to be on by default
@@ -648,6 +655,7 @@ files.eps.gz	:= $(call filter-buildable,eps.gz)
 # perfectly valid and causes no problems even if they're going to become eps
 # files in the end.
 .SECONDARY:	$(patsubst %.fig,%.pstex,$(files.fig))
+.SECONDARY:	$(patsubst %.fig,%._gray_.pstex,$(files.fig))
 
 # Top level sources that are built by default targets
 default_files.tex	:= $(filter-out %._gray_.tex,$(call filter-default,tex))
@@ -794,6 +802,8 @@ allowed_batch_source_targets	:= \
 # All targets that build multiple graphics (independent of document)
 allowed_batch_graphic_targets	:= \
 	all-graphics \
+	all-pstex \
+	all-gray-pstex \
 	show-graphics
 
 # Now we figure out which stuff is available as a make target for THIS RUN.
@@ -856,6 +866,8 @@ all_dvi_targets		:= $(addsuffix .dvi,$(stems_ssg))
 all_tex_targets		:= $(addsuffix .tex,$(stems_sg))
 all_d_targets		:= $(addsuffix .d,$(stems_ssg))
 all_graphics_targets	:= $(addsuffix .eps,$(stems_gg))
+all_pstex_targets	:= $(addsuffix .pstex_t,$(stems.fig))
+all_gray_pstex_targets	:= $(addsuffix ._gray_.pstex_t,$(stems.fig))
 
 all_known_graphics	:= $(sort $(all_graphics_targets) $(wildcard *.eps))
 
@@ -936,51 +948,18 @@ $(SED) \
 $1 | $(SORT) | $(UNIQ)
 endef
 
-# This next section depends on the setting of the NO_PSTEX_BUILD_ALL_HACK
-# variable.  If it is set, then pstex files will be built one at a time, and
-# latex will have to be invoked at least once for each one (because it stops
-# after one of them is not found, so that's the only one that it knows about).
-# Note that if you set this variable, then tex files with pstex dependencies
-# may not build correctly at all, since there are some strange
-# race-condition-like issues on some architectures (still nailing this down).
-
-# Outputs all of the pstex (\include-ed) dependencies to stdout.  The first
-# argument is the stem of the source file being built, the second is a list of
-# suffixes that will show up as dependencies in the generated .d file.  Note
-# that pstex_t files are the only ones ever included directly into LaTeX, but
-# it has an implicit dependency on the corresponding pstex file.  We therefore
-# include it as a *direct* dependency, so that make doesn't delete it (it's
-# harder to specify a .SECONDARY file correctly than to just add this silly
-# thing as a dependency right here).
+# Checks for build failure due to pstex inclusion, and gives instructions.
 #
-# $(call get-pstexs,<parsed file>,<target files>)
-ifdef NO_PSTEX_BUILD_ALL_HACK
-define get-pstexs
-$(SED) \
--e '/^! LaTeX Error: File/!d' \
--e 's/^.*`//' \
--e 's/'"'"' not found\..*//' \
--e '/\.pstex_t$$/!d' \
--e '/^\(.*\)\(\.[^.]*\)$$/{' \
--e   's//$2: \1\2/' \
--e   'p' \
--e   's/^\([^:]*: \)\(.*\)\(\.[^.]*\)$$/\1\2\3/' \
--e   'p' \
--e   'd' \
--e '}' \
-$1 | $(SORT) | $(UNIQ)
-endef
-else
-define get-pstexs
+# $(call die-on-pstexs,<parsed file>)
+define die-on-pstexs
 if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
-	$(ECHO) "Failed to build because of a missing pstex_t file: " 1>&2; \
-	$(ECHO) "  Building all such files:" 1>&2; \
-	for s in $(stems.fig); do \
-		$(ECHO) '$2: '"$$s.pstex_t"; \
-	done | $(SORT) | $(UNIQ); \
+	$(ECHO) "$(C_ERROR)Missing pstex_t file(s)$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)Please run$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)  make all-pstex$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)before proceeding.$(C_RESET)"; \
+	exit 1; \
 fi
 endef
-endif
 
 # Outputs all index files to stdout.  Arg 1 is the source stem, arg 2 is the
 # list of targets for the discovered dependency.
@@ -1088,20 +1067,6 @@ endef
 define colorize-latex-errors
 $(SED) \
 -e '/^! LaTeX Error: File .*eps'"'"' not found\.$$/d' \
--e '/^! LaTeX Error: File .*pstex_t'"'"' not found\.$$/{' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  N' \
--e '  d' \
--e '}' \
 -e '/^! LaTeX Error: Cannot determine size/d' \
 -e '/^! /,/^$$/{' \
 -e '  H' \
@@ -1239,7 +1204,7 @@ define test-log-for-need-to-run
 $(SED) \
 -e '/^No file $(call escape-dots,$1)\.aux\./d' \
 $1.log \
-| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*|! LaTeX Error.*\.pstex_t'"'"' not found.*)$$'
+| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*)$$'
 endef
 
 # LaTeX invocations
@@ -1304,12 +1269,12 @@ endef
 convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
 
 # Creation of .pstex files from .fig files
-# $(call convert-fig-pstex,<fig file>,<pstex file>,[gray])
-convert-fig-pstex	= $(FIG2DEV) -L pstex $(if $3,-N,) $1 $2 > /dev/null 2>&1
+# $(call convert-fig-pstex,<fig file>,<pstex file>)
+convert-fig-pstex	= $(FIG2DEV) -L pstex $1 $2 > /dev/null 2>&1
 
 # Creation of .pstex_t files from .fig files
-# $(call convert-fig-pstex-t,<fig file>,<pstex file>,<pstex_t file>,[gray])
-convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $(if $4,-N,) $1 $2 > /dev/null 2>&1
+# $(call convert-fig-pstex-t,<fig file>,<pstex file>,<pstex_t file>)
+convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $1 $2 > /dev/null 2>&1
 
 # Creation of .tex files from .rst files
 # TODO: Fix paper size so that it can be specified in the file itself
@@ -1706,6 +1671,10 @@ endif
 .PHONY: all-graphics
 all-graphics:	$(all_graphics_targets);
 
+.PHONY: all-pstex all-gray-pstex
+all-pstex:	$(all_pstex_targets);
+all-gray-pstex:	$(all_gray_pstex_targets);
+
 .PHONY: show-graphics
 show-graphics: all-graphics
 	$(VIEW_GRAPHICS) $(all_known_graphics)
@@ -1738,9 +1707,9 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig-pstex,$<,$@,1)
 
-%._gray_.pstex_t: %.fig %.pstex
+%._gray_.pstex_t: %.fig %._gray_.pstex
 	$(QUIET)$(call echo-graphic,$^,$@)
-	$(QUIET)$(call convert-fig-pstex-t,$<,$@,$*.pstex,1)
+	$(QUIET)$(call convert-fig-pstex-t,$<,$@,$*._gray_.pstex,1)
 
 %.eps:	%.gpi $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
@@ -1801,13 +1770,13 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-build,$<,$*.d $*.dvi,1)
 	$(QUIET)\
 	$(call run-latex,$<,--recorder) || $(sh_true); \
+	$(call die-on-pstexs,$*.log); \
 	$(MV) $*.dvi $*.dvi.1st.make; \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
 	$(call get-inputs,$*.fls,$(addprefix $*.,aux aux.make d dvi)) >> $*.d; \
 	$(call get-graphics,$*.log,$(addprefix $*.,d dvi _graphics)) >> $*.d; \
-	$(call get-pstexs,$*.log,$(addprefix $*.,d dvi _graphics)) >> $*.d; \
 	$(call get-inds,$*.log,$(addprefix $*.,d aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	for s in toc out lot lof nav; do \
@@ -2136,6 +2105,9 @@ define help_text
 #
 #    all-graphics:
 #        Make all of the graphics in this directory.
+#
+#    all-pstex:
+#        Build all fig files into pstex and pstex_t files.  Gray DOES NOT WORK.
 #
 #    show-graphics:
 #        Builds and displays all graphics in this directory.  Uses the
@@ -2495,7 +2467,8 @@ define help_text
 #                make GRAY=1 document
 #
 #            In these cases the .eps files is created using the -N switch to
-#            fig2dev to turn off color output.
+#            fig2dev to turn off color output.  (Only works with eps, not
+#            pstex output!)
 #
 #    GraphVis Graphics:
 #            Color settings are simply ignored here.  The 'dot' program is used
@@ -2578,8 +2551,6 @@ endef
 #    fig -> pstex [label="fig2dev"]
 #    fig -> pstex_t [label="fig2dev"]
 #    pstex -> pstex_t [label="fig2dev"]
-#    pstex -> extra_tex_files
-#    pstex_t -> extra_tex_files
 #    dot -> eps:dot [label="dot"]
 #    dvi -> ps [label="dvips"]
 #    include_aux -> bbl [label="bibtex"]
