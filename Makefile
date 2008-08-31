@@ -29,9 +29,26 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.20
+version		:= 2.1.21
 svninfo		:= $$Id$$
 #
+# If you specify sources here,
+# all other files with the same suffix
+# will be treated as if they were _include_ files.
+#sources.tex	:= main.tex
+#sources.tex.sh	:=
+#sources.rst	:=
+#sources.fig	:=
+#sources.gpi	:=
+#sources.dot	:=
+#sources.eps.gz	:=
+#sources.eps	:=
+#
+# Alternatively (recommended), you can add those lines to a Makefile.ini file
+# and it will get picked up automatically without your having to edit this
+# Makefile.
+-include Makefile.ini
+
 # TODO:
 # 	* Sometimes we get
 # 		"mv: cannot stat '*.dvi.1st.make': No such file or directory"
@@ -64,6 +81,14 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-08-30):
+# 	* Bumped version to 2.1.21
+# 	* Added ability to specify sources.* variables to indicate the only
+# 		files that should *not* be considered includes.  Thanks to a
+# 		contributor who wishes to remain anonymous (other than his
+# 		email: yllohy@googlemail.com) for this patch.
+# 	* Added an automatic include of Makefile.ini if it exists.  Allows
+# 		settings to be made outside of this makefile.
 # Chris Monson (2008-05-21):
 # 	* Bumped version to 2.1.20
 # 	* Added manual pstex compilation support (run make all-pstex first)
@@ -624,6 +649,10 @@ all_files.dot		:= $(wildcard *.dot)
 all_files.eps.gz	:= $(wildcard *.eps.gz)
 all_files.eps		:= $(wildcard *.eps)
 
+# Consider .$1 files that are not in $(sources.$1) to be _include_ files
+# if $(sources.$1) is empty, don't ignore anything.
+ignore_files = $(if $(sources.$1),$(filter-out $(sources.$1), $(all_files.$1)))
+
 # Patterns to never be allowed as source targets
 ignore_patterns	:= %._include_
 
@@ -633,12 +662,14 @@ nodefault_patterns := %._nobuild_ $(ignore_patterns)
 # Utility function for getting targets suitable building
 # $(call filter-buildable,suffix)
 filter-buildable	= \
-	$(filter-out $(addsuffix .$1,$(ignore_patterns)),$(all_files.$1))
+	$(filter-out $(call ignore_files,$1) \
+		$(addsuffix .$1,$(ignore_patterns)),$(all_files.$1))
 
 # Utility function for getting targets suitable for 'all' builds
 # $(call filter-default,suffix)
 filter-default		= \
-	$(filter-out $(addsuffix .$1,$(nodefault_patterns)),$(all_files.$1))
+	$(filter-out $(call ignore_files,$1) \
+		$(addsuffix .$1,$(nodefault_patterns)),$(all_files.$1))
 
 # Top level sources that can be built even when they are not by default
 files.tex	:= $(filter-out %._gray_.tex,$(call filter-buildable,tex))
@@ -2097,6 +2128,17 @@ define help_text
 #        determined by scanning for .tex and .tex.sh (described in more detail
 #        later) and omitting any file that ends in ._include_.tex or
 #        ._nobuild_.tex.  The output is a set of .pdf files.
+#
+#        If you wish to omit files without naming them with the special
+#        underscore names, you can set the following near the top of the file,
+#        or (this is recommended) within a Makefile.ini in the same directory:
+#
+#        	sources.tex := main.tex
+#
+#        This will cause only the source files listed to be considered in
+#        dependency detection.  All other .tex files will be considered as
+#        include files.  Note that this works for *any* source file, so you
+#        could do something similar with sources.gpi, for example.
 #
 #    show:
 #        Builds and displays all documents in this directory.  It uses the
