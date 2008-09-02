@@ -32,17 +32,26 @@ author		:= Chris Monson
 version		:= 2.1.21
 svninfo		:= $$Id$$
 #
-# If you specify sources here,
-# all other files with the same suffix
+# If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
-#sources.tex	:= main.tex
-#sources.tex.sh	:=
-#sources.rst	:=
-#sources.fig	:=
-#sources.gpi	:=
-#sources.dot	:=
-#sources.eps.gz	:=
-#sources.eps	:=
+#onlysources.tex	:= main.tex
+#onlysources.tex.sh	:=
+#onlysources.rst	:=
+#onlysources.fig	:=
+#onlysources.gpi	:=
+#onlysources.dot	:=
+#onlysources.eps.gz	:=
+#onlysources.eps	:=
+#
+# If you list files here, they will be treated as _include_ files
+#includes.tex		:= file1.tex file2.tex
+#includes.tex.sh	:=
+#includes.rst		:=
+#includes.fig		:=
+#includes.gpi		:=
+#includes.dot		:=
+#includes.eps.gz	:=
+#includes.eps		:=
 #
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
@@ -81,12 +90,15 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-09-02):
+# 	* Bumped version to 2.1.22
+# 	* Appled patch from Holger <yllohy@googlemail.com> to add include
+# 		sources and some documentation updates.
 # Chris Monson (2008-08-30):
 # 	* Bumped version to 2.1.21
-# 	* Added ability to specify sources.* variables to indicate the only
-# 		files that should *not* be considered includes.  Thanks to a
-# 		contributor who wishes to remain anonymous (other than his
-# 		email: yllohy@googlemail.com) for this patch.
+# 	* Added ability to specify onlysources.* variables to indicate the only
+# 		files that should *not* be considered includes.  Thanks to Holger
+# 		<yllohy@googlemail.com> for this patch.
 # 	* Added an automatic include of Makefile.ini if it exists.  Allows
 # 		settings to be made outside of this makefile.
 # Chris Monson (2008-05-21):
@@ -649,9 +661,12 @@ all_files.dot		:= $(wildcard *.dot)
 all_files.eps.gz	:= $(wildcard *.eps.gz)
 all_files.eps		:= $(wildcard *.eps)
 
-# Consider .$1 files that are not in $(sources.$1) to be _include_ files
-# if $(sources.$1) is empty, don't ignore anything.
-ignore_files = $(if $(sources.$1),$(filter-out $(sources.$1), $(all_files.$1)))
+# Utility function for getting all .$1 files that are to be ignored
+#  * files listed in $(includes.$1)
+#  * files not listed in $(onlysources.$1) if it is defined
+ignore_files = \
+  $(includes.$1) \
+  $(if $(onlysources.$1),$(filter-out $(onlysources.$1), $(all_files.$1)))
 
 # Patterns to never be allowed as source targets
 ignore_patterns	:= %._include_
@@ -2130,15 +2145,21 @@ define help_text
 #        ._nobuild_.tex.  The output is a set of .pdf files.
 #
 #        If you wish to omit files without naming them with the special
-#        underscore names, you can set the following near the top of the file,
+#        underscore names, set the following near the top of the Makefile,
 #        or (this is recommended) within a Makefile.ini in the same directory:
 #
-#        	sources.tex := main.tex
+#        	includes.tex := file1.tex file2.tex
+#
+#        This will cause the files listed to be considered as include files.
+#
+#        If you have only few source files, you can set
+#
+#        	onlysources.tex := main.tex
 #
 #        This will cause only the source files listed to be considered in
 #        dependency detection.  All other .tex files will be considered as
-#        include files.  Note that this works for *any* source file, so you
-#        could do something similar with sources.gpi, for example.
+#        include files.  Note that these options work for *any* source type,
+#        so you could do something similar with includes.gpi, for example.
 #
 #    show:
 #        Builds and displays all documents in this directory.  It uses the
