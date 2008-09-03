@@ -94,6 +94,8 @@ svninfo		:= $$Id$$
 # 	* Bumped version to 2.1.22
 # 	* Appled patch from Holger <yllohy@googlemail.com> to add include
 # 		sources and some documentation updates.
+# 	* Updated backup_patterns to be a bit more aggressive (also thanks to
+# 		Holger)
 # Chris Monson (2008-08-30):
 # 	* Bumped version to 2.1.21
 # 	* Added ability to specify onlysources.* variables to indicate the only
@@ -925,7 +927,7 @@ default_dvi_targets	:= $(addsuffix .dvi,$(default_stems_ss))
 rm_ext		:= \
 	log aux dvi ps pdf blg bbl out nav snm toc lof lot pfg fls vrb \
 	idx ind ilg lox
-backup_patterns	:= *.bak
+backup_patterns	:= *~ *.bak *.backup
 
 graph_stem	:= _graph
 
@@ -2184,8 +2186,9 @@ define help_text
 #        Remove all generated graphics files.
 #
 #    clean-backups:
-#        Remove all backup files (XFig has a nasty habit of leaving them
-#        around)
+#        Remove all backup files: $(backup_patterns)
+#        (XFig and other editors have a nasty habit of leaving them around)
+#        Also removes Makefile-generated .temp files
 #
 #    clean-tex:
 #        Remove all files generated from LaTeX invocations except dependency
