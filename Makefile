@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.21
+version		:= 2.1.23
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -90,6 +90,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2008-10-23):
+# 	* Bumped version to 2.1.23
+# 	* issue 23: fixed _check_programs to not use bash string subs
 # Chris Monson (2008-09-02):
 # 	* Bumped version to 2.1.22
 # 	* Appled patch from Holger <yllohy@googlemail.com> to add include
@@ -370,7 +373,6 @@ svninfo		:= $$Id$$
 # == Basic Shell Utilities ==
 CAT		:= cat
 CP		:= cp -f
-LS		:= ls
 DIFF		:= diff
 ECHO		:= echo
 EGREP		:= egrep
@@ -1908,6 +1910,7 @@ _all_programs:
 _check_programs:
 	$(QUIET)$(ECHO) "== Checking Makefile Dependencies =="; $(ECHO)
 	$(QUIET) \
+	$(ECHO) hi; \
 	allprogs=`\
 	 ($(call output-all-programs)) | \
 	 $(SED) \
@@ -1918,21 +1921,20 @@ _check_programs:
 	 -e '/^[[:space:]]*$$/d' \
 	 -e 's/^[^=].*=[[:space:]]*\([^[:space:]]\{1,\}\).*$$/\\1/' \
 	 `; \
-	formatfield='               ';\
-	for p in $${allprogs[*]}; do \
-		if [ x"$${p:0:1}" = x"=" ]; then \
-		    $(ECHO); \
-		    $(ECHO) "$$p"; \
-		else \
-		    spaces="$${formatfield:0:$${#formatfield}-$${#p}}"; \
-		    $(ECHO) -n "$$p:$$spaces"; \
-		    loc=`$(WHICH) $$p`; \
-		    if [ x"$$?" = x"0" ]; then \
-			$(ECHO) "$(C_SUCCESS)Found:$(C_RESET) $$loc"; \
-		    else \
-			$(ECHO) "$(C_FAILURE)Not Found$(C_RESET)"; \
-		    fi; \
-		fi; \
+	spaces='                             '; \
+	for p in $${allprogs}; do \
+	case $$p in \
+		=*) $(ECHO); $(ECHO) "$$p";; \
+		*) \
+			$(ECHO) -n "$$p:$$spaces" | $(SED) -e 's/^\(.\{0,20\}\).*$$/\1/'; \
+			loc=`$(WHICH) $$p`; \
+			if [ x"$$?" = x"0" ]; then \
+				$(ECHO) "$(C_SUCCESS)Found:$(C_RESET) $$loc"; \
+			else \
+				$(ECHO) "$(C_FAILURE)Not Found$(C_RESET)"; \
+			fi; \
+			;; \
+	esac; \
 	done
 
 .PHONY: _check_gpi_files
