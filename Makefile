@@ -2225,6 +2225,12 @@ define help_text
 #
 #    clean:
 #        Remove ALL generated files, leaving only source intact.
+#        This will *always* skip files mentioned in the "neverclean" variable,
+#        either in this file or specified in Makefile.ini:
+#        
+#        	neverclean := *.pdf *.ps
+#
+#       The neverclean variable works on all "clean" targets below, as well.
 #
 #    clean-graphics:
 #        Remove all generated graphics files.
