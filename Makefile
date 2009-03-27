@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.24
+version		:= 2.1.25
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -97,10 +97,12 @@ svninfo		:= $$Id$$
 #
 # CHANGES:
 # Chris Monson (2009-03-27):
+# 	* Bumped version to 2.1.25
 # 	* Cleaned up a bunch of variable setting stuff - more stuff is now
 # 		settable from Makefile.ini
 # 	* Cleaned up documentation for various features, especially settable
 # 		variables.
+# 	* issue 28: support for png -> eps conversion (it even looks good!)
 # 	* issue 29: support for "neverclean" files in Makefile.ini
 # 	* issue 30: make ps2pdf14 the default - fall back when not there
 # Chris Monson (2009-03-09):
@@ -419,6 +421,9 @@ DOT		?= dot		# GraphViz
 FIG2DEV		?= fig2dev	# XFig
 GNUPLOT		?= gnuplot	# GNUplot
 XMGRACE		?= xmgrace	# XMgrace
+PNGTOPNM	?= pngtopnm	# From NetPBM - step 1 for png -> eps
+PPMTOPGM	?= ppmtopgm	# From NetPBM - (gray) step 2 for png -> eps
+PNMTOPS		?= pnmtops	# From NetPBM - step 3 for png -> eps
 GUNZIP		?= gunzip	# GZipped EPS
 # == Beamer Enlarged Output ==
 PSNUP		?= psnup
@@ -699,6 +704,7 @@ all_files.fig		:= $(wildcard *.fig)
 all_files.gpi		:= $(wildcard *.gpi)
 all_files.dot		:= $(wildcard *.dot)
 all_files.xvg		:= $(wildcard *.xvg)
+all_files.png		:= $(wildcard *.png)
 all_files.eps.gz	:= $(wildcard *.eps.gz)
 all_files.eps		:= $(wildcard *.eps)
 
@@ -740,6 +746,7 @@ files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
 files.fig	:= $(call filter-buildable,fig)
 files.xvg	:= $(call filter-buildable,xvg)
+files.png	:= $(call filter-buildable,png)
 files.eps.gz	:= $(call filter-buildable,eps.gz)
 
 # Make all pstex targets secondary.  The pstex_t target requires the pstex
@@ -758,6 +765,7 @@ default_files.gpi	:= $(call filter-default,gpi)
 default_files.dot	:= $(call filter-default,dot)
 default_files.fig	:= $(call filter-default,fig)
 default_files.xvg	:= $(call filter-default,xvg)
+default_files.png	:= $(call filter-default,png)
 default_files.eps.gz	:= $(call filter-default,eps.gz)
 
 # Utility function for creating larger lists of files
@@ -767,15 +775,15 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
 all_files_scripts	:= $(call concat-files,tex.sh rst,all)
-all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg dot,all)
+all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot,all)
 
 default_files_source	:= $(call concat-files,tex,default)
 default_files_scripts	:= $(call concat-files,tex.sh rst,default)
-default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg dot,default)
+default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot,default)
 
 files_source	:= $(call concat-files,tex)
 files_scripts	:= $(call concat-files,tex.sh rst)
-files_graphics	:= $(call concat-files,fig gpi eps.gz xvg dot)
+files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot)
 
 # Utility function for obtaining stems
 # $(call get-stems,suffix,[prefix])
@@ -789,6 +797,7 @@ all_stems.fig		:= $(call get-stems,fig,all)
 all_stems.gpi		:= $(call get-stems,gpi,all)
 all_stems.dot		:= $(call get-stems,dot,all)
 all_stems.xvg		:= $(call get-stems,xvg,all)
+all_stems.png		:= $(call get-stems,png,all)
 all_stems.eps.gz	:= $(call get-stems,eps.gz,all)
 all_stems.eps		:= $(call get-stems,eps,all)
 
@@ -800,6 +809,7 @@ default_stems.fig		:= $(call get-stems,fig,default)
 default_stems.gpi		:= $(call get-stems,gpi,default)
 default_stems.dot		:= $(call get-stems,dot,default)
 default_stems.xvg		:= $(call get-stems,xvg,default)
+default_stems.png		:= $(call get-stems,png,default)
 default_stems.eps.gz		:= $(call get-stems,eps.gz,default)
 
 # List of all stems (all possible bare PDF targets created here):
@@ -810,6 +820,7 @@ stems.fig		:= $(call get-stems,fig)
 stems.gpi		:= $(call get-stems,gpi)
 stems.dot		:= $(call get-stems,dot)
 stems.xvg		:= $(call get-stems,xvg)
+stems.png		:= $(call get-stems,png)
 stems.eps.gz		:= $(call get-stems,eps.gz)
 
 # Utility function for creating larger lists of stems
@@ -818,7 +829,7 @@ concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 
 all_stems_source	:= $(call concat-stems,tex,all)
 all_stems_script	:= $(call concat-stems,tex.sh rst,all)
-all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg dot,all)
+all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg png dot,all)
 all_stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(all_stems_graphic) $(all_stems.eps) \
 	)
@@ -831,7 +842,7 @@ all_stems_ssg		:= $(sort $(all_stems_ss) $(all_stems_gray))
 
 default_stems_source	:= $(call concat-stems,tex,default)
 default_stems_script	:= $(call concat-stems,tex.sh rst,default)
-default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg dot,default)
+default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg png dot,default)
 default_stems_gray_graphic	:= $(addsuffix ._gray_,$(default_stems_graphic))
 default_stems_gg	:= $(sort \
 	$(default_stems_graphic) $(default_stems_gray_graphic))
@@ -843,7 +854,7 @@ default_stems_ssg	:= $(sort $(default_stems_ss) $(default_stems_gray))
 
 stems_source		:= $(call concat-stems,tex)
 stems_script		:= $(call concat-stems,tex.sh rst)
-stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg dot)
+stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg png dot)
 stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(stems_graphic) $(all_stems.eps))
 stems_gg		:= $(sort $(stems_graphic) $(stems_gray_graphic))
@@ -1361,6 +1372,23 @@ $(call remove-temporary-files,$1head.make); \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
 endef
 
+# Creation of .eps files from .png files
+#
+# The intermediate step of PNM (using NetPBM) produces much nicer output than
+# ImageMagick's "convert" binary.  I couldn't get the right combination of
+# flags to make it look nice, anyway.
+#
+# To handle gray scale conversion, we pipe things through ppmtopgm in the
+# middle.
+#
+# $(call convert-png,<png file>,<eps file>)
+define convert-png
+$(PNGTOPNM) "$1" \
+	$(if $3,| $(PPMTOPGM),) \
+	| $(PNMTOPS) -noturn \
+	> "$2"
+endef
+
 # Creation of .eps files from .fig files
 # $(call convert-fig,<fig file>,<eps file>,[gray])
 convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
@@ -1801,6 +1829,10 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,1)
 
+%._gray_.eps: %.png $(gray_eps_file)
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-png,$<,$@,1)
+
 %._gray_.eps: %.eps.gz $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-epsgz,$<,$@,1)
@@ -1832,6 +1864,10 @@ $(gray_eps_file):
 %.eps: %.xvg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,$(GRAY))
+
+%.eps: %.png $(if $(GRAY),$(gray_eps_file))
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-png,$<,$@,$(GRAY))
 
 %.eps: %.eps.gz $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
@@ -2416,6 +2452,7 @@ define help_text
 #       .gpi    : gnuplot
 #       .fig    : xfig
 #       .xvg    : xmgrace
+#       .png	: png (goes through NetPBM)
 #       .eps.gz : gzipped eps
 #
 #       The behavior of this makefile with each type is described in
@@ -2543,6 +2580,7 @@ define help_text
 #        GNUPlot:       .gpi
 #        XFig:          .fig
 #        XMgrace:       .xvg
+#        PNG:		.png
 #        GZipped EPS:   .eps.gz
 #
 #        If the file exists as a .eps already, it is merely used (and will not
