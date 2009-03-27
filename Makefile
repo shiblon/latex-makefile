@@ -34,30 +34,30 @@ svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
-#onlysources.tex	:= main.tex
-#onlysources.tex.sh	:=
-#onlysources.rst	:=
-#onlysources.fig	:=
-#onlysources.gpi	:=
-#onlysources.dot	:=
-#onlysources.xvg	:=
-#onlysources.eps.gz	:=
-#onlysources.eps	:=
+#onlysources.tex	?= main.tex
+#onlysources.tex.sh	?=
+#onlysources.rst	?=
+#onlysources.fig	?=
+#onlysources.gpi	?=
+#onlysources.dot	?=
+#onlysources.xvg	?=
+#onlysources.eps.gz	?=
+#onlysources.eps	?=
 #
 # If you list files here, they will be treated as _include_ files
-#includes.tex		:= file1.tex file2.tex
-#includes.tex.sh	:=
-#includes.rst		:=
-#includes.fig		:=
-#includes.gpi		:=
-#includes.dot		:=
-#includes.xvg		:=
-#includes.eps.gz	:=
-#includes.eps		:=
+#includes.tex		?= file1.tex file2.tex
+#includes.tex.sh	?=
+#includes.rst		?=
+#includes.fig		?=
+#includes.gpi		?=
+#includes.dot		?=
+#includes.xvg		?=
+#includes.eps.gz	?=
+#includes.eps		?=
 #
 # If you list files or wildcards here, they will *not* be cleaned - default is
 # to allow everything to be cleaned.
-#neverclean		:= *.pdf
+#neverclean		?= *.pdf
 #
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
@@ -97,7 +97,12 @@ svninfo		:= $$Id$$
 #
 # CHANGES:
 # Chris Monson (2009-03-27):
+# 	* Cleaned up a bunch of variable setting stuff - more stuff is now
+# 		settable from Makefile.ini
+# 	* Cleaned up documentation for various features, especially settable
+# 		variables.
 # 	* issue 29: support for "neverclean" files in Makefile.ini
+# 	* issue 30: make ps2pdf14 the default - fall back when not there
 # Chris Monson (2009-03-09):
 # 	* Bumped version to 2.1.24
 # 	* issue 27: xmgrace support (thanks to rolandschulzhd)
@@ -382,30 +387,31 @@ svninfo		:= $$Id$$
 # EXTERNAL PROGRAMS:
 # = ESSENTIAL PROGRAMS =
 # == Basic Shell Utilities ==
-CAT		:= cat
-CP		:= cp -f
-DIFF		:= diff
-ECHO		:= echo
-EGREP		:= egrep
-ENV		:= env
-MV		:= mv -f
-SED		:= sed
-SORT		:= sort
-TOUCH		:= touch
-UNIQ		:= uniq
-WHICH		:= which
-XARGS		:= xargs
+CAT		?= cat
+CP		?= cp -f
+DIFF		?= diff
+ECHO		?= echo
+EGREP		?= egrep
+ENV		?= env
+MV		?= mv -f
+SED		?= sed
+SORT		?= sort
+TOUCH		?= touch
+UNIQ		?= uniq
+WHICH		?= which
+XARGS		?= xargs
 # == LaTeX (tetex-provided) ==
-BIBTEX		:= bibtex
-DVIPS		:= dvips
-LATEX		:= latex
-MAKEINDEX	:= makeindex
-KPSEWHICH	:= kpsewhich
-PS2PDF_NORMAL	:= ps2pdf
-PS2PDF_EMBED	:= ps2pdf13
+BIBTEX		?= bibtex
+DVIPS		?= dvips
+LATEX		?= latex
+MAKEINDEX	?= makeindex
+KPSEWHICH	?= kpsewhich
+PS2PDF_NORMAL	?= ps2pdf
+PS2PDF_EMBED13	?= ps2pdf13
+PS2PDF_EMBED	?= ps2pdf14
 # = OPTIONAL PROGRAMS =
 # == Makefile Color Output ==
-TPUT		:= tput
+TPUT		?= tput
 # == TeX Generation ==
 RST2LATEX	?= rst2latex.py
 # == EPS Generation ==
@@ -425,6 +431,18 @@ VIEW_GRAPHICS	?= display
 # (the builtin doesn't always understand -n)
 FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
+
+# Fall back to ps2pdf13 (and ultimately ps2pdf) if ps2pdf14 is not on the system:
+PS2PDF_EMBED	:= \
+	$(if \
+		$(shell $(WHICH) $(PS2PDF_EMBED)), \
+		$(PS2PDF_EMBED), \
+		$(if \
+			$(shell $(WHICH) $(PS2PDF_EMBED13)), \
+			$(PS2PDF_EMBED13), \
+			$(PS2PDF_NORMAL) \
+		) \
+	)
 
 # SH NOTES
 #
@@ -2146,6 +2164,28 @@ define help_text
 #
 #        make -d SHELL_DEBUG=1 VERBOSE=1 2>&1 | less
 #
+# STANDARD AUXILIARY FILES:
+#
+#      Makefile.ini
+#
+#          This file can contain variable declarations that override various
+#          aspects of the makefile.  For example, one might specify
+#
+#          neverclean := *.pdf *.ps
+#          onlysources.tex := main.tex
+#          PS2PDF_EMBED := ps2pdf14
+#          LATEX_COLOR_WARNING := 'bold red uline'
+#
+#          And this would override the neverclean setting to ensure that pdf
+#          and ps files always remain behind, set the makefile to treat all
+#          .tex files that are not "main.tex" as includes (and therefore not
+#          default targets), and ps2pdf14 as the proper ps to pdf conversion
+#          program for embedded fonts.  It also changes the LaTeX warning
+#          output to be red, bold, and underlined.
+#
+#          There are numerous variables in this file that can be overridden in
+#          this way.  Search for '?=' to find them all.
+#
 # STANDARD ENVIRONMENT VARIABLES:
 #
 #      LATEX_COLOR_WARNING		'$(LATEX_COLOR_WARNING)'
@@ -2206,6 +2246,14 @@ define help_text
 #        dependency detection.  All other .tex files will be considered as
 #        include files.  Note that these options work for *any* source type,
 #        so you could do something similar with includes.gpi, for example.
+#        Note that this works for *any valid source* target.  All of the
+#        onlysources.* variables are commented out in the shipping version of
+#        this file, so it does the right thing when they simply don't exist.
+#        The comments are purely documentation.  If you know, for example, that
+#        file.mycoolformat is supported by this Makefile, but don't see the
+#        "onlysources.mycoolformat" declared in the comments, that doesn't mean
+#        you can't use it.  Go ahead and set "onlysources.mycoolformat" and it
+#        should do the right thing.
 #
 #    show:
 #        Builds and displays all documents in this directory.  It uses the
