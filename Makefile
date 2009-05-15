@@ -1029,6 +1029,7 @@ $(SED) \
 -e '/\.tex$$/p' \
 -e '/\.cls$$/p' \
 -e '/\.sty$$/p' \
+-e '/\.pstex_t$$/p' \
 -e 'd' \
 $1 | $(SORT) | $(UNIQ)
 endef
