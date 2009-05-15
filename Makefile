@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.25
+version		:= 2.1.26
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -96,6 +96,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-05-15):
+# 	* Bumped version to 2.1.26
+# 	* Included patch for issue 9 from favonia - detects .fig changes for
+# 		pstex files during regular compilation, so long as the pstex
+# 		has been built at least once with make all-pstex.
 # Chris Monson (2009-03-27):
 # 	* Bumped version to 2.1.25
 # 	* Cleaned up a bunch of variable setting stuff - more stuff is now
