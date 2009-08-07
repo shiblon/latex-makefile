@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.26
+version		:= 2.1.27
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -96,6 +96,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-08-07):
+# 	* Bumped version to 2.1.27
+# 	* Included patch for issue 37 - removes pdf/ps files before copying,
+# 		allowing some broken viewers to see changes properly.
 # Chris Monson (2009-05-15):
 # 	* Bumped version to 2.1.26
 # 	* Included patch for issue 9 from favonia - detects .fig changes for
@@ -1634,6 +1638,7 @@ endif
 	$(QUIET)$(call make-pdf,$<,$@.temp,$@.log,$*.embed.make); \
 	if [ x"$$?" = x"0" ]; then \
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
+	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
 	else \
 	    $(CAT) $@.log; \
@@ -1648,6 +1653,7 @@ endif
 			$(firstword $(shell $(CAT) $*.paper.make))); \
 	if [ x"$$?" = x"0" ]; then \
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
+	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
 	else \
 	    $(CAT) $@.log; \
