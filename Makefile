@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.27
+version		:= 2.1.28
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -96,6 +96,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-08-17):
+# 	* Bumped version to 2.1.28
+# 	* Patch from paul.biggar for issue 38: package warnings are overlooked
 # Chris Monson (2009-08-07):
 # 	* Bumped version to 2.1.27
 # 	* Included patch for issue 37 - removes pdf/ps files before copying,
@@ -1284,6 +1287,7 @@ color_tex	:= \
 	-e '}' \
 	-e 's/^! *LaTeX Error:.*/$(C_ERROR)&$(C_RESET)/' -e 't' \
 	-e 's/^LaTeX Warning:.*/$(C_WARNING)&$(C_RESET)/' -e 't' \
+	-e 's/^Package .* Warning:.*/$(C_WARNING)&$(C_RESET)/' -e 't' \
 	-e 's/^Underfull.*/$(C_UNDERFULL)&$(C_RESET)/' -e 't' \
 	-e 's/^Overfull.*/$(C_OVERFULL)&$(C_RESET)/' -e 't' \
 	$(if $(VERBOSE),,-e 'd')
