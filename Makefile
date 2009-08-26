@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.28
+version		:= 2.1.29
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -41,6 +41,7 @@ svninfo		:= $$Id$$
 #onlysources.gpi	?=
 #onlysources.dot	?=
 #onlysources.xvg	?=
+#onlysources.svg	?=
 #onlysources.eps.gz	?=
 #onlysources.eps	?=
 #
@@ -52,6 +53,7 @@ svninfo		:= $$Id$$
 #includes.gpi		?=
 #includes.dot		?=
 #includes.xvg		?=
+#includes.svg		?=
 #includes.eps.gz	?=
 #includes.eps		?=
 #
@@ -96,6 +98,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-08-26):
+# 	* Bumped version to 2.1.29
+# 	* Closed issue 42: add svg support using inkscape
 # Chris Monson (2009-08-17):
 # 	* Bumped version to 2.1.28
 # 	* Patch from paul.biggar for issue 38: package warnings are overlooked
@@ -432,6 +437,7 @@ RST2LATEX	?= rst2latex.py
 DOT		?= dot		# GraphViz
 FIG2DEV		?= fig2dev	# XFig
 GNUPLOT		?= gnuplot	# GNUplot
+INKSCAPE	?= inkscape	# Inkscape (svg support)
 XMGRACE		?= xmgrace	# XMgrace
 PNGTOPNM	?= pngtopnm	# From NetPBM - step 1 for png -> eps
 PPMTOPGM	?= ppmtopgm	# From NetPBM - (gray) step 2 for png -> eps
@@ -716,6 +722,7 @@ all_files.fig		:= $(wildcard *.fig)
 all_files.gpi		:= $(wildcard *.gpi)
 all_files.dot		:= $(wildcard *.dot)
 all_files.xvg		:= $(wildcard *.xvg)
+all_files.svg		:= $(wildcard *.svg)
 all_files.png		:= $(wildcard *.png)
 all_files.eps.gz	:= $(wildcard *.eps.gz)
 all_files.eps		:= $(wildcard *.eps)
@@ -758,6 +765,7 @@ files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
 files.fig	:= $(call filter-buildable,fig)
 files.xvg	:= $(call filter-buildable,xvg)
+files.svg	:= $(call filter-buildable,svg)
 files.png	:= $(call filter-buildable,png)
 files.eps.gz	:= $(call filter-buildable,eps.gz)
 
@@ -777,6 +785,7 @@ default_files.gpi	:= $(call filter-default,gpi)
 default_files.dot	:= $(call filter-default,dot)
 default_files.fig	:= $(call filter-default,fig)
 default_files.xvg	:= $(call filter-default,xvg)
+default_files.svg	:= $(call filter-default,svg)
 default_files.png	:= $(call filter-default,png)
 default_files.eps.gz	:= $(call filter-default,eps.gz)
 
@@ -787,15 +796,15 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
 all_files_scripts	:= $(call concat-files,tex.sh rst,all)
-all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot,all)
+all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png dot,all)
 
 default_files_source	:= $(call concat-files,tex,default)
 default_files_scripts	:= $(call concat-files,tex.sh rst,default)
-default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot,default)
+default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png dot,default)
 
 files_source	:= $(call concat-files,tex)
 files_scripts	:= $(call concat-files,tex.sh rst)
-files_graphics	:= $(call concat-files,fig gpi eps.gz xvg png dot)
+files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png dot)
 
 # Utility function for obtaining stems
 # $(call get-stems,suffix,[prefix])
@@ -809,6 +818,7 @@ all_stems.fig		:= $(call get-stems,fig,all)
 all_stems.gpi		:= $(call get-stems,gpi,all)
 all_stems.dot		:= $(call get-stems,dot,all)
 all_stems.xvg		:= $(call get-stems,xvg,all)
+all_stems.svg		:= $(call get-stems,svg,all)
 all_stems.png		:= $(call get-stems,png,all)
 all_stems.eps.gz	:= $(call get-stems,eps.gz,all)
 all_stems.eps		:= $(call get-stems,eps,all)
@@ -821,6 +831,7 @@ default_stems.fig		:= $(call get-stems,fig,default)
 default_stems.gpi		:= $(call get-stems,gpi,default)
 default_stems.dot		:= $(call get-stems,dot,default)
 default_stems.xvg		:= $(call get-stems,xvg,default)
+default_stems.svg		:= $(call get-stems,svg,default)
 default_stems.png		:= $(call get-stems,png,default)
 default_stems.eps.gz		:= $(call get-stems,eps.gz,default)
 
@@ -832,6 +843,7 @@ stems.fig		:= $(call get-stems,fig)
 stems.gpi		:= $(call get-stems,gpi)
 stems.dot		:= $(call get-stems,dot)
 stems.xvg		:= $(call get-stems,xvg)
+stems.svg		:= $(call get-stems,svg)
 stems.png		:= $(call get-stems,png)
 stems.eps.gz		:= $(call get-stems,eps.gz)
 
@@ -841,7 +853,7 @@ concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 
 all_stems_source	:= $(call concat-stems,tex,all)
 all_stems_script	:= $(call concat-stems,tex.sh rst,all)
-all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg png dot,all)
+all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png dot,all)
 all_stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(all_stems_graphic) $(all_stems.eps) \
 	)
@@ -854,7 +866,7 @@ all_stems_ssg		:= $(sort $(all_stems_ss) $(all_stems_gray))
 
 default_stems_source	:= $(call concat-stems,tex,default)
 default_stems_script	:= $(call concat-stems,tex.sh rst,default)
-default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg png dot,default)
+default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png dot,default)
 default_stems_gray_graphic	:= $(addsuffix ._gray_,$(default_stems_graphic))
 default_stems_gg	:= $(sort \
 	$(default_stems_graphic) $(default_stems_gray_graphic))
@@ -866,7 +878,7 @@ default_stems_ssg	:= $(sort $(default_stems_ss) $(default_stems_gray))
 
 stems_source		:= $(call concat-stems,tex)
 stems_script		:= $(call concat-stems,tex.sh rst)
-stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg png dot)
+stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg svg png dot)
 stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(stems_graphic) $(all_stems.eps))
 stems_gg		:= $(sort $(stems_graphic) $(stems_gray_graphic))
@@ -1426,6 +1438,11 @@ $(RST2LATEX) \
 	$1 $2
 endef
 
+# Converts svg files into .eps files
+#
+# $(call convert-svg,<svg file>,<eps file>,[gray])
+convert-svg	= $(INKSCAPE) --export-eps='$2' '$1'
+
 # Converts xvg files into .eps files
 #
 # $(call convert-xvg,<xvg file>,<eps file>,[gray])
@@ -1845,6 +1862,10 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,1)
 
+%._gray_.eps: %.svg $(gray_eps_file)
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-svg,$<,$@,1)
+
 %._gray_.eps: %.png $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-png,$<,$@,1)
@@ -1880,6 +1901,10 @@ $(gray_eps_file):
 %.eps: %.xvg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,$(GRAY))
+
+%.eps: %.svg $(if $(GRAY),$(gray_eps_file))
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-svg,$<,$@,$(GRAY))
 
 %.eps: %.png $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
@@ -2468,6 +2493,7 @@ define help_text
 #       .gpi    : gnuplot
 #       .fig    : xfig
 #       .xvg    : xmgrace
+#       .svg	: scalable vector graphics (goes through inkscape)
 #       .png	: png (goes through NetPBM)
 #       .eps.gz : gzipped eps
 #
@@ -2596,6 +2622,7 @@ define help_text
 #        GNUPlot:       .gpi
 #        XFig:          .fig
 #        XMgrace:       .xvg
+#        SVG:		.svg
 #        PNG:		.png
 #        GZipped EPS:   .eps.gz
 #
