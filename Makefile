@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.29
+version		:= 2.1.30
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -98,6 +98,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-08-28):
+# 	* Bumped version to 2.1.30
+# 	* Closed issue 39: Capture multi-line log warnings/errors to output
 # Chris Monson (2009-08-26):
 # 	* Bumped version to 2.1.29
 # 	* Closed issue 42: add svg support using inkscape
@@ -1290,19 +1293,58 @@ ps2pdf_embedded	:= \
 	-dMaxSubsetPct=100
 
 # Colorize LaTeX output.
+# This uses a neat trick from the Sed & Awk Book from O'Reilly:
+# 1) Ensure that the last line of the file gets appended to the hold buffer,
+# 	and blank it out to trigger end-of-paragraph logic below.
+# 2) When encountering a blank line (LaTeX output helpfully breaks output on
+# 	newlines)
+# 	a) swap the hold buffer (containing the paragraph) into the pattern buffer (putting a blank line into the hold buffer),
+# 	b) remove the newline at the beginning (don't ask),
+# 	c) apply any colorizing substitutions necessary to ensure happiness.
+# 	d) get the newline out of the hold buffer and append it
+# 	e) profit! (print)
+# 3) Anything not colorized is deleted, unless in verbose mode.
 color_tex	:= \
 	$(SED) \
-	-e '/^[[:space:]]*Output written/{' \
-	-e ' s/.*(\([^)]\{1,\}\)).*/Success!  Wrote \1/' \
-	-e ' s/[[:digit:]]\{1,\}/$(C_PAGES)&$(C_RESET)/g' \
-	-e ' s/Success!/$(C_SUCCESS)&$(C_RESET)/g' \
+	-e '$${' \
+	-e '  /^$$/!{' \
+	-e '    H' \
+	-e '    s/.*//' \
+	-e '  }' \
 	-e '}' \
-	-e 's/^! *LaTeX Error:.*/$(C_ERROR)&$(C_RESET)/' -e 't' \
-	-e 's/^LaTeX Warning:.*/$(C_WARNING)&$(C_RESET)/' -e 't' \
-	-e 's/^Package .* Warning:.*/$(C_WARNING)&$(C_RESET)/' -e 't' \
-	-e 's/^Underfull.*/$(C_UNDERFULL)&$(C_RESET)/' -e 't' \
-	-e 's/^Overfull.*/$(C_OVERFULL)&$(C_RESET)/' -e 't' \
-	$(if $(VERBOSE),,-e 'd')
+	-e '/^$$/!{' \
+	-e '  H' \
+	-e '  d' \
+	-e '}' \
+	-e '/^$$/{' \
+	-e '  x' \
+	-e '  s/^\n//' \
+	-e '  /^Output written/{' \
+	-e '    s/.*(\([^)]\{1,\}\)).*/Success!  Wrote \1/' \
+	-e '    s/[[:digit:]]\{1,\}/$(C_PAGES)&$(C_RESET)/g' \
+	-e '    s/Success!/$(C_SUCCESS)&$(C_RESET)/g' \
+	-e '    b end' \
+	-e '  }' \
+	-e '  /^! *LaTeX Error:.*/{' \
+	-e '    s//$(C_ERROR)&$(C_RESET)/' \
+	-e '    b end' \
+	-e '  }' \
+	-e '  /^.*Warning:.*/{' \
+	-e '    s//$(C_WARNING)&$(C_RESET)/' \
+	-e '    b end' \
+	-e '  }' \
+	-e '  /^Underfull.*/{' \
+	-e '    s//$(C_UNDERFULL)&$(C_RESET)/' \
+	-e '    b end' \
+	-e '  }' \
+	-e '  /^Overfull.*/{' \
+	-e '    s//$(C_OVERFULL)&$(C_RESET)/' \
+	-e '    b end' \
+	-e '  }' \
+	$(if $(VERBOSE),,-e '  d') \
+	-e '  :end' \
+	-e '  G' \
+	-e '}' \
 
 # Colorize BibTeX output.
 color_bib	:= \
