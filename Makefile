@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.30
+version		:= 2.1.31
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -98,6 +98,9 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-09-08):
+# 	* Bumped version to 2.1.31
+# 	* Closed issue 43: evince doesn't notice pdf change w/out touch
 # Chris Monson (2009-08-28):
 # 	* Bumped version to 2.1.30
 # 	* Closed issue 39: Capture multi-line log warnings/errors to output
@@ -1703,6 +1706,7 @@ endif
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
 	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
+	    $(TOUCH) '$@'; \
 	else \
 	    $(CAT) $@.log; \
 	    $(call remove-temporary-files,'$@.temp'); \
