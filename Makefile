@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.31
+version		:= 2.1.32
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
