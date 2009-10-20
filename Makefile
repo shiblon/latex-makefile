@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.32
+version		:= 2.1.33
 svninfo		:= $$Id$$
 #
 # If you specify sources here, all other files with the same suffix
@@ -98,6 +98,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-10-20):
+# 	* Bumped version to 2.1.33
+# 	* Fixed issue 47, thanks to fdemesmay: add binary copy directory, copy
+# 		dvi, pdf, and ps if it exists
 # Chris Monson (2009-09-25):
 # 	* Bumped version to 2.1.32
 # 	* Fixed so that a changed lol file will cause a rebuild
@@ -465,6 +469,9 @@ VIEW_GRAPHICS	?= display
 FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 
+# Directory into which we place "binaries" if it exists.
+BINARY_TARGET_DIR	?= _out
+
 # Fall back to ps2pdf13 (and ultimately ps2pdf) if ps2pdf14 is not on the system:
 PS2PDF_EMBED	:= \
 	$(if \
@@ -596,6 +603,18 @@ test-exists-and-different	= \
 # Return value 1, or value 2 if value 1 is empty
 # $(call get-default,<possibly empty arg>,<default value if empty>)
 get-default	= $(if $1,$1,$2)
+
+# Copy a file and log what's going on
+# $(call copy-with-logging,<source>,<target>)
+define copy-binaries-with-logging
+if [ -d '$(BINARY_TARGET_DIR)' ]; then \
+	if $(CP) '$1' '$2'; then \
+		$(ECHO) "$(C_INFO)Copied '$1' to '$2'$(C_RESET)"; \
+	else \
+		$(ECHO) "$(C_ERROR)Failed to copy '$1' to '$2'$(C_RESET)"; \
+	fi; \
+fi
+endef
 
 # Gives a reassuring message about the failure to find include files
 # $(call include-message,<list of include files>)
@@ -1711,6 +1730,7 @@ endif
 	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
 	    $(TOUCH) '$@'; \
+	    $(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	else \
 	    $(CAT) $@.log; \
 	    $(call remove-temporary-files,'$@.temp'); \
@@ -1726,6 +1746,8 @@ endif
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
 	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
+	    $(TOUCH) '$@'; \
+	    $(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	else \
 	    $(CAT) $@.log; \
 	    $(call remove-temporary-files,'$@.temp'); \
@@ -1817,6 +1839,7 @@ endif
 	else \
 		$(MV) $@.1st.make $@; \
 	fi; \
+	$(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	$(call latex-color-log,$*)
 
 # Build the .bbl file.  When dependencies are included, this will (or will
