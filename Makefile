@@ -470,7 +470,19 @@ FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(EC
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 
 # Directory into which we place "binaries" if it exists.
-BINARY_TARGET_DIR	?= _out
+# Note that this can be changed on the commandline or in Makefile.ini:
+#
+# Command line:
+#   make BINARY_TARGET_DIR=$HOME/pdfs myfile.pdf
+#
+# Also, you can specify a relative directory (relative to the Makefile):
+#   make BINARY_TARGET_DIR=pdfs myfile.pdf
+#
+# Or, you can use Makefile.ini:
+#
+#   BINARY_TARGET_DIR := $(HOME)/bin_out
+#
+BINARY_TARGET_DIR	?= $(HOME)/_out
 
 # Fall back to ps2pdf13 (and ultimately ps2pdf) if ps2pdf14 is not on the system:
 PS2PDF_EMBED	:= \
@@ -2607,6 +2619,19 @@ define help_text
 #    clean'.
 #
 # FEATURES:
+#
+#    Optional Binary Directory:
+#        If you create the _out directory in the same place as the makefile, it
+#        will automatically be used as a dumping ground for .dvi, .ps, and .pdf
+#        output files.
+#
+#        Alternatively, you can set the BINARY_TARGET_DIR variable, either as a
+#        make argument or in Makefile.ini, to point to your directory of
+#        choice.  Note that no pathname wildcard expansion is done in the
+#        makefile, so make sure that the path is complete before going in
+#        there.  E.g., if you want to specify something in your home directory,
+#        use $HOME/ instead of ~/ so that the shell expands it before it gets
+#        to the makefile.
 #
 #    External Program Dependencies:
 #        Every external program used by the makefile is represented by an
