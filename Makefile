@@ -423,6 +423,7 @@ svninfo		:= $$Id$$
 CAT		?= cat
 CP		?= cp -f
 DIFF		?= diff
+DIRNAME		?= dirname
 ECHO		?= echo
 EGREP		?= egrep
 ENV		?= env
@@ -482,7 +483,7 @@ ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 #
 #   BINARY_TARGET_DIR := $(HOME)/bin_out
 #
-BINARY_TARGET_DIR	?= $(HOME)/_out
+BINARY_TARGET_DIR	?= _out_
 
 # Fall back to ps2pdf13 (and ultimately ps2pdf) if ps2pdf14 is not on the system:
 PS2PDF_EMBED	:= \
@@ -618,8 +619,8 @@ get-default	= $(if $1,$1,$2)
 
 # Copy a file and log what's going on
 # $(call copy-with-logging,<source>,<target>)
-define copy-binaries-with-logging
-if [ -d '$(BINARY_TARGET_DIR)' ]; then \
+define copy-with-logging
+if [ -d `$(DIRNAME) '$2'` ]; then \
 	if $(CP) '$1' '$2'; then \
 		$(ECHO) "$(C_INFO)Copied '$1' to '$2'$(C_RESET)"; \
 	else \
@@ -1742,7 +1743,7 @@ endif
 	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
 	    $(TOUCH) '$@'; \
-	    $(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
+	    $(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	else \
 	    $(CAT) $@.log; \
 	    $(call remove-temporary-files,'$@.temp'); \
@@ -1759,7 +1760,7 @@ endif
 	    $(RM) -f '$@'; \
 	    $(MV) '$@.temp' '$@'; \
 	    $(TOUCH) '$@'; \
-	    $(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
+	    $(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	else \
 	    $(CAT) $@.log; \
 	    $(call remove-temporary-files,'$@.temp'); \
@@ -1851,7 +1852,7 @@ endif
 	else \
 		$(MV) $@.1st.make $@; \
 	fi; \
-	$(call copy-binaries-with-logging,$@,$(BINARY_TARGET_DIR)); \
+	$(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	$(call latex-color-log,$*)
 
 # Build the .bbl file.  When dependencies are included, this will (or will
@@ -2621,9 +2622,9 @@ define help_text
 # FEATURES:
 #
 #    Optional Binary Directory:
-#        If you create the _out directory in the same place as the makefile, it
-#        will automatically be used as a dumping ground for .dvi, .ps, and .pdf
-#        output files.
+#        If you create the _out_ directory in the same place as the makefile,
+#        it will automatically be used as a dumping ground for .dvi, .ps, and
+#        .pdf output files.
 #
 #        Alternatively, you can set the BINARY_TARGET_DIR variable, either as a
 #        make argument or in Makefile.ini, to point to your directory of
