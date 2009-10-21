@@ -450,6 +450,7 @@ TPUT		?= tput
 RST2LATEX	?= rst2latex.py
 # == EPS Generation ==
 DOT		?= dot		# GraphViz
+DOT2TEX		?= dot2tex	# dot2tex - add options (not -o) as needed
 FIG2DEV		?= fig2dev	# XFig
 GNUPLOT		?= gnuplot	# GNUplot
 INKSCAPE	?= inkscape	# Inkscape (svg support)
@@ -977,6 +978,7 @@ allowed_batch_source_targets	:= \
 allowed_batch_graphic_targets	:= \
 	all-graphics \
 	all-pstex \
+	all-dot2tex \
 	all-gray-pstex \
 	show-graphics
 
@@ -1042,6 +1044,7 @@ all_d_targets		:= $(addsuffix .d,$(stems_ssg))
 all_graphics_targets	:= $(addsuffix .eps,$(stems_gg))
 all_pstex_targets	:= $(addsuffix .pstex_t,$(stems.fig))
 all_gray_pstex_targets	:= $(addsuffix ._gray_.pstex_t,$(stems.fig))
+all_dot2tex_targets	:= $(addsuffix .dot_t,$(stems.dot))
 
 all_known_graphics	:= $(sort $(all_graphics_targets) $(wildcard *.eps))
 
@@ -1096,6 +1099,7 @@ $(SED) \
 -e '/\.cls$$/p' \
 -e '/\.sty$$/p' \
 -e '/\.pstex_t$$/p' \
+-e '/\.dot_t$$/p' \
 -e 'd' \
 $1 | $(SORT) | $(UNIQ)
 endef
@@ -1131,6 +1135,19 @@ if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
 	$(ECHO) "$(C_ERROR)Missing pstex_t file(s)$(C_RESET)"; \
 	$(ECHO) "$(C_ERROR)Please run$(C_RESET)"; \
 	$(ECHO) "$(C_ERROR)  make all-pstex$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)before proceeding.$(C_RESET)"; \
+	exit 1; \
+fi
+endef
+
+# Checks for build failure due to dot2tex, and gives instructions.
+#
+# $(call die-on-dot2tex,<parsed file>)
+define die-on-dot2tex
+if $(EGREP) -q '^! LaTeX Error: File .*\.dot_t.* not found' $1; then \
+	$(ECHO) "$(C_ERROR)Missing dot_t file(s)$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)Please run$(C_RESET)"; \
+	$(ECHO) "$(C_ERROR)  make all-dot2tex$(C_RESET)"; \
 	$(ECHO) "$(C_ERROR)before proceeding.$(C_RESET)"; \
 	exit 1; \
 fi
@@ -1507,6 +1524,10 @@ convert-fig-pstex	= $(FIG2DEV) -L pstex $1 $2 > /dev/null 2>&1
 # Creation of .pstex_t files from .fig files
 # $(call convert-fig-pstex-t,<fig file>,<pstex file>,<pstex_t file>)
 convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $1 $2 > /dev/null 2>&1
+
+# Creation of .dot_t files from .dot files
+# #(call convert-dot-tex,<dot file>,<dot_t file>)
+convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 
 # Creation of .tex files from .rst files
 # TODO: Fix paper size so that it can be specified in the file itself
@@ -1924,6 +1945,9 @@ all-graphics:	$(all_graphics_targets);
 all-pstex:	$(all_pstex_targets);
 all-gray-pstex:	$(all_gray_pstex_targets);
 
+.PHONY: all-dot2tex
+all-dot2tex:	$(all_dot2tex_targets);
+
 .PHONY: show-graphics
 show-graphics: all-graphics
 	$(VIEW_GRAPHICS) $(all_known_graphics)
@@ -2008,6 +2032,10 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig-pstex-t,$<,$@,$*.pstex,$(GRAY))
 
+%.dot_t: %.dot
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-dot-tex,$<,$@)
+
 #
 # DEPENDENCY-RELATED TARGETS.
 #
@@ -2044,6 +2072,7 @@ $(gray_eps_file):
 	$(QUIET)\
 	$(call run-latex,$<,--recorder) || $(sh_true); \
 	$(call die-on-pstexs,$*.log); \
+	$(call die-on-dot2tex,$*.log); \
 	$(MV) $*.dvi $*.dvi.1st.make; \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
@@ -2254,7 +2283,7 @@ clean-tex: clean-deps
 # even want to keep pstex functionality, so my motivation is not terribly high
 # for doing it right.
 clean-graphics:
-	$(QUIET)$(call clean-files,$(all_graphics_targets) *.gpi.d *.pstex *.pstex_t)
+	$(QUIET)$(call clean-files,$(all_graphics_targets) *.gpi.d *.pstex *.pstex_t *.dot_t)
 
 .PHONY: clean-backups
 clean-backups:
@@ -2428,6 +2457,12 @@ define help_text
 #
 #    all-pstex:
 #        Build all fig files into pstex and pstex_t files.  Gray DOES NOT WORK.
+#
+#    all-gray-pstex:
+#    	 Build all fig files into grayscale pstex and pstex_t files.
+#
+#    all-dot2tex:
+#    	 Build all dot files into tex files.
 #
 #    show-graphics:
 #        Builds and displays all graphics in this directory.  Uses the
@@ -2819,6 +2854,22 @@ define help_text
 #    GraphVis Graphics:
 #            Color settings are simply ignored here.  The 'dot' program is used
 #            to transform a .dot file into a .eps file.
+#
+#            If you want, you can use the dot2tex program to convert dot files
+#            to tex graphics.  The default is to just call dot2tex with no
+#            arguments, but you can change the DOT2TEX definition to include
+#            options as needed (in your Makefile.ini).
+#
+#            Note that, like pstex, the makefile cannot use latex's own output
+#            to discover all missing dot_t (output) files, since anytime TeX
+#            includes TeX, it has to bail when it can't find the include file.
+#            It can therefore only stop on the first missing file it discovers,
+#            and we can't get a large list of them out easily.
+#
+#            So, the makefile errors out if it's missing an included dot_t
+#            file, then prompts the user to run this command manually:
+#
+#                make all-dot2tex
 #
 #    GZipped EPS Graphics:
 #        
