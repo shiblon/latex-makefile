@@ -98,8 +98,10 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2009-10-20):
+# Chris Monson (2009-10-21):
 # 	* Bumped version to 2.1.33
+# 	* Fixed issue 46, adding support for dot2tex (thanks to fdemesmay)
+# 	* Made all_files.* settable in Makefile.ini (using ?= instead of :=)
 # 	* Fixed issue 47, thanks to fdemesmay: add binary copy directory, copy
 # 		dvi, pdf, and ps if it exists
 # Chris Monson (2009-09-25):
