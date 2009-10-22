@@ -758,17 +758,17 @@ GNUPLOT_SED	:= global-gpi.sed gnuplot.sed
 GNUPLOT_GLOBAL	:= global._include_.gpi gnuplot.global
 
 # Files of interest
-all_files.tex		:= $(wildcard *.tex)
-all_files.tex.sh	:= $(wildcard *.tex.sh)
-all_files.rst		:= $(wildcard *.rst)
-all_files.fig		:= $(wildcard *.fig)
-all_files.gpi		:= $(wildcard *.gpi)
-all_files.dot		:= $(wildcard *.dot)
-all_files.xvg		:= $(wildcard *.xvg)
-all_files.svg		:= $(wildcard *.svg)
-all_files.png		:= $(wildcard *.png)
-all_files.eps.gz	:= $(wildcard *.eps.gz)
-all_files.eps		:= $(wildcard *.eps)
+all_files.tex		?= $(wildcard *.tex)
+all_files.tex.sh	?= $(wildcard *.tex.sh)
+all_files.rst		?= $(wildcard *.rst)
+all_files.fig		?= $(wildcard *.fig)
+all_files.gpi		?= $(wildcard *.gpi)
+all_files.dot		?= $(wildcard *.dot)
+all_files.xvg		?= $(wildcard *.xvg)
+all_files.svg		?= $(wildcard *.svg)
+all_files.png		?= $(wildcard *.png)
+all_files.eps.gz	?= $(wildcard *.eps.gz)
+all_files.eps		?= $(wildcard *.eps)
 
 # Utility function for obtaining all files not specified in $(neverclean)
 # $(call cleanable-files,file1 file2 file3 ...)
