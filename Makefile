@@ -1,4 +1,4 @@
-# Copyright 2004 Chris Monson (monpublic@gmail.com)
+# Copyright 2004 Chris Monson (shiblon@gmail.com)
 # Latest version available at http://www.bouncingchairs.net/oss
 #
 #    This file is part of ``Chris Monson's Free Software''.
@@ -98,6 +98,11 @@ svninfo		:= $$Id$$
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-10-29):
+# 	* Bumped version to 2.1.34
+# 	* Fixed _out_ creation bug introduced in 2.1.33 (it was always created)
+# 	* Fixed erroneous help output for $HOME in BINARY_TARGET_DIR
+# 	* Changed contact email address - bring on the spam!
 # Chris Monson (2009-10-21):
 # 	* Bumped version to 2.1.33
 # 	* Fixed issue 46, adding support for dot2tex (thanks to fdemesmay)
@@ -425,7 +430,6 @@ svninfo		:= $$Id$$
 CAT		?= cat
 CP		?= cp -f
 DIFF		?= diff
-DIRNAME		?= dirname
 ECHO		?= echo
 EGREP		?= egrep
 ENV		?= env
@@ -623,11 +627,11 @@ get-default	= $(if $1,$1,$2)
 # Copy a file and log what's going on
 # $(call copy-with-logging,<source>,<target>)
 define copy-with-logging
-if [ -d `$(DIRNAME) '$2'` ]; then \
-	if $(CP) '$1' '$2'; then \
-		$(ECHO) "$(C_INFO)Copied '$1' to '$2'$(C_RESET)"; \
+if [ -d '$2/' ]; then \
+	if $(CP) '$1' '$2/'; then \
+		$(ECHO) "$(C_INFO)Copied '$1' to '$2/'$(C_RESET)"; \
 	else \
-		$(ECHO) "$(C_ERROR)Failed to copy '$1' to '$2'$(C_RESET)"; \
+		$(ECHO) "$(C_ERROR)Failed to copy '$1' to '$2/'$(C_RESET)"; \
 	fi; \
 fi
 endef
@@ -2380,6 +2384,16 @@ define help_text
 #          There are numerous variables in this file that can be overridden in
 #          this way.  Search for '?=' to find them all.
 #
+#          Also, you can put arbitrary targets into it if, for example, you
+#          want your source built from something else, e.g.:
+#
+#          generated.tex: generating_script.weird_lang depA depB
+#          	./generating_script.weird_lang > $$@
+#
+#          The Makefile.ini is imported before anything else is done, so go
+#          wild with your ideas for changes to this makefile in there.  It
+#          makes it easy to test them before submitting patches.
+#
 # STANDARD ENVIRONMENT VARIABLES:
 #
 #      LATEX_COLOR_WARNING		'$(LATEX_COLOR_WARNING)'
@@ -2668,7 +2682,7 @@ define help_text
 #        choice.  Note that no pathname wildcard expansion is done in the
 #        makefile, so make sure that the path is complete before going in
 #        there.  E.g., if you want to specify something in your home directory,
-#        use $HOME/ instead of ~/ so that the shell expands it before it gets
+#        use $$HOME/ instead of ~/ so that the shell expands it before it gets
 #        to the makefile.
 #
 #    External Program Dependencies:
