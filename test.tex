@@ -5,16 +5,23 @@
 \includeonly{test1._include_,test4._include_}
 
 \usepackage{graphicx}
+\usepackage{nomencl}
 
 \usepackage{apalike}\bibliographystyle{apalike}
 %\usepackage{named}\bibliographystyle{named}
 
+\makeglossary
+
 \begin{document}
+
+This is a nomenclature statement about NOMS.\nomenclature{NOMS}{Hello Nom Kitty}.
 
 \tableofcontents
 \listoffigures
 
 \section{first section}
+
+\printglossary
 
 \nocite{testentry3}
 
