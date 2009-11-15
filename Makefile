@@ -102,6 +102,8 @@ version		:= 2.1.36
 # 	* Removed svninfo, since this is now managed by mercurial
 # 	* Fixed typo in changelist
 # 	* Issue 52: added jpg->eps conversion (thanks to brubakee)
+# 	* Issue 54: fix missing Overfull colorization due to lack of a blank
+# 		line preceding the first error.
 # Chris Monson (2009-11-14):
 # 	* Bumped version to 2.1.36
 # 	* Issues 53 and 49: added .brf, .mtc, and .maf to the cleanables
@@ -1377,18 +1379,22 @@ ps2pdf_embedded	:= \
 
 # Colorize LaTeX output.
 # This uses a neat trick from the Sed & Awk Book from O'Reilly:
-# 1) Ensure that the last line of the file gets appended to the hold buffer,
+# 1) If a line has a single ending paren, delete it to make a blank line (so
+#	that we catch the first error, which is not always preceded by a blank
+#	line).
+# 2) Ensure that the last line of the file gets appended to the hold buffer,
 # 	and blank it out to trigger end-of-paragraph logic below.
-# 2) When encountering a blank line (LaTeX output helpfully breaks output on
+# 3) When encountering a blank line (LaTeX output helpfully breaks output on
 # 	newlines)
 # 	a) swap the hold buffer (containing the paragraph) into the pattern buffer (putting a blank line into the hold buffer),
 # 	b) remove the newline at the beginning (don't ask),
 # 	c) apply any colorizing substitutions necessary to ensure happiness.
 # 	d) get the newline out of the hold buffer and append it
 # 	e) profit! (print)
-# 3) Anything not colorized is deleted, unless in verbose mode.
+# 4) Anything not colorized is deleted, unless in verbose mode.
 color_tex	:= \
 	$(SED) \
+	-e 's/^)$$//' \
 	-e '$${' \
 	-e '  /^$$/!{' \
 	-e '    H' \
