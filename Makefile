@@ -104,6 +104,7 @@ version		:= 2.1.36
 # 	* Issue 52: added jpg->eps conversion (thanks to brubakee)
 # 	* Issue 54: fix missing Overfull colorization due to lack of a blank
 # 		line preceding the first error.
+#	* Issue 51: remove head.tmp and body.tmp in make clean invocation
 # Chris Monson (2009-11-14):
 # 	* Bumped version to 2.1.36
 # 	* Issues 53 and 49: added .brf, .mtc, and .maf to the cleanables
@@ -1084,7 +1085,7 @@ default_dvi_targets	:= $(addsuffix .dvi,$(default_stems_ss))
 rm_ext		:= \
 	log aux dvi ps pdf blg bbl out nav snm toc lof lot lol pfg fls vrb \
 	idx ind ilg glg glo gls lox nls nlo nlg brf mtc maf
-backup_patterns	:= *~ *.bak *.backup
+backup_patterns	:= *~ *.bak *.backup body.tmp head.tmp
 
 graph_stem	:= _graph
 
