@@ -1416,7 +1416,7 @@ color_tex	:= \
 	-e '    b end' \
 	-e '  }' \
 	-e '  /! *LaTeX Error:.*/{' \
-	-e '    s/! *LaTeX Error:.*/$(C_ERROR)&$(C_RESET)/' \
+	-e '    s/.*\(! *LaTeX Error:.*\)/$(C_ERROR)\1$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
 	-e '  /.*Warning:.*/{' \
@@ -1424,11 +1424,11 @@ color_tex	:= \
 	-e '    b end' \
 	-e '  }' \
 	-e '  /Underfull.*/{' \
-	-e '    s/Underfull.*/$(C_UNDERFULL)&$(C_RESET)/' \
+	-e '    s/.*\(Underfull.*\)/$(C_UNDERFULL)\1$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
 	-e '  /Overfull.*/{' \
-	-e '    s/Overfull.*/$(C_OVERFULL)&$(C_RESET)/' \
+	-e '    s/.*\(Overfull.*\)/$(C_OVERFULL)\1$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
 	$(if $(VERBOSE),,-e '  d') \
