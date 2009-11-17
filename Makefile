@@ -1395,7 +1395,6 @@ ps2pdf_embedded	:= \
 # 4) Anything not colorized is deleted, unless in verbose mode.
 color_tex	:= \
 	$(SED) \
-	-e 's/^)$$//' \
 	-e '$${' \
 	-e '  /^$$/!{' \
 	-e '    H' \
@@ -1409,26 +1408,26 @@ color_tex	:= \
 	-e '/^$$/{' \
 	-e '  x' \
 	-e '  s/^\n//' \
-	-e '  /^Output written/{' \
+	-e '  /Output written/{' \
 	-e '    s/.*(\([^)]\{1,\}\)).*/Success!  Wrote \1/' \
 	-e '    s/[[:digit:]]\{1,\}/$(C_PAGES)&$(C_RESET)/g' \
 	-e '    s/Success!/$(C_SUCCESS)&$(C_RESET)/g' \
 	-e '    b end' \
 	-e '  }' \
-	-e '  /^! *LaTeX Error:.*/{' \
-	-e '    s//$(C_ERROR)&$(C_RESET)/' \
+	-e '  /! *LaTeX Error:.*/{' \
+	-e '    s/! *LaTeX Error:.*/$(C_ERROR)&$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
-	-e '  /^.*Warning:.*/{' \
+	-e '  /.*Warning:.*/{' \
 	-e '    s//$(C_WARNING)&$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
-	-e '  /^Underfull.*/{' \
-	-e '    s//$(C_UNDERFULL)&$(C_RESET)/' \
+	-e '  /Underfull.*/{' \
+	-e '    s/Underfull.*/$(C_UNDERFULL)&$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
-	-e '  /^Overfull.*/{' \
-	-e '    s//$(C_OVERFULL)&$(C_RESET)/' \
+	-e '  /Overfull.*/{' \
+	-e '    s/Overfull.*/$(C_OVERFULL)&$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
 	$(if $(VERBOSE),,-e '  d') \
