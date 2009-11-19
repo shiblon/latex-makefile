@@ -1144,6 +1144,13 @@ endef
 # the stem of the source file being built, the second is a list of suffixes
 # that will show up as dependencies in the generated .d file.
 #
+# Note that we try to escape spaces in filenames where possible.  We have to do
+# it with three backslashes so that as the name percolates through the makefile
+# it eventually ends up with the proper escaping when the build rule is found.
+# Ugly, but it appears to work.  Note that graphicx doesn't allow filenames
+# with spaces, so this could in many ways be moot unless you're using something
+# like grffile.
+#
 # $(call get-graphics,<parsed file>,<target files>)
 define get-graphics
 $(SED) \
@@ -1155,7 +1162,7 @@ $(SED) \
 -e 's/ Graphic.*$$//' \
 -e '/^\(.*\)\(\.[^.]*\)$$/{' \
 -e   's//TARGETS=\1\2/' \
--e   's/[[:space:]]/\\&/g' \
+-e   's/[[:space:]]/\\\\\\&/g' \
 -e   's/^TARGETS=/$2: /' \
 -e   'p' \
 -e   's/[^:]*: \(.*\)\(\.[^.]*\)$$/-include \1.gpi.d/' \
@@ -1349,7 +1356,7 @@ $(SED) \
 -e '/^Error:/,/context:/s/.*/$(C_ERROR)&$(C_RESET)/p' \
 -e 's/^Warning:.*/$(C_WARNING)&$(C_RESET)/p' \
 -e 'd' \
-$1
+'$1'
 endef
 
 # Get all important .aux files from the top-level .aux file and merges them all
@@ -1734,7 +1741,7 @@ endef
 # that case.
 # $(call convert-dot,<dot file>,<eps file>,<log file>,[gray])
 define convert-dot
-$(DOT) -Tps '$1' 2>'$3' $(if $4,| $(call kill-ps-color)) > '$2'; \
+$(DOT) -Tps '$1' 2>'$3' $(if $4,| $(call kill-ps-color)) > $2; \
 $(call colorize-dot-errors,$3)
 endef
 
