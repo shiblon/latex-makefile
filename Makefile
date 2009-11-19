@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.37
+version		:= 2.1.38
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
@@ -97,6 +97,9 @@ version		:= 2.1.37
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-11-19):
+# 	* Bumped version to 2.1.38
+# 	* issue 57: Added some limited support for Cygwin (spaces in filenames)
 # Chris Monson (2009-11-15):
 # 	* Bumped version to 2.1.37
 # 	* Removed svninfo, since this is now managed by mercurial
