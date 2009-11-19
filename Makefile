@@ -1223,10 +1223,10 @@ $(SED) \
 -e '/^\\bibdata/!d' \
 -e 's/\\bibdata{\([^}]*\)}/\1,/' \
 -e 's/,\{2,\}/,/g' \
+-e 's/[[:space:]]/\\&/g' \
 -e 's/,/.bib /g' \
 -e 's/ \{1,\}$$//' \
--e 's/[[:space:]]/\\&/g' \
-$1 | $(XARGS) $(KPSEWHICH) - | \
+$1 | $(XARGS) $(KPSEWHICH) | \
 $(SED) \
 -e 's/^/$2: /' | \
 \$(SORT) | $(UNIQ)
