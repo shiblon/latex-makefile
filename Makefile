@@ -1120,11 +1120,17 @@ gpi_global	:= $(strip \
 # NOTE: BSD sed does not understand \|, so we have to do something more
 # clunky to extract suitable extensions.
 #
+# Also, we do a little bit of funny rewriting up front (TARGETS=) to make sure
+# that we can properly backslash-escape spaces in file names (e.g, on Cygwin
+# for tex distributions that have "Program Files" in their name).
+#
 # $(call get-inputs,<parsed file>,<target files>)
 define get-inputs
 $(SED) \
 -e '/^INPUT/!d' \
--e 's!^INPUT \(\./\)\{0,1\}!$2: !' \
+-e 's!^INPUT \(\./\)\{0,1\}!TARGETS=!' \
+-e 's/[[:space:]]/\\ /g' \
+-e 's/^TARGETS=/$2: /' \
 -e '/\.tex$$/p' \
 -e '/\.cls$$/p' \
 -e '/\.sty$$/p' \
@@ -1148,7 +1154,9 @@ $(SED) \
 -e 's/^File: //' \
 -e 's/ Graphic.*$$//' \
 -e '/^\(.*\)\(\.[^.]*\)$$/{' \
--e   's//$2: \1\2/' \
+-e   's//TARGETS=\1\2/' \
+-e   's/[[:space:]]/\\&/g' \
+-e   's/^TARGETS=/$2: /' \
 -e   'p' \
 -e   's/[^:]*: \(.*\)\(\.[^.]*\)$$/-include \1.gpi.d/' \
 -e   'p' \
@@ -1189,8 +1197,10 @@ endef
 # $(call get-inds,<parsed file>,<target files>)
 define get-inds
 $(SED) \
--e 's/^No file \(.*\.ind\)\.$$/$2: \1/p' \
--e 's/^No file \(.*\.[gn]ls\)\.$$/$2: \1/p' \
+-e 's/^No file \(.*\.ind\)\.$$/TARGETS=\1/' \
+-e 's/^No file \(.*\.[gn]ls\)\.$$/TARGETS=\1/' \
+-e 's/[[:space:]]/\\&/g' \
+-e 's/^TARGETS=/$2: /p' \
 -e 'd' \
 $1 | $(SORT) | $(UNIQ)
 endef
@@ -1203,8 +1213,9 @@ endef
 # the \bibdata macro and delimiters removed to create a dependency list.  A
 # trailing comma is added, then all adjacent commas are collapsed into a single
 # comma.  Then commas are replaced with the string .bib[space], and the
-# trailing space is killed off.  This produces a list of space-delimited .bib
-# filenames, which is what the make dep file expects to see.
+# trailing space is killed off.  Finally, all filename spaces are escaped.
+# This produces a list of space-delimited .bib filenames, which is what the
+# make dep file expects to see.
 #
 # $(call get-bibs,<aux file>,<targets>)
 define get-bibs
@@ -1214,6 +1225,7 @@ $(SED) \
 -e 's/,\{2,\}/,/g' \
 -e 's/,/.bib /g' \
 -e 's/ \{1,\}$$//' \
+-e 's/[[:space:]]/\\&/g' \
 $1 | $(XARGS) $(KPSEWHICH) - | \
 $(SED) \
 -e 's/^/$2: /' | \
