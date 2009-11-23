@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.38
+version		:= 2.1.39
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
@@ -97,6 +97,9 @@ version		:= 2.1.38
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2009-11-23):
+# 	* Bumped version to 2.1.39
+# 	* issue 57: now possible to override font embedding options
 # Chris Monson (2009-11-19):
 # 	* Bumped version to 2.1.38
 # 	* issue 57: Added some limited support for Cygwin (spaces in filenames)
@@ -489,6 +492,9 @@ PSNUP		?= psnup
 VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
+
+# Command options for embedding fonts
+EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -1394,12 +1400,7 @@ endef
 
 # Generate pdf from postscript
 ps2pdf_normal	:= $(PS2PDF_NORMAL)
-ps2pdf_embedded	:= \
-	$(PS2PDF_EMBED) \
-	-dPDFSETTINGS=/printer \
-	-dEmbedAllFonts=true \
-	-dSubsetFonts=true \
-	-dMaxSubsetPct=100
+ps2pdf_embedded	:= $(PS2PDF_EMBED) $(EMBED_OPTIONS)
 
 # Colorize LaTeX output.
 # This uses a neat trick from the Sed & Awk Book from O'Reilly:
@@ -2450,14 +2451,16 @@ define help_text
 #          neverclean := *.pdf *.ps
 #          onlysources.tex := main.tex
 #          PS2PDF_EMBED := ps2pdf14
+#          EMBED_OPTIONS := # MikTex ps2pdf doesn't grok -d
 #          LATEX_COLOR_WARNING := 'bold red uline'
 #
 #          And this would override the neverclean setting to ensure that pdf
 #          and ps files always remain behind, set the makefile to treat all
 #          .tex files that are not "main.tex" as includes (and therefore not
 #          default targets), and ps2pdf14 as the proper ps to pdf conversion
-#          program for embedded fonts.  It also changes the LaTeX warning
-#          output to be red, bold, and underlined.
+#          program for embedded fonts.  It removes all -d command options (see
+#          the default setting) for font embedding, as well.  It also changes
+#          the LaTeX warning output to be red, bold, and underlined.
 #
 #          There are numerous variables in this file that can be overridden in
 #          this way.  Search for '?=' to find them all.
