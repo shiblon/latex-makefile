@@ -99,7 +99,7 @@ version		:= 2.1.39
 # CHANGES:
 # Chris Monson (2009-11-23):
 # 	* Bumped version to 2.1.39
-# 	* issue 57: now possible to override font embedding options
+# 	* issue 57: change ps2pdf invocations to just use gs directly
 # Chris Monson (2009-11-19):
 # 	* Bumped version to 2.1.38
 # 	* issue 57: Added some limited support for Cygwin (spaces in filenames)
