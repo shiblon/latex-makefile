@@ -466,9 +466,7 @@ DVIPS		?= dvips
 LATEX		?= latex
 MAKEINDEX	?= makeindex
 KPSEWHICH	?= kpsewhich
-PS2PDF_NORMAL	?= ps2pdf
-PS2PDF_EMBED13	?= ps2pdf13
-PS2PDF_EMBED	?= ps2pdf14
+GS		?= gs
 # = OPTIONAL PROGRAMS =
 # == Makefile Color Output ==
 TPUT		?= tput
@@ -493,8 +491,9 @@ VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
 
-# Command options for embedding fonts
-EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
+# Command options for embedding fonts and postscript->pdf conversion
+PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
+PS_COMPATIBILITY	?= 1.4
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -515,18 +514,6 @@ ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 #   BINARY_TARGET_DIR := $(HOME)/bin_out
 #
 BINARY_TARGET_DIR	?= _out_
-
-# Fall back to ps2pdf13 (and ultimately ps2pdf) if ps2pdf14 is not on the system:
-PS2PDF_EMBED	:= \
-	$(if \
-		$(shell $(WHICH) $(PS2PDF_EMBED)), \
-		$(PS2PDF_EMBED), \
-		$(if \
-			$(shell $(WHICH) $(PS2PDF_EMBED13)), \
-			$(PS2PDF_EMBED13), \
-			$(PS2PDF_NORMAL) \
-		) \
-	)
 
 # SH NOTES
 #
@@ -1399,8 +1386,24 @@ $(call remove-temporary-files,$1.$$$$.make $1.$$$$.sed.make)
 endef
 
 # Generate pdf from postscript
-ps2pdf_normal	:= $(PS2PDF_NORMAL)
-ps2pdf_embedded	:= $(PS2PDF_EMBED) $(EMBED_OPTIONS)
+#
+# Note that we don't just call ps2pdf, since there are so many versions of that
+# script on various systems.  Instead, we call the postscript interpreter
+# directly.
+#
+# $(call ps2pdf,infile,outfile,[embed fonts])
+define ps2pdf
+	$(GS) \
+		-dSAFER -dCompatibilityLevel=$(PS_COMPATIBILITY) \
+		$(if $3,$(PS_EMBED_OPTIONS)) \
+		-q -dNOPAUSE -dBATCH \
+		-sDEVICE=pdfwrite -sstdout=%stderr \
+		'-sOutputFile=$2' \
+		-dSAFER -dCompatibilityLevel=$(PS_COMPATIBILITY) \
+		$(if $3,$(PS_EMBED_OPTIONS)) \
+		-c .setpdfwrite \
+		-f '$1'
+endef
 
 # Colorize LaTeX output.
 # This uses a neat trick from the Sed & Awk Book from O'Reilly:
@@ -1758,9 +1761,7 @@ make-ps		= \
 # Convert Postscript to PDF
 # $(call make-pdf,<ps file>,<pdf file>,<log file>,<embed file>)
 make-pdf	= \
-	$(if $(filter 1,$(shell $(CAT) '$4')),\
-		$(ps2pdf_embedded),\
-		$(ps2pdf_normal)) '$1' '$2' > $3 2>&1
+	$(call ps2pdf,$1,$2,$(filter 1,$(shell $(CAT) '$4'))) > '$3' 2>&1
 
 # Display information about what is being done
 # $(call echo-build,<output file>,[<run number>])
@@ -2450,17 +2451,13 @@ define help_text
 #
 #          neverclean := *.pdf *.ps
 #          onlysources.tex := main.tex
-#          PS2PDF_EMBED := ps2pdf14
-#          EMBED_OPTIONS := # MikTex ps2pdf doesn't grok -d
 #          LATEX_COLOR_WARNING := 'bold red uline'
 #
 #          And this would override the neverclean setting to ensure that pdf
 #          and ps files always remain behind, set the makefile to treat all
 #          .tex files that are not "main.tex" as includes (and therefore not
-#          default targets), and ps2pdf14 as the proper ps to pdf conversion
-#          program for embedded fonts.  It removes all -d command options (see
-#          the default setting) for font embedding, as well.  It also changes
-#          the LaTeX warning output to be red, bold, and underlined.
+#          default targets).  It also changes the LaTeX warning output to be
+#          red, bold, and underlined.
 #
 #          There are numerous variables in this file that can be overridden in
 #          this way.  Search for '?=' to find them all.
