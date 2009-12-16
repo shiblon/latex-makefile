@@ -498,7 +498,7 @@ VIEW_GRAPHICS	?= display
 # Command options for embedding fonts and postscript->pdf conversion - note
 # that options are quoted for Windows Cygwin compatibility (both / and = are
 # bad news there).
-PS_EMBED_OPTIONS	?= '-dPDFSETTINGS=/printer' '-dEmbedAllFonts=true' '-dSubsetFonts=true' '-dMaxSubsetPct=102'
+PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=102
 PS_COMPATIBILITY	?= 1.4
 
 # This ensures that even when echo is a shell builtin, we still use the binary
@@ -2556,7 +2556,7 @@ define help_text
 #   in your .bashrc file.  I don't know why, but you may want to.
 #
 # STANDARD TARGETS:
-# 
+#
 #    all:
 #        Make all possible documents in this directory.  The documents are
 #        determined by scanning for .tex and .tex.sh (described in more detail
@@ -2614,7 +2614,7 @@ define help_text
 #        Remove ALL generated files, leaving only source intact.
 #        This will *always* skip files mentioned in the "neverclean" variable,
 #        either in this file or specified in Makefile.ini:
-#        
+#
 #        	neverclean := *.pdf *.ps
 #
 #       The neverclean variable works on all "clean" targets below, as well.
@@ -2986,7 +2986,7 @@ define help_text
 #            This is not generally advisable, since you can always create a
 #            grayscale document using the forms mentioned above.  But, if your
 #            plot simply must be grayscale even in a document that allows
-#            colors, this is how you do it.    
+#            colors, this is how you do it.
 #
 #    XFig Graphics:
 #            No special handling is done with XFig, except when a global
@@ -3021,7 +3021,7 @@ define help_text
 #                make all-dot2tex
 #
 #    GZipped EPS Graphics:
-#        
+#
 #        A .eps.gz file is sometimes a nice thing to have.  EPS files can get
 #        very large, especially when created from bitmaps (don't do this if you
 #        don't have to).  This makefile will unzip them (not in place) to
