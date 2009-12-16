@@ -495,10 +495,8 @@ VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
 
-# Command options for embedding fonts and postscript->pdf conversion - note
-# that options are quoted for Windows Cygwin compatibility (both / and = are
-# bad news there).
-PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=102
+# Command options for embedding fonts and postscript->pdf conversion
+PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 PS_COMPATIBILITY	?= 1.4
 
 # This ensures that even when echo is a shell builtin, we still use the binary
