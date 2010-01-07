@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.40
+version		:= 2.1.41
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
@@ -97,6 +97,9 @@ version		:= 2.1.40
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-01-07):
+# 	* Bumped version to 2.1.41
+# 	* issue 60: bad makeindex runs now error out on subsequent tries
 # Chris Monson (2009-12-01):
 # 	* Bumped version to 2.1.40
 # 	* issue 36: build all indices (for e.g., splitidx usage)
