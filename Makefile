@@ -1541,6 +1541,7 @@ define run-makeindex
 success=1; \
 if ! $(MAKEINDEX) -q $1 -t $3 -o $2 $4 > /dev/null || $(EGREP) -q '^!!' $3; then \
 	$(call colorize-makeindex-errors,$3); \
+	$(RM) -f '$2'; \
 	success=0; \
 fi; \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
