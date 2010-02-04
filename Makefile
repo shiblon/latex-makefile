@@ -106,7 +106,7 @@ version		:= 2.1.42
 # 	* All of the following are for issue 63 (thanks to mojoh81):
 # 	* Added documentation about fixing Makefile.ini default target
 # 	* Added perl and python script targets
-# 	* Fixed sh tex generation to sleep and touch (to always trigger a build
+# 	* Fixed scripted tex generation to always rebuild
 # 	* Fixed run logic to allow included .tex files to be scripted (the
 # 		run-again logic now detects missing .tex files, and the MV
 # 		command has been switched out for a command that only invokes
@@ -481,7 +481,6 @@ MV		?= mv -f
 SED		?= sed
 SORT		?= sort
 TOUCH		?= touch
-SLEEP		?= sleep
 UNIQ		?= uniq
 WHICH		?= which
 XARGS		?= xargs
@@ -521,9 +520,6 @@ VIEW_GRAPHICS	?= display
 # Command options for embedding fonts and postscript->pdf conversion
 PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 PS_COMPATIBILITY	?= 1.4
-
-# Filesystem modification time resolution (at least 2 seconds on FAT, reports are that 0.1 works for ext4)
-FS_MODIFICATION_RESOLUTION	?= 1
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -2065,24 +2061,24 @@ endif
 
 # SCRIPTED LaTeX TARGETS
 #
+# Keep the generated .tex files around for debugging if needed, but mark the
+# scripts themselves as phony so that they are always invoked (it's impossible
+# to tell whether a script dependency has changed, so we just always invoke
+# scripts when they're present)
 .SECONDARY: $(all_tex_targets)
+.PHONY: $(all_files_scripts)
+
 %.tex:	%.tex.sh
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(SHELL) $< $@
-	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
-	$(QUIET)$(TOUCH) $<
 
 %.tex:	%.tex.py
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(PYTHON) $< $@
-	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
-	$(QUIET)$(TOUCH) $<
 
 %.tex:	%.tex.pl
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(PERL) $< $@
-	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
-	$(QUIET)$(TOUCH) $<
 
 %.tex:	%.rst $(rst_style_file)
 	$(QUIET)$(call echo-build,$<,$@)
