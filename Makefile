@@ -97,6 +97,16 @@ version		:= 2.1.42
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-02-04):
+# 	* Bumped version to 2.1.43
+# 	* All of the following are for issue 63 (thanks to mojoh81):
+# 	* Added documentation about fixing Makefile.ini default target
+# 	* Added perl and python script targets
+# 	* Fixed sh tex generation to sleep and touch (to always trigger a build
+# 	* Fixed run logic to allow included .tex files to be scripted (the
+# 		run-again logic now detects missing .tex files, and the MV
+# 		command has been switched out for a command that only invokes
+# 		MV if the files exist)
 # Chris Monson (2010-01-19):
 # 	* Bumped version to 2.1.42
 # 	* issue 62: Added .brf extension to cleanable files (backrefs)
@@ -467,6 +477,7 @@ MV		?= mv -f
 SED		?= sed
 SORT		?= sort
 TOUCH		?= touch
+SLEEP		?= sleep
 UNIQ		?= uniq
 WHICH		?= which
 XARGS		?= xargs
@@ -481,6 +492,8 @@ GS		?= gs
 # == Makefile Color Output ==
 TPUT		?= tput
 # == TeX Generation ==
+PERL		?= perl
+PYTHON		?= python
 RST2LATEX	?= rst2latex.py
 # == EPS Generation ==
 CONVERT		?= convert	# ImageMagick
@@ -504,6 +517,9 @@ VIEW_GRAPHICS	?= display
 # Command options for embedding fonts and postscript->pdf conversion
 PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 PS_COMPATIBILITY	?= 1.4
+
+# Filesystem modification time resolution (at least 2 seconds on FAT, reports are that 0.1 works for ext4)
+FS_MODIFICATION_RESOLUTION	?= 1
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -594,7 +610,7 @@ GRAY	?= $(call get-default,$(GREY),)
 
 # don't call this directly - it is here to avoid calling wildcard more than
 # once in remove-files.
-remove-files-helper	= $(if $1,$(RM) $1,:)
+remove-files-helper	= $(if $1,$(RM) $1,$(sh_true))
 
 # $(call remove-files,file1 file2)
 remove-files		= $(call remove-files-helper,$(wildcard $1))
@@ -644,6 +660,13 @@ escape-dots		= $(subst .,\\.,$1)
 # Test that a file exists
 # $(call test-exists,file)
 test-exists		= [ -e '$1' ]
+
+# don't call this directly - it is here to avoid calling wildcard more than
+# once in move-if-exists.
+move-files-helper	= $(if $1,$(MV) $1 $2,$(sh_true))
+
+# $(call move-files,source,destination)
+move-if-exists		= $(call move-files-helper,$(wildcard $1),$2)
 
 # Copy file1 to file2 only if file2 doesn't exist or they are different
 # $(call copy-if-different,sfile,dfile)
@@ -1157,6 +1180,7 @@ $(SED) \
 -e 's!^INPUT \(\./\)\{0,1\}!TARGETS=!' \
 -e 's/[[:space:]]/\\ /g' \
 -e 's/^TARGETS=/$2: /' \
+-e 's/\(.*\)\.aux$$/\1.tex/p' \
 -e '/\.tex$$/p' \
 -e '/\.cls$$/p' \
 -e '/\.sty$$/p' \
@@ -1531,7 +1555,7 @@ define test-log-for-need-to-run
 $(SED) \
 -e '/^No file $(call escape-dots,$1)\.aux\./d' \
 $1.log \
-| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|LaTeX Warning: File.*)$$'
+| $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|No file .+\.tex\.|LaTeX Warning: File.*)$$'
 endef
 
 # LaTeX invocations
@@ -1976,7 +2000,7 @@ endif
 			$(call test-run-again,$*) || break; \
 		done; \
 	else \
-		$(MV) $@.1st.make $@; \
+		$(call move-if-exists,$@.1st.make,$@); \
 	fi; \
 	$(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	$(call latex-color-log,$*)
@@ -2029,6 +2053,20 @@ endif
 %.tex:	%.tex.sh
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(SHELL) $< $@
+	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
+	$(QUIET)$(TOUCH) $<
+
+%.tex:	%.tex.py
+	$(QUIET)$(call echo-build,$<,$@)
+	$(QUIET)$(PYTHON) $< $@
+	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
+	$(QUIET)$(TOUCH) $<
+
+%.tex:	%.tex.pl
+	$(QUIET)$(call echo-build,$<,$@)
+	$(QUIET)$(PERL) $< $@
+	$(QUIET)$(SLEEP) $(FS_MODIFICATION_RESOLUTION)
+	$(QUIET)$(TOUCH) $<
 
 %.tex:	%.rst $(rst_style_file)
 	$(QUIET)$(call echo-build,$<,$@)
@@ -2203,7 +2241,6 @@ $(gray_eps_file):
 	$(CP) '$*.log' '$*.1.log'; \
 	$(call die-on-pstexs,$*.log); \
 	$(call die-on-dot2tex,$*.log); \
-	$(MV) $*.dvi $*.dvi.1st.make; \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
@@ -2211,6 +2248,7 @@ $(gray_eps_file):
 	$(call get-graphics,$*.log,$(addprefix $*.,d dvi _graphics)) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,d aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
+	$(call move-if-exists,$*.dvi,$*.dvi.1st.make); \
 	for s in toc out lot lof lol nav; do \
 		if [ -e "$*.$$s" ]; then \
 			if ! $(DIFF) -q $*.$$s $*.$$s.make 2>/dev/null; then \
@@ -2519,6 +2557,13 @@ define help_text
 #
 #          generated.tex: generating_script.weird_lang depA depB
 #          	./generating_script.weird_lang > $$@
+#
+#          Note that if you are not careful, you can override the default
+#          target (what happens when you type "make" without arguments), so if
+#          you do use Makefile.ini, you probably want to start it with the
+#          following line:
+#
+#          %: %.pdf ;
 #
 #          The Makefile.ini is imported before anything else is done, so go
 #          wild with your ideas for changes to this makefile in there.  It
@@ -2860,10 +2905,11 @@ define help_text
 #        Currently supported script or predecessor languages are:
 #
 #        sh:     %.tex.sh
+#        perl:   %.tex.pl
+#        python: %.tex.py
 #
-#           Calls the script using sh, assuming that its output is a .tex
-#           file.  Of course, your .sh file can call another script to do
-#           its work.  Go wild!
+#           Calls the script using the appropriate interpreter, assuming that
+#           its output is a .tex file.
 #
 #           The script is called thus:
 #
@@ -2879,12 +2925,8 @@ define help_text
 #           life easier, since as it stands I have to run the script and
 #           then build the document with make.  This feature provides hooks
 #           for complicated stuff that you may want to do, but that I have
-#           not considered.
-#
-#           This approach does not work for included .tex files.  If you
-#           want to do something special with those, you should wrap all of
-#           that functionality into a top-level source script that creates
-#           the necessary includes as well.
+#           not considered.  It should work fine with included dependencies,
+#           too.
 #
 #        reST:	 %.rst
 #
@@ -3080,6 +3122,8 @@ endef
 #
 #    rst -> tex:tex [label="reST"]
 #    tex_sh -> tex:tex [label="sh"]
+#    tex_pl -> tex:tex [label="perl"]
+#    tex_py -> tex:tex [label="python"]
 #    tex -> tex_outputs [label="latex"]
 #    tex_outputs -> dvi
 #    tex_outputs -> aux
