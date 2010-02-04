@@ -35,6 +35,8 @@ version		:= 2.1.42
 # will be treated as if they were _include_ files.
 #onlysources.tex	?= main.tex
 #onlysources.tex.sh	?=
+#onlysources.tex.pl	?=
+#onlysources.tex.py	?=
 #onlysources.rst	?=
 #onlysources.fig	?=
 #onlysources.gpi	?=
@@ -47,6 +49,8 @@ version		:= 2.1.42
 # If you list files here, they will be treated as _include_ files
 #includes.tex		?= file1.tex file2.tex
 #includes.tex.sh	?=
+#includes.tex.pl	?=
+#includes.tex.py	?=
 #includes.rst		?=
 #includes.fig		?=
 #includes.gpi		?=
@@ -830,6 +834,8 @@ GNUPLOT_GLOBAL	:= global._include_.gpi gnuplot.global
 # Files of interest
 all_files.tex		?= $(wildcard *.tex)
 all_files.tex.sh	?= $(wildcard *.tex.sh)
+all_files.tex.pl	?= $(wildcard *.tex.pl)
+all_files.tex.py	?= $(wildcard *.tex.py)
 all_files.rst		?= $(wildcard *.rst)
 all_files.fig		?= $(wildcard *.fig)
 all_files.gpi		?= $(wildcard *.gpi)
@@ -874,6 +880,8 @@ filter-default		= \
 # Top level sources that can be built even when they are not by default
 files.tex	:= $(filter-out %._gray_.tex,$(call filter-buildable,tex))
 files.tex.sh	:= $(call filter-buildable,tex.sh)
+files.tex.pl	:= $(call filter-buildable,tex.pl)
+files.tex.py	:= $(call filter-buildable,tex.py)
 files.rst	:= $(call filter-buildable,rst)
 files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
@@ -895,6 +903,8 @@ files.eps.gz	:= $(call filter-buildable,eps.gz)
 # Top level sources that are built by default targets
 default_files.tex	:= $(filter-out %._gray_.tex,$(call filter-default,tex))
 default_files.tex.sh	:= $(call filter-default,tex.sh)
+default_files.tex.pl	:= $(call filter-default,tex.pl)
+default_files.tex.py	:= $(call filter-default,tex.py)
 default_files.rst	:= $(call filter-default,rst)
 default_files.gpi	:= $(call filter-default,gpi)
 default_files.dot	:= $(call filter-default,dot)
@@ -911,15 +921,15 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
-all_files_scripts	:= $(call concat-files,tex.sh rst,all)
+all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,all)
 all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot,all)
 
 default_files_source	:= $(call concat-files,tex,default)
-default_files_scripts	:= $(call concat-files,tex.sh rst,default)
+default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,default)
 default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot,default)
 
 files_source	:= $(call concat-files,tex)
-files_scripts	:= $(call concat-files,tex.sh rst)
+files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst)
 files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot)
 
 # Utility function for obtaining stems
@@ -977,7 +987,7 @@ stems.eps.gz		:= $(call get-stems,eps.gz)
 concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 
 all_stems_source	:= $(call concat-stems,tex,all)
-all_stems_script	:= $(call concat-stems,tex.sh rst,all)
+all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,all)
 all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot,all)
 all_stems_gray_graphic	:= $(addsuffix ._gray_,\
 	$(all_stems_graphic) $(all_stems.eps) \
