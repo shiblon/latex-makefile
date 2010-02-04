@@ -106,11 +106,13 @@ version		:= 2.1.42
 # 	* All of the following are for issue 63 (thanks to mojoh81):
 # 	* Added documentation about fixing Makefile.ini default target
 # 	* Added perl and python script targets
-# 	* Fixed scripted tex generation to always rebuild
 # 	* Fixed run logic to allow included .tex files to be scripted (the
 # 		run-again logic now detects missing .tex files, and the MV
 # 		command has been switched out for a command that only invokes
 # 		MV if the files exist)
+# 	* Added documentation about how to properly use scripted tex generation
+# 		(you really have to create a wrapper script for this, since
+# 		make doesn't give us the necessary hooks)
 # Chris Monson (2010-01-19):
 # 	* Bumped version to 2.1.42
 # 	* issue 62: Added .brf extension to cleanable files (backrefs)
@@ -2012,7 +2014,7 @@ endif
 			$(call test-run-again,$*) || break; \
 		done; \
 	else \
-		$(call move-if-exists,$@.1st.make,$@); \
+		$(MV) '$@.1st.make' '$@'; \
 	fi; \
 	$(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	$(call latex-color-log,$*)
@@ -2062,11 +2064,7 @@ endif
 # SCRIPTED LaTeX TARGETS
 #
 # Keep the generated .tex files around for debugging if needed, but mark the
-# scripts themselves as phony so that they are always invoked (it's impossible
-# to tell whether a script dependency has changed, so we just always invoke
-# scripts when they're present)
 .SECONDARY: $(all_tex_targets)
-.PHONY: $(all_files_scripts)
 
 %.tex:	%.tex.sh
 	$(QUIET)$(call echo-build,$<,$@)
@@ -2572,12 +2570,16 @@ define help_text
 #
 #          Note that if you are not careful, you can override the default
 #          target (what happens when you type "make" without arguments), so if
-#          you do use Makefile.ini, you probably want to start it with the
-#          following line:
+#          you do use Makefile.ini, you probably want to start it with
+#          something like the following line:
 #
-#          %: %.pdf ;
+#          default: all
 #
-#          The Makefile.ini is imported before anything else is done, so go
+#          Since the first target in any makefile is automatically the default,
+#          and the makefile already has a sensible "all" target, this will do
+#          what you want.
+#
+#          The Makefile.ini is imported before *anything else* is done, so go
 #          wild with your ideas for changes to this makefile in there.  It
 #          makes it easy to test them before submitting patches.
 #
@@ -2940,7 +2942,27 @@ define help_text
 #           not considered.  It should work fine with included dependencies,
 #           too.
 #
-#        reST:	 %.rst
+#           NOTE, however, that the .tex file will *not* be created if the
+#           corresponding script has not changed.  Therefore, don't expect it
+#           to run every time you invoke make.  Forcing a rebuild has really
+#           subtle effects, like causing a long loop of unnecessary rebuilds
+#           (make is invoked multiple times to pull in things like generated .d
+#           files), so we don't do it.  If you want to ensure that your .tex
+#           file is generated every time, make a wrapper script that invokes
+#           make, like so:
+#
+#           #!/bin/bash
+#           # "build"
+#           touch *.tex.sh
+#           make
+#
+#           This will ensure that your script is newer than the .tex file, but
+#           will only do it once per intentional make invocation, which is what
+#           you want.  Then you just call ./build instead of make, and you're
+#           set.
+#
+#
+#        reST: %.rst
 #
 #           Runs the reST to LaTeX converter to generate a .tex file
 #           If it finds a file names _rststyle_._include_.tex, uses it as
