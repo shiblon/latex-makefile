@@ -1,1 +1,1 @@
-cp test.tex $1
+cp test-scripted-include.tex $1

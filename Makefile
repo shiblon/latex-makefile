@@ -479,6 +479,7 @@ DIFF		?= diff
 ECHO		?= echo
 EGREP		?= egrep
 ENV		?= env
+EXPR		?= expr
 MV		?= mv -f
 SED		?= sed
 SORT		?= sort
@@ -1591,6 +1592,23 @@ fi; \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
 endef
 
+# This runs the given script to generate output, and it uses MAKE_RESTARTS to
+# ensure that it never runs it more than once for a particular root make
+# invocation.
+#
+# $(call run-script,<interpreter>,<input>,<output>)
+define run-script
+cur=$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0); \
+[ ! -e '$2.cookie' ] && $(ECHO) $$cur > $2.cookie; \
+last=`$(CAT) $2.cookie`; \
+run=`$(EXPR) $$cur '<=' $$last`; \
+if [ x"$$run" = x"1" ]; then \
+	$(call echo-build,$2,$3); \
+	$1 '$2' '$3'; \
+	$(ECHO) $$cur > $2.cookie; \
+fi
+endef
+
 # BibTeX invocations
 #
 # $(call run-bibtex,<tex stem>)
@@ -2065,20 +2083,20 @@ endif
 #
 # Keep the generated .tex files around for debugging if needed, but mark the
 .SECONDARY: $(all_tex_targets)
+# Ensure that builds are attempted every time.  Scripts don't always change,
+# but their output often does.
+.PHONY: $(all_files_scripts)
 
-%.tex:	%.tex.sh
-	$(QUIET)$(call echo-build,$<,$@)
-	$(QUIET)$(SHELL) $< $@
+%.tex::	%.tex.sh
+	$(QUIET)$(call run-script,$(SHELL),$<,$@)
 
-%.tex:	%.tex.py
-	$(QUIET)$(call echo-build,$<,$@)
-	$(QUIET)$(PYTHON) $< $@
+%.tex::	%.tex.py
+	$(QUIET)$(call run-script,$(PYTHON),$<,$@)
 
-%.tex:	%.tex.pl
-	$(QUIET)$(call echo-build,$<,$@)
-	$(QUIET)$(PERL) $< $@
+%.tex::	%.tex.pl
+	$(QUIET)$(call run-script,$(PERL),$<,$@)
 
-%.tex:	%.rst $(rst_style_file)
+%.tex::	%.rst $(rst_style_file)
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call convert-rst,$<,$@)
 
@@ -2942,31 +2960,19 @@ define help_text
 #           not considered.  It should work fine with included dependencies,
 #           too.
 #
-#           NOTE, however, that the .tex file will *not* be created if the
-#           corresponding script has not changed.  Therefore, don't expect it
-#           to run every time you invoke make.  Forcing a rebuild has really
-#           subtle effects, like causing a long loop of unnecessary rebuilds
-#           (make is invoked multiple times to pull in things like generated .d
-#           files), so we don't do it.  If you want to ensure that your .tex
-#           file is generated every time, make a wrapper script that invokes
-#           make, like so:
-#
-#           #!/bin/bash
-#           # "build"
-#           touch *.tex.sh
-#           make
-#
-#           This will ensure that your script is newer than the .tex file, but
-#           will only do it once per intentional make invocation, which is what
-#           you want.  Then you just call ./build instead of make, and you're
-#           set.
-#
+#           Scripts are run every time make is invoked.  Some trickery is
+#           employed to make sure that multiple restarts of make don't cause
+#           them to be run again.
 #
 #        reST: %.rst
 #
 #           Runs the reST to LaTeX converter to generate a .tex file
 #           If it finds a file names _rststyle_._include_.tex, uses it as
 #           the "stylesheet" option to rst2latex.
+#
+#           Note that this does not track sub-dependencies in rst files.  It
+#           assumes that the top-level rst file will change if you want a
+#           rebuild.
 #
 #    Dependencies:
 #
