@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.1.42
+version		:= 2.1.43
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
