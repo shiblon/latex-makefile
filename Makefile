@@ -110,9 +110,8 @@ version		:= 2.1.42
 # 		run-again logic now detects missing .tex files, and the MV
 # 		command has been switched out for a command that only invokes
 # 		MV if the files exist)
-# 	* Added documentation about how to properly use scripted tex generation
-# 		(you really have to create a wrapper script for this, since
-# 		make doesn't give us the necessary hooks)
+# 	* Changed scripted generation to only run once per make invocation
+# 	* Added dependency on expr
 # Chris Monson (2010-01-19):
 # 	* Bumped version to 2.1.42
 # 	* issue 62: Added .brf extension to cleanable files (backrefs)
