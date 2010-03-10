@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-alpha1
+version		:= 2.2.0-alpha2
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -72,8 +72,11 @@ BUILD_STRATEGY		?= pdflatex
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
 # Makefile.
--include $(HOME)/.latex-makefile/Makefile.ini
+#
+# Note that the user-global version is imported *after* the source directory,
+# so that you can use stuff like ?= to get proper override behavior.
 -include Makefile.ini
+-include $(HOME)/.latex-makefile/Makefile.ini
 
 # KNOWN ISSUES:
 #	* The following occurs:
@@ -528,6 +531,10 @@ VIEW_GRAPHICS	?= display
 # Command options for embedding fonts and postscript->pdf conversion
 PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 PS_COMPATIBILITY	?= 1.4
+
+# Defaults for GPI
+DEFAULT_GPI_EPS_FONTSIZE	?= 22
+DEFAULT_GPI_PDF_FONTSIZE	?= 12
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -1238,9 +1245,6 @@ endef
 # extension, otherwise compilation barfs on the first missing file.  Truly
 # annoying, but there you have it.
 #
-# TODO: if we find a fatal file error for a missing graphic file, we should
-# paint that error differently and issue instructions to remove the extension.
-#
 # $(call get-graphics,<parsed file>,<target files>)
 define get-graphics
 $(SED) \
@@ -1451,6 +1455,22 @@ endef
 # $(call colorize-gnuplot-errors,<log file>)
 define colorize-gnuplot-errors
 $(SED) \
+-e '/, line [0-9]*:/!{' \
+-e '  H' \
+-e '  x' \
+-e '  s/.*\n\(.*\n.*\)$$/\1/' \
+-e '  x' \
+-e '}' \
+-e '/, line [0-9]*:/{' \
+-e '  H' \
+-e '  /gpihead/{' \
+-e '    s/.*/--- This is a Makefile bug - contact the maintainer./' \
+-e '    H' \
+-e '  }' \
+-e '  g' \
+-e '  s/.*/$(C_ERROR)&$(C_RESET)/' \
+-e '  p' \
+-e '}' \
 -e '/^gnuplot>/,/^$$/{' \
 -e '  s/^gnuplot.*/$(C_ERROR)&/' \
 -e '  s/^$$/$(C_RESET)/' \
@@ -1665,11 +1685,11 @@ $(EPSTOPDF) '$1.cookie' --outfile='$2' > $1.log; \
 $(call colorize-epstopdf-errors,$1.log);
 endef
 
-
-# $(call convert-gpi,<gpi file>,<eps file>,[gray])
+# $(call convert-gpi,<gpi file>,<output file>,[gray])
+#
 define convert-gpi
-$(ECHO) 'set terminal postscript enhanced eps' \
-$(call get-default,$(strip \
+$(ECHO) 'set terminal $(if $(filter %.pdf,$2),pdf enhanced,postscript enhanced eps)' \
+$(if $(filter %.pdf,$2),fsize ,)$(call get-default,$(strip \
 $(firstword \
 	$(shell \
 		$(SED) \
@@ -1678,7 +1698,7 @@ $(firstword \
 			$1 $(strip $(gpi_global)) \
 	) \
 ) \
-),22) \
+),$(if $(filter %.pdf,$2),$(DEFAULT_GPI_PDF_FONTSIZE),$(DEFAULT_GPI_EPS_FONTSIZE))) \
 $(strip $(if $3,monochrome,$(if \
 $(shell $(EGREP) '^\#\#[[:space:]]*GRAY[[:space:]]*$$' $< $(gpi_global)),\
 ,color))) > $1head.make; \
@@ -1727,8 +1747,8 @@ $(CONVERT) $(if $3,-type Grayscale,) '$1' eps2:'$2'
 endef
 
 # Creation of .eps files from .fig files
-# $(call convert-fig,<fig file>,<eps file>,[gray])
-convert-fig	= $(FIG2DEV) -L eps $(if $3,-N,) $1 $2
+# $(call convert-fig,<fig file>,<output file>,[gray])
+convert-fig	= $(FIG2DEV) -L $(if $(filter %.pdf,$2),pdf,eps) $(if $3,-N,) $1 $2
 
 # Creation of .pstex files from .fig files
 # $(call convert-fig-pstex,<fig file>,<pstex file>)
@@ -1761,7 +1781,7 @@ convert-svg	= $(INKSCAPE) --export-eps='$2' '$1'
 # Converts xvg files into .eps files
 #
 # $(call convert-xvg,<xvg file>,<eps file>,[gray])
-convert-xvg	= $(XMGRACE) '$1' -printfile - -hardcopy -hdevice EPS $(if $3,| $(call kill-ps-color)) > '$2'
+convert-xvg	= $(XMGRACE) '$1' -printfile - -hardcopy -hdevice $(if $3,-mono,) EPS > '$2'
 
 # Converts .eps.gz files into .eps files
 #
@@ -2250,6 +2270,23 @@ ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 %.pdf: %.eps $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
+
+%.pdf:	%.gpi $(gpi_sed)
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
+
+%.pdf:	%.fig
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-fig,$<,$@,$(GRAY))
+
+%._gray_.pdf:	%.gpi $(gpi_sed)
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-gpi,$<,$@,1)
+
+%._gray_.pdf:	%.fig
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-fig,$<,$@,1)
+
 endif
 
 %.eps:	%.gpi $(gpi_sed)

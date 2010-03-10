@@ -1,4 +1,4 @@
-##FONTSIZE=25
+##FONTSIZE=15
 #load 'global.gpi'
 plot x**2 lw 5.0, \
     'test1.dat', \
