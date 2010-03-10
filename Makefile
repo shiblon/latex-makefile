@@ -34,6 +34,8 @@ version		:= 2.2.0-beta2
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
 BUILD_STRATEGY		?= pdflatex
+# This can be "yes" or "no"
+GNUPLOT_PDF		?= yes
 #
 #
 # If you specify sources here, all other files with the same suffix
@@ -2318,17 +2320,19 @@ ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
+ifeq "$(strip $(GNUPLOT_PDF))" "yes"
 %.pdf:	%.gpi $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 
-%.pdf:	%.fig
-	$(QUIET)$(call echo-graphic,$^,$@)
-	$(QUIET)$(call convert-fig,$<,$@,$(GRAY))
-
 %._gray_.pdf:	%.gpi $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,1)
+endif
+
+%.pdf:	%.fig
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-fig,$<,$@,$(GRAY))
 
 %._gray_.pdf:	%.fig
 	$(QUIET)$(call echo-graphic,$^,$@)
