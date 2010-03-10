@@ -1511,8 +1511,12 @@ $(SED) \
 -e '}' \
 -e '/, line [0-9]*:/{' \
 -e '  H' \
+-e '  /unknown.*terminal type/{' \
+-e '    s/.*/--- Try changing the GNUPLOT_PDF variable./' \
+-e '	H' \
+-e '  }' \
 -e '  /gpihead/{' \
--e '    s/.*/--- This is a Makefile bug - contact the maintainer./' \
+-e '    s/.*/--- This could be a Makefile bug - contact the maintainer./' \
 -e '    H' \
 -e '  }' \
 -e '  g' \
