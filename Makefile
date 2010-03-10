@@ -34,8 +34,6 @@ version		:= 2.2.0-beta2
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
 BUILD_STRATEGY		?= pdflatex
-# This can be "yes" or "no"
-GNUPLOT_PDF		?= yes
 #
 #
 # If you specify sources here, all other files with the same suffix
@@ -105,8 +103,8 @@ GNUPLOT_PDF		?= yes
 # 	* Bumped version to 2.2.0-beta2
 # 	* Fixed clean-graphics to get rid of intermediate .eps files that may
 # 		be hanging around
-# 	* Added a test for unknown gnuplot terminals with a setting to turn off
-# 		PDF output.
+# 	* Added an automatic setting to use eps terminals in pdflatex mode for
+# 		gnuplot if it doesn't understand pdf.
 # Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-beta1
 # 	* Fixed success message to handle output message in different places
@@ -560,6 +558,15 @@ DEFAULT_GPI_PDF_FONTSIZE	?= 12
 # (the builtin doesn't always understand -n)
 FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
+
+define determine-gnuplot-pdf-capability
+$(if $(shell $(WHICH) $(GNUPLOT)),
+     $(if $(findstring unknown or ambiguous, $(shell $(GNUPLOT) -e "set terminal pdf" 2>&1)),
+	  no, yes),
+     none)
+endef
+
+GNUPLOT_PDF	:= $(strip $(call determine-gnuplot-pdf-capability))
 
 # Directory into which we place "binaries" if it exists.
 # Note that this can be changed on the commandline or in Makefile.ini:
@@ -1514,7 +1521,7 @@ $(SED) \
 -e '/, line [0-9]*:/{' \
 -e '  H' \
 -e '  /unknown.*terminal type/{' \
--e '    s/.*/--- Try changing the GNUPLOT_PDF variable./' \
+-e '    s/.*/--- Try changing the GNUPLOT_PDF variable to 'no'./' \
 -e '	H' \
 -e '  }' \
 -e '  /gpihead/{' \
