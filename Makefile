@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-alpha3
+version		:= 2.2.0-beta1
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -100,11 +100,13 @@ BUILD_STRATEGY		?= pdflatex
 #
 # CHANGES:
 # Chris Monson (2010-03-10):
+# 	* Bumped version to 2.2.0-beta1
+# 	* Fixed success message to handle output message in different places
+# 	* Added name of produced file to success message
+# Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-alpha3
 # 	* Added meaningful error message for wrong hyperref options
 # 	* Added meaningful error message for incorrect graphics extensions
-# 	* Fixed success message to handle output message in different places
-# 	* Added name of produced file to success message
 # Chris Monson (2010-03-09):
 # 	* Bumped version to 2.2.0-alpha2
 # 	* Updated graphics handling (gnuplot and fig generate pdf natively)
