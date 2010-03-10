@@ -103,6 +103,8 @@ BUILD_STRATEGY		?= pdflatex
 # 	* Bumped version to 2.2.0-alpha3
 # 	* Added meaningful error message for wrong hyperref options
 # 	* Added meaningful error message for incorrect graphics extensions
+# 	* Fixed success message to handle output message in different places
+# 	* Added name of produced file to success message
 # Chris Monson (2010-03-09):
 # 	* Bumped version to 2.2.0-alpha2
 # 	* Updated graphics handling (gnuplot and fig generate pdf natively)
@@ -1432,7 +1434,7 @@ $(SED) \
 -e '  N' \
 -e '  s/^Error: pdflatex (file \([^)]*\)): cannot find image file.*/$(C_ERROR)Could not find image file \1: You might want to list it without the extension; pdflatex graphics work better that way.$(C_RESET)/p' \
 -e '}' \
--e '/^\*hyperref using driver \(.*\)\*$$/{' \
+-e '/^\*hyperref using.*driver \(.*\)\*$$/{' \
 -e '  s//\1/' \
 -e '  /^$(hyperref_driver_pattern)$$/!{' \
 -e '    s/.*//' \
@@ -1608,10 +1610,11 @@ color_tex	:= \
 	-e '/^$$/{' \
 	-e '  x' \
 	-e '  s/^\n//' \
-	-e '  /Output written/{' \
-	-e '    s/.*(\([^)]\{1,\}\)).*/Success!  Wrote \1/' \
+	-e '  /Output written on /{' \
+	-e '    s/.*Output written on \([^(]*\) (\([^)]\{1,\}\)).*/Success!  Wrote \2 to \1/' \
 	-e '    s/[[:digit:]]\{1,\}/$(C_PAGES)&$(C_RESET)/g' \
 	-e '    s/Success!/$(C_SUCCESS)&$(C_RESET)/g' \
+	-e '    s/to \(.*\)$$/to $(C_SUCCESS)\1$(C_RESET)/' \
 	-e '    b end' \
 	-e '  }' \
 	-e '  / *LaTeX Error:.*/{' \
