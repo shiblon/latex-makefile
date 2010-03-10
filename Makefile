@@ -105,6 +105,8 @@ GNUPLOT_PDF		?= yes
 # 	* Bumped version to 2.2.0-beta2
 # 	* Fixed clean-graphics to get rid of intermediate .eps files that may
 # 		be hanging around
+# 	* Added a test for unknown gnuplot terminals with a setting to turn off
+# 		PDF output.
 # Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-beta1
 # 	* Fixed success message to handle output message in different places
