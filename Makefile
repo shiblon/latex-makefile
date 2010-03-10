@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-alpha2
+version		:= 2.2.0-alpha3
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -99,8 +99,16 @@ BUILD_STRATEGY		?= pdflatex
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-03-10):
+# 	* Bumped version to 2.2.0-alpha3
+# 	* Added meaningful error message for wrong hyperref options
+# 	* Added meaningful error message for incorrect graphics extensions
 # Chris Monson (2010-03-09):
-# 	* Bumped version to 2.2.0 - major change!
+# 	* Bumped version to 2.2.0-alpha2
+# 	* Updated graphics handling (gnuplot and fig generate pdf natively)
+# 	* Changed xmgrace to output monochrome natively
+# Chris Monson (2010-03-09):
+# 	* Bumped version to 2.2.0-alpha1 - major change!
 # 	* Support pdflatex natively and by default (issue 6 - a long time coming)
 # 	* Add ability to have a single $HOME/.latex-makefile/Makefile.ini for
 # 		all invocations
@@ -846,10 +854,14 @@ ifneq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 default_graphic_extension	?= eps
 latex_build_program		?= $(LATEX)
 build_target_extension		?= dvi
+hyperref_driver_pattern		?= hdvips
+hyperref_driver_error		?= Using dvips: specify ps2pdf in the hyperref options.
 else
 default_graphic_extension	?= pdf
 latex_build_program		?= $(PDFLATEX)
 build_target_extension		?= pdf
+hyperref_driver_pattern		?= hpdf.*
+hyperref_driver_error		?= Using pdflatex: specify pdftex in the hyperref options (or leave it blank).
 endif
 
 # Files of interest
@@ -1419,6 +1431,31 @@ $(SED) \
 -e '/^Error: pdflatex /{' \
 -e '  N' \
 -e '  s/^Error: pdflatex (file \([^)]*\)): cannot find image file.*/$(C_ERROR)Could not find image file \1: You might want to list it without the extension; pdflatex graphics work better that way.$(C_RESET)/p' \
+-e '}' \
+-e '/^\*hyperref using driver \(.*\)\*$$/{' \
+-e '  s//\1/' \
+-e '  /^$(hyperref_driver_pattern)$$/!{' \
+-e '    s/.*//' \
+-e '    p' \
+-e '    s/.*/$(C_ERROR)--- Using incorrect driver for hyperref! ---/' \
+-e '    p' \
+-e '    s/.*/$(C_ERROR)$(hyperref_driver_error)$(C_RESET)/' \
+-e '    p' \
+-e '  }' \
+-e '}' \
+-e '/ LaTeX Error: Unknown graphics extension/{' \
+-e '  s/^/     /' \
+-e '  h' \
+-e '  s/.*/--- Graphics extension error:/' \
+-e '  G' \
+-e '  h' \
+-e '  s/.*/--- If you specified the extension explicitly in your .tex file, try removing it./' \
+-e '  H' \
+-e '  g' \
+-e '  s/.*/$(C_ERROR)&$(C_RESET)/' \
+-e '  p' \
+-e '  s/.*//' \
+-e '  h' \
 -e '}' \
 -e 'd' \
 $1
