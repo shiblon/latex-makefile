@@ -34,6 +34,10 @@ version		:= 2.2.0-beta2
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
 BUILD_STRATEGY		?= pdflatex
+# This is to fix issues with 'sort' on systems that are using utf-8, but that
+# have non-ascii characters in the aux file.  For some reason, specifying -i to
+# ignore non-printable characters is not sufficient.
+export LC_ALL		?= C
 #
 #
 # If you specify sources here, all other files with the same suffix
