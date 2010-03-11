@@ -34,9 +34,9 @@ version		:= 2.2.0-beta2
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
 BUILD_STRATEGY		?= pdflatex
-# This is to fix issues with 'sort' on systems that are using utf-8, but that
-# have non-ascii characters in the aux file.  For some reason, specifying -i to
-# ignore non-printable characters is not sufficient.
+#
+# Sets LC_ALL=C, by default, so that the locale-aware tools, like sort, be
+# # immune to changes to the locale in the user environment.
 export LC_ALL		?= C
 #
 #
@@ -103,16 +103,18 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2010-03-10):
+# Chris Monson (2010-03-11):
 # 	* Bumped version to 2.2.0-beta2
 # 	* Fixed clean-graphics to get rid of intermediate .eps files that may
 # 		be hanging around
 # 	* Added an automatic setting to use eps terminals in pdflatex mode for
 # 		gnuplot if it doesn't understand pdf.
-# 	* Fixed grayscale generation - had to change the infix from ._gray_ to
-# 		__gray, added an override for those that want the old way of
-# 		doing it back (for dvips users, anyway).
-# 	* Fixed grayscale cleaning to handle arbitrary infixes.
+# 	* issue 66: Fixed grayscale generation - had to change the infix from
+# 		._gray_ to __gray, added an override for those that want the
+# 		old way of doing it back (for dvips users, anyway).
+# 	* issue 66: Fixed grayscale cleaning to handle arbitrary infixes.
+# 	* issue 68: Added explicit handling of LC_ALL for locale-aware tools
+# 		like "sort"
 # Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-beta1
 # 	* Fixed success message to handle output message in different places
