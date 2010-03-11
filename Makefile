@@ -108,6 +108,7 @@ BUILD_STRATEGY		?= pdflatex
 # 	* Fixed grayscale generation - had to change the infix from ._gray_ to
 # 		__gray, added an override for those that want the old way of
 # 		doing it back (for dvips users, anyway).
+# 	* Fixed grayscale cleaning to handle arbitrary infixes.
 # Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-beta1
 # 	* Fixed success message to handle output message in different places
@@ -1224,7 +1225,8 @@ rm_tex := \
 	$(foreach e,$(rm_ext),$(addsuffix .$e,$(all_stems_source))) \
 	$(foreach e,$(rm_ext) tex,$(addsuffix .$e,$(all_stems_sg))) \
 	$(addsuffix .log,$(all_ps_targets) $(all_pdf_targets)) \
-	$(addsuffix .*.log,$(stems_graphic))
+	$(addsuffix .*.log,$(stems_graphic)) \
+	$(addsuffix $(GRAY_INFIX).*.log,$(stems_graphic)) \
 
 # These are the files that will affect .gpi transformation for all .gpi files.
 #
