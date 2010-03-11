@@ -105,6 +105,9 @@ BUILD_STRATEGY		?= pdflatex
 # 		be hanging around
 # 	* Added an automatic setting to use eps terminals in pdflatex mode for
 # 		gnuplot if it doesn't understand pdf.
+# 	* Fixed grayscale generation - had to change the infix from ._gray_ to
+# 		__gray, added an override for those that want the old way of
+# 		doing it back (for dvips users, anyway).
 # Chris Monson (2010-03-10):
 # 	* Bumped version to 2.2.0-beta1
 # 	* Fixed success message to handle output message in different places
@@ -554,6 +557,10 @@ PS_COMPATIBILITY	?= 1.4
 DEFAULT_GPI_EPS_FONTSIZE	?= 22
 DEFAULT_GPI_PDF_FONTSIZE	?= 12
 
+# Change this to ._gray_ to have the former behavior (but don't use pdflatex if
+# you do!
+GRAY_INFIX	?= __gray_
+
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
 FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
@@ -566,7 +573,7 @@ $(if $(shell $(WHICH) $(GNUPLOT)),
      none)
 endef
 
-GNUPLOT_PDF	:= $(strip $(call determine-gnuplot-pdf-capability))
+GNUPLOT_PDF	?= $(strip $(call determine-gnuplot-pdf-capability))
 
 # Directory into which we place "binaries" if it exists.
 # Note that this can be changed on the commandline or in Makefile.ini:
@@ -930,7 +937,7 @@ filter-default		= \
 		$(addsuffix .$1,$(nodefault_patterns)),$(all_files.$1))
 
 # Top level sources that can be built even when they are not by default
-files.tex	:= $(filter-out %._gray_.tex,$(call filter-buildable,tex))
+files.tex	:= $(filter-out %$(GRAY_INFIX).tex,$(call filter-buildable,tex))
 files.tex.sh	:= $(call filter-buildable,tex.sh)
 files.tex.pl	:= $(call filter-buildable,tex.pl)
 files.tex.py	:= $(call filter-buildable,tex.py)
@@ -950,10 +957,10 @@ files.eps.gz	:= $(call filter-buildable,eps.gz)
 # perfectly valid and causes no problems even if they're going to become eps
 # files in the end.
 .SECONDARY:	$(patsubst %.fig,%.pstex,$(files.fig))
-.SECONDARY:	$(patsubst %.fig,%._gray_.pstex,$(files.fig))
+.SECONDARY:	$(patsubst %.fig,%$(GRAY_INFIX).pstex,$(files.fig))
 
 # Top level sources that are built by default targets
-default_files.tex	:= $(filter-out %._gray_.tex,$(call filter-default,tex))
+default_files.tex	:= $(filter-out %$(GRAY_INFIX).tex,$(call filter-default,tex))
 default_files.tex.sh	:= $(call filter-default,tex.sh)
 default_files.tex.pl	:= $(call filter-default,tex.pl)
 default_files.tex.py	:= $(call filter-default,tex.py)
@@ -1041,36 +1048,36 @@ concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 all_stems_source	:= $(call concat-stems,tex,all)
 all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,all)
 all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot,all)
-all_stems_gray_graphic	:= $(addsuffix ._gray_,\
+all_stems_gray_graphic	:= $(addsuffix $(GRAY_INFIX),\
 	$(all_stems_graphic) $(all_stems.eps) \
 	)
 all_stems_gg		:= $(sort \
 	$(all_stems_graphic) $(all_stems_gray_graphic))
 all_stems_ss		:= $(sort $(all_stems_source) $(all_stems_script))
-all_stems_gray		:= $(addsuffix ._gray_,$(all_stems_ss))
+all_stems_gray		:= $(addsuffix $(GRAY_INFIX),$(all_stems_ss))
 all_stems_sg		:= $(sort $(all_stems_script) $(all_stems_gray))
 all_stems_ssg		:= $(sort $(all_stems_ss) $(all_stems_gray))
 
 default_stems_source	:= $(call concat-stems,tex,default)
 default_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,default)
 default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot,default)
-default_stems_gray_graphic	:= $(addsuffix ._gray_,$(default_stems_graphic))
+default_stems_gray_graphic	:= $(addsuffix $(GRAY_INFIX),$(default_stems_graphic))
 default_stems_gg	:= $(sort \
 	$(default_stems_graphic) $(default_stems_gray_graphic))
 default_stems_ss	:= $(sort \
 	$(default_stems_source) $(default_stems_script))
-default_stems_gray	:= $(addsuffix ._gray_,$(default_stems_ss))
+default_stems_gray	:= $(addsuffix $(GRAY_INFIX),$(default_stems_ss))
 default_stems_sg	:= $(sort $(default_stems_script) $(default_stems_gray))
 default_stems_ssg	:= $(sort $(default_stems_ss) $(default_stems_gray))
 
 stems_source		:= $(call concat-stems,tex)
 stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py rst)
 stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot)
-stems_gray_graphic	:= $(addsuffix ._gray_,\
+stems_gray_graphic	:= $(addsuffix $(GRAY_INFIX),\
 	$(stems_graphic) $(all_stems.eps))
 stems_gg		:= $(sort $(stems_graphic) $(stems_gray_graphic))
 stems_ss		:= $(sort $(stems_source) $(stems_script))
-stems_gray		:= $(addsuffix ._gray_,$(stems_ss))
+stems_gray		:= $(addsuffix $(GRAY_INFIX),$(stems_ss))
 stems_sg		:= $(sort $(stems_script) $(stems_gray))
 stems_ssg		:= $(sort $(stems_ss) $(stems_gray))
 
@@ -1191,7 +1198,7 @@ all_d_targets		:= $(addsuffix .d,$(stems_ssg))
 all_graphics_targets	:= $(addsuffix .$(default_graphic_extension),$(stems_gg))
 intermediate_graphics_targets	:= $(if $(filter pdf,$(default_graphic_extension)),$(addsuffix .eps,$(stems_gg)),)
 all_pstex_targets	:= $(addsuffix .pstex_t,$(stems.fig))
-all_gray_pstex_targets	:= $(addsuffix ._gray_.pstex_t,$(stems.fig))
+all_gray_pstex_targets	:= $(addsuffix $(GRAY_INFIX).pstex_t,$(stems.fig))
 all_dot2tex_targets	:= $(addsuffix .dot_t,$(stems.dot))
 
 all_known_graphics	:= $(sort $(all_graphics_targets) $(wildcard *.$(default_graphic_extension)))
@@ -2245,20 +2252,26 @@ endif
 
 # Parse %.d to get all of the include files, then run sed to generate new files
 # for all of them that depend on _gray.
-%._gray_.tex: %.d %.tex
+%$(GRAY_INFIX).tex: %.d %.tex
 	$(QUIET)$(call echo-build,$^,$@)
 	$(QUIET)\
 	texstems=`$(SED) \
+		 -e '/\/tex\/context\/base\/supp-...\.tex/d' \
 		 -e 's/[^:]*:[[:space:]]*\(.*\)\.tex[[:space:]]*$$/\\1/p' \
 		 -e 'd' \
 		 $<`; \
 	for f in $$texstems; do \
 		$(SED) \
-		-e 's/\.eps/._gray_&/' \
-		-e 's/\.pstex/._gray_&/' \
-		-e 's/\.pstex_t/._gray_&/' \
-		-e 's/_include_/&._gray_/g' \
-		$$f.tex > $$f._gray_.tex; \
+		-e 's/\.eps/$(GRAY_INFIX)&/g' \
+		-e 's/\.pstex/$(GRAY_INFIX)&/g' \
+		-e 's/\.pstex_t/$(GRAY_INFIX)&/g' \
+		-e 's/_include_/&$(GRAY_INFIX)/g' \
+		-e 's/\(includegraphics\(\[[^]]*\]\)\{0,1\}{[^}]*\)\(}\)/\1$(GRAY_INFIX)\3/g' \
+		-e 's/$(GRAY_INFIX)\(\$(GRAY_INFIX)\)*/$(GRAY_INFIX)/g' \
+		-e 's/\.eps\$(GRAY_INFIX)/\.eps/g' \
+		-e 's/\.pstex\$(GRAY_INFIX)/\.pstex/g' \
+		-e 's/\.pstex_t\$(GRAY_INFIX)/\.pstex_t/g' \
+		"$$f.tex" > "$${f}$(GRAY_INFIX).tex"; \
 	done;
 
 #
@@ -2284,49 +2297,49 @@ $(gray_eps_file):
 	$(QUIET)$(call echo-build,$^,$@)
 	$(QUIET)$(call create-gray-eps-file,$@)
 
-%._gray_.eps:	%.gpi $(gpi_sed)
+%$(GRAY_INFIX).eps:	%.gpi $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,1)
 
-%._gray_.eps:	%.fig
+%$(GRAY_INFIX).eps:	%.fig
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig,$<,$@,1)
 
-%._gray_.eps: %.dot $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.dot $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-dot,$<,$@,$<.log,1)
 
-%._gray_.eps: %.xvg $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.xvg $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,1)
 
-%._gray_.eps: %.svg $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.svg $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-svg,$<,$@,1)
 
-%._gray_.eps: %.jpg $(gray_jpg_file)
+%$(GRAY_INFIX).eps: %.jpg $(gray_jpg_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-jpg,$<,$@,1)
 
-%._gray_.eps: %.png $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.png $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-png,$<,$@,1)
 
-%._gray_.eps: %.eps.gz $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.eps.gz $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-epsgz,$<,$@,1)
 
-%._gray_.eps: %.eps $(gray_eps_file)
+%$(GRAY_INFIX).eps: %.eps $(gray_eps_file)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps,$<,$@,1)
 
-%._gray_.pstex: %.fig
+%$(GRAY_INFIX).pstex: %.fig
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig-pstex,$<,$@,1)
 
-%._gray_.pstex_t: %.fig %._gray_.pstex
+%$(GRAY_INFIX).pstex_t: %.fig %$(GRAY_INFIX).pstex
 	$(QUIET)$(call echo-graphic,$^,$@)
-	$(QUIET)$(call convert-fig-pstex-t,$<,$@,$*._gray_.pstex,1)
+	$(QUIET)$(call convert-fig-pstex-t,$<,$@,$*$(GRAY_INFIX).pstex,1)
 
 ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 %.pdf: %.eps $(if $(GRAY),$(gray_eps_file))
@@ -2338,7 +2351,7 @@ ifeq "$(strip $(GNUPLOT_PDF))" "yes"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 
-%._gray_.pdf:	%.gpi $(gpi_sed)
+%$(GRAY_INFIX).pdf:	%.gpi $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,1)
 endif
@@ -2347,7 +2360,7 @@ endif
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig,$<,$@,$(GRAY))
 
-%._gray_.pdf:	%.fig
+%$(GRAY_INFIX).pdf:	%.fig
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig,$<,$@,1)
 
@@ -2463,7 +2476,7 @@ endif
 # also reside in the directory, so if a data file changes, it's nice to know
 # about it.  This also handles loaded .gpi files, whose filename should have
 # _include_. in it.
-%._gray_.gpi.d: %.gpi
+%$(GRAY_INFIX).gpi.d: %.gpi
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call make-gpi-d,$<,$@)
 
@@ -2711,7 +2724,7 @@ define help_text
 #
 #        There is another facility for creating grayscale documents that is
 #        better when you can use it (it has some small limitations not shared
-#        by this approach).  See the section on %._gray_ targets below.
+#        by this approach).  See the section on %$(GRAY_INFIX) targets below.
 #
 #    VERBOSE:
 #        This turns off all @ prefixes for commands invoked by make.  Thus,
@@ -3024,16 +3037,16 @@ define help_text
 #    %.pstex{,_t} (only for BUILD_STRATEGY=latex):
 #       Build a .pstex_t file from a .fig file.
 #
-#    All targets have a corresponding %._gray_.suffix form, which creates
+#    All targets have a corresponding %$(GRAY_INFIX).suffix form, which creates
 #    everything in monochrome.  This is useful for creating both color and
 #    grayscale versions of the same document, and they can coexist happily in
 #    the same directory.  Examples:
 #
-#       make test._gray_._graphics 	# Build all grayscale graphics
-#       make test._gray_		# Build a grayscale document
+#       make test$(GRAY_INFIX)._graphics 	# Build all grayscale graphics
+#       make test$(GRAY_INFIX)		# Build a grayscale document
 #
-#    The use of a ._gray_ target creates ._gray_.tex files (not forgetting the
-#    included files!) with appropriate dependencies on ._gray_.eps graphics.
+#    The use of a $(GRAY_INFIX) target creates $(GRAY_INFIX).tex files (not forgetting the
+#    included files!) with appropriate dependencies on $(GRAY_INFIX).eps graphics.
 #    This approach is in many ways superior to specifying GRAY=1 on the command
 #    line, but has some limitations.  Because a new .tex file must be created,
 #    this means that the original .tex file must be parsed and all references
@@ -3045,7 +3058,7 @@ define help_text
 #    ._include_. in their name, and are therefore fairly easy to search out.
 #    That sequence is unlikely to appear in text, so it is fairly safe to
 #    replace it.  Anything ending in .eps is also replaced to end with
-#    ._gray_.eps, and is subject to the same issues.
+#    $(GRAY_INFIX).eps, and is subject to the same issues.
 #
 #    In short, if your file contains _include_ when not referencing a file, or
 #    it says .eps when not referencing a graphic, this approach is probably not
@@ -3250,7 +3263,7 @@ define help_text
 #            No special handling is done with XFig, except when a global
 #            grayscale method is used, e.g.
 #
-#                make document._gray_
+#                make document$(GRAY_INFIX)
 #                or
 #                make GRAY=1 document
 #
