@@ -566,7 +566,7 @@ DEFAULT_GPI_PDF_FONTSIZE	?= 12
 
 # Change this to ._gray_ to have the former behavior (but don't use pdflatex if
 # you do!
-GRAY_INFIX	?= __gray_
+GRAY_INFIX	?= __gray
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -1369,6 +1369,9 @@ endef
 # This produces a list of space-delimited .bib filenames, which is what the
 # make dep file expects to see.
 #
+# Note that we give kpsewhich a bogus argument so that a failure of sed to
+# produce output will not cause an error.
+#
 # $(call get-bibs,<aux file>,<targets>)
 define get-bibs
 $(SED) \
@@ -1378,7 +1381,7 @@ $(SED) \
 -e 's/[[:space:]]/\\&/g' \
 -e 's/,/.bib /g' \
 -e 's/ \{1,\}$$//' \
-$1 | $(XARGS) $(KPSEWHICH) | \
+$1 | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
 -e 's/^/$2: /' | \
 \$(SORT) | $(UNIQ)
