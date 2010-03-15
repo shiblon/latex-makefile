@@ -801,23 +801,24 @@ endif
 
 # Terminal color definitions
 
-ifdef NO_COLOR
-tput		=
-else
-tput		= $(shell $(TPUT) $1)
-endif
+REAL_TPUT 	:= $(if $(NO_COLOR),,$(shell $(WHICH) $(TPUT)))
 
-black	:= $(call tput,setaf 0)
-red	:= $(call tput,setaf 1)
-green	:= $(call tput,setaf 2)
-yellow	:= $(call tput,setaf 3)
-blue	:= $(call tput,setaf 4)
-magenta	:= $(call tput,setaf 5)
-cyan	:= $(call tput,setaf 6)
-white	:= $(call tput,setaf 7)
-bold	:= $(call tput,bold)
-uline	:= $(call tput,smul)
-reset	:= $(call tput,sgr0)
+# $(call get-term-code,codeinfo)
+# e.g.,
+# $(call get-term-code,setaf 0)
+get-term-code = $(if $(REAL_TPUT),$(shell $(REAL_TPUT) $1),)
+
+black	:= $(call get-term-code,setaf 0)
+red	:= $(call get-term-code,setaf 1)
+green	:= $(call get-term-code,setaf 2)
+yellow	:= $(call get-term-code,setaf 3)
+blue	:= $(call get-term-code,setaf 4)
+magenta	:= $(call get-term-code,setaf 5)
+cyan	:= $(call get-term-code,setaf 6)
+white	:= $(call get-term-code,setaf 7)
+bold	:= $(call get-term-code,bold)
+uline	:= $(call get-term-code,smul)
+reset	:= $(call get-term-code,sgr0)
 
 #
 # User-settable definitions
