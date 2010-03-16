@@ -107,8 +107,8 @@ export LC_ALL		?= C
 # 	* Bumped version to 2.2.0-beta4
 # 	* issue 70: .pdf not moved out of the way properly on first
 # 		compilation, resulting in early error detection failure.
-# 	* issue 66: patched magic __gray generation back in to see if recent
-# 		fixes make it work properly again.
+# 	* issue 74: fixed broken error on missing .aux files: the
+# 		implementation was masking real errors.
 # Chris Monson (2010-03-15):
 # 	* Bumped version to 2.2.0-beta3
 # 	* issue 71: Made the tput dependency optional
