@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta2
+version		:= 2.2.0-beta3
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -103,6 +103,15 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-03-15):
+# 	* Bumped version to 2.2.0-beta3
+# 	* issue 71: Made the tput dependency optional
+# 	* issue 73: Made .tex targets not pull in .d files (building them from
+# 		scripts should not require a .d)
+# 	* issue 74: Output a much saner error when a .aux file is not produced
+# 		(e.g., when you are typing "make" without arguments in a
+# 		directory with included .tex files that are not named with
+# 		._include_.)
 # Chris Monson (2010-03-11):
 # 	* Bumped version to 2.2.0-beta2
 # 	* Fixed clean-graphics to get rid of intermediate .eps files that may
@@ -1084,7 +1093,6 @@ allowed_source_suffixes	:= \
 	aux \
 	aux.make \
 	d \
-	tex \
 	auxbbl.make \
 	_graphics \
 	_show
@@ -1314,6 +1322,23 @@ if $(EGREP) -q ' LaTeX Error: File .*\.dot_t.* not found' $1; then \
 	$(ECHO) "$(C_ERROR)Please run$(C_RESET)"; \
 	$(ECHO) "$(C_ERROR)  make all-dot2tex$(C_RESET)"; \
 	$(ECHO) "$(C_ERROR)before proceeding.$(C_RESET)"; \
+	exit 1; \
+fi
+endef
+
+# Checks for the existence of a .aux file, and dies with an error message if it
+# isn't there.  Note that we pass the file stem in, not the full filename,
+# e.g., to check for foo.aux, we call it thus: $(call die-on-no-aux,foo)
+#
+# $(call die-on-no-aux,<aux stem>)
+define die-on-no-aux
+if [ ! -e '$1' ]; then \
+	$(ECHO) "$(C_ERROR)No aux file found for '$1'.  Is '$1.tex' a "; \
+	$(ECHO) "  complete LaTeX document, or is it meant to be included "; \
+	$(ECHO) "  in one?  If it is an include, consider renaming it to "; \
+	$(ECHO) "  $1._include_.tex so that it is not automatically a make "; \
+	$(ECHO) "  target.  Alternatively, set the appropriate includes.X "; \
+	$(ECHO) "  variable in Makefile.ini.$(C_RESET)"; \
 	exit 1; \
 fi
 endef
@@ -2357,6 +2382,7 @@ endif
 	$(call run-latex,$<,--recorder) || $(sh_true); \
 	$(CP) '$*.log' '$*.1.log'; \
 	$(call die-on-dot2tex,$*.log); \
+	$(call die-on-no-aux,$*.aux); \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
