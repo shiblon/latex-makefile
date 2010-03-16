@@ -1353,13 +1353,8 @@ endef
 #
 # $(call die-on-no-aux,<aux stem>)
 define die-on-no-aux
-if [ ! -e '$1' ]; then \
-	$(ECHO) "$(C_ERROR)No aux file found for '$1'.  Is '$1.tex' a "; \
-	$(ECHO) "  complete LaTeX document, or is it meant to be included "; \
-	$(ECHO) "  in one?  If it is an include, consider renaming it to "; \
-	$(ECHO) "  $1._include_.tex so that it is not automatically a make "; \
-	$(ECHO) "  target.  Alternatively, set the appropriate includes.X "; \
-	$(ECHO) "  variable in Makefile.ini.$(C_RESET)"; \
+if [ ! -e '$1.aux' ]; then \
+	$(call colorize-latex-errors,$1.log); \
 	exit 1; \
 fi
 endef
@@ -1483,6 +1478,7 @@ endef
 define colorize-latex-errors
 $(SED) \
 -e '/ LaTeX Error: File .*eps'"'"' not found\.$$/d' \
+-e 's/.* LaTeX Error: Missing .begin.document..*/& -- Are you trying to build an include file?/' \
 -e '/ LaTeX Error: Cannot determine size/d' \
 -e '/.* LaTeX Error/,/^$$/{' \
 -e '  H' \
@@ -1501,7 +1497,7 @@ $(SED) \
 -e '  /^$(hyperref_driver_pattern)$$/!{' \
 -e '    s/.*//' \
 -e '    p' \
--e '    s/.*/$(C_ERROR)--- Using incorrect driver for hyperref! ---/' \
+-e '    s/.*/$(C_ERROR)--- Using incorrect driver for hyperref! ---$(C_RESET)/' \
 -e '    p' \
 -e '    s/.*/$(C_ERROR)$(hyperref_driver_error)$(C_RESET)/' \
 -e '    p' \
@@ -2484,7 +2480,7 @@ endif
 	$(call run-latex,$<,--recorder) || $(sh_true); \
 	$(CP) '$*.log' '$*.1.log'; \
 	$(call die-on-dot2tex,$*.log); \
-	$(call die-on-no-aux,$*.aux); \
+	$(call die-on-no-aux,$*); \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
