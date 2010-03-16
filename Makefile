@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta3
+version		:= 2.2.0-beta4
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -103,6 +103,10 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-03-16):
+# 	* Bumped version to 2.2.0-beta4
+# 	* issue 70: .pdf not moved out of the way properly on first
+# 		compilation, resulting in early error detection failure.
 # Chris Monson (2010-03-15):
 # 	* Bumped version to 2.2.0-beta3
 # 	* issue 71: Made the tput dependency optional
@@ -720,12 +724,8 @@ escape-dots		= $(subst .,\\.,$1)
 # $(call test-exists,file)
 test-exists		= [ -e '$1' ]
 
-# don't call this directly - it is here to avoid calling wildcard more than
-# once in move-if-exists.
-move-files-helper	= $(if $1,$(MV) $1 $2,$(sh_true))
-
 # $(call move-files,source,destination)
-move-if-exists		= $(call move-files-helper,$(wildcard $1),$2)
+move-if-exists		= $(call test-exists,$1) && $(MV) '$1' '$2'
 
 # Copy file1 to file2 only if file2 doesn't exist or they are different
 # $(call copy-if-different,sfile,dfile)
