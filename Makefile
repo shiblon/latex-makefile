@@ -105,6 +105,10 @@ export LC_ALL		?= C
 #
 # CHANGES:
 # Chris Monson (2010-03-17):
+# 	* Bumped version to 2.2.0-beta6
+# 	* Fixed bareword builds to actually work (requires static patterns)
+# 	* Fixed colorization to work with new paragraph stuff
+# Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta5
 # 	* Fixed graphic detection to be much more focused - splits log file
 # 		into paragraphs before doing pattern matching.
@@ -617,6 +621,7 @@ GNUPLOT_OUTPUT_EXTENSION	?= $(strip $(call determine-gnuplot-output-extension))
 #
 BINARY_TARGET_DIR	?= _out_
 
+RESTARTS		:= $(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0)
 # SH NOTES
 #
 # On some systems, /bin/sh, which is the default shell, is not linked to
@@ -851,7 +856,7 @@ LATEX_COLOR_INFO	?= green
 LATEX_COLOR_UNDERFULL	?= magenta
 LATEX_COLOR_OVERFULL	?= red bold
 LATEX_COLOR_PAGES	?= bold
-LATEX_COLOR_BUILD	?= blue
+LATEX_COLOR_BUILD	?= cyan
 LATEX_COLOR_GRAPHIC	?= yellow
 LATEX_COLOR_DEP		?= green
 LATEX_COLOR_SUCCESS	?= green bold
@@ -1552,6 +1557,7 @@ $(SED) \
 -e '    s/.*/$(C_ERROR)$(hyperref_driver_error)$(C_RESET)/' \
 -e '    p' \
 -e '  }' \
+-e '  b' \
 -e '}' \
 -e '/ LaTeX Error: Unknown graphics extension/{' \
 -e '  s/^/     /' \
@@ -1566,7 +1572,9 @@ $(SED) \
 -e '  p' \
 -e '  s/.*//' \
 -e '  h' \
+-e '  b' \
 -e '}' \
+-e 's/.*\(\n! .*\)/$(C_ERROR)\1$(C_RESET)/p' \
 -e 'd' \
 $1
 endef
@@ -1812,7 +1820,7 @@ endef
 #
 # $(call run-script,<interpreter>,<input>,<output>)
 define run-script
-cur=$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0); \
+cur=$(RESTARTS); \
 [ ! -e '$2.cookie' ] && $(ECHO) $$cur > $2.cookie; \
 last=`$(CAT) $2.cookie`; \
 run=`$(EXPR) $$cur '<=' $$last`; \
@@ -2142,7 +2150,8 @@ endif
 #
 # Thus, we invoke make recursively with better arugments instead, restarting
 # all of the appropriate machinery.
-%: ;
+.PHONY: $(default_stems_ss)
+$(default_stems_ss): %:
 	$(QUIET)$(MAKE) $*.pdf
 
 # This builds and displays the wanted file.
@@ -2229,7 +2238,7 @@ endif
 ifneq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 .SECONDARY: $(all_dvi_targets)
 endif
-%.$(build_target_extension): %.bbl %.aux
+%.$(build_target_extension): %.bbl %.aux %.$(build_target_extension).1st.make
 	$(QUIET)\
 	fatal=`$(call colorize-latex-errors,$*.log)`; \
 	if [ x"$$fatal" != x"" ]; then \
@@ -2268,7 +2277,7 @@ endif
 				$(call echo-build,$*.tex,$@,$$i)\
 			); \
 			$(call run-latex,$*); \
-			$(CP) '$*.log' '$*.'$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0)-$$i'.log'; \
+			$(CP) '$*.log' '$*.'$(RESTARTS)-$$i'.log'; \
 			$(call test-run-again,$*) || break; \
 		done; \
 	else \
@@ -2453,11 +2462,11 @@ endif
 #	Create cookies for various suffixes that may represent files that
 #	need to be read by LaTeX in order for it to function properly.
 #
-%.d %.aux %.aux.make %.fls: %.tex
-	$(QUIET)$(call echo-build,$<,$*.d $*.$(build_target_extension),1)
+%.$(build_target_extension).1st.make %.d %.aux %.aux.make %.fls: %.tex
+	$(QUIET)$(call echo-build,$<,$*.d $*.$(build_target_extension).1st.make,$(RESTARTS)-1)
 	$(QUIET)\
 	$(call run-latex,$<,--recorder) || $(sh_true); \
-	$(CP) '$*.log' '$*.$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0)-1.log'; \
+	$(CP) '$*.log' '$*.$(RESTARTS)-1.log'; \
 	$(call die-on-dot2tex,$*.log); \
 	$(call die-on-no-aux,$*); \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
@@ -2592,7 +2601,7 @@ _check_gpi_files:
 .PHONY: _all_stems
 _all_stems:
 	$(QUIET)$(ECHO) "== All Stems =="
-	$(QUIET)$(call echo-list,$(sort $(all_stems)))
+	$(QUIET)$(call echo-list,$(sort $(default_stems_ss)))
 
 .PHONY: _includes
 _includes:
