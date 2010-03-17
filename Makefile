@@ -1557,7 +1557,7 @@ $(SED) \
 -e '    s/.*/$(C_ERROR)$(hyperref_driver_error)$(C_RESET)/' \
 -e '    p' \
 -e '  }' \
--e '  b' \
+-e '  d' \
 -e '}' \
 -e '/ LaTeX Error: Unknown graphics extension/{' \
 -e '  s/^/     /' \
