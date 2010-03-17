@@ -79,6 +79,7 @@ export LC_ALL		?= C
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
+.PHONY: Makefile GNUmakefile Makefile.ini $(HOME)/.latex-makefile/Makefile.ini
 -include Makefile.ini
 -include $(HOME)/.latex-makefile/Makefile.ini
 
@@ -103,12 +104,20 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2010-03-16):
+# Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta4
 # 	* issue 70: .pdf not moved out of the way properly on first
 # 		compilation, resulting in early error detection failure.
 # 	* issue 74: fixed broken error on missing .aux files: the
 # 		implementation was masking real errors.
+# 	* Fixed graphic detection to be much more focused - splits log file
+# 		into paragraphs before doing pattern matching.
+# 	* Fixed make foo to work properly (recursively calls make foo.pdf)
+# 	* Fixed gpi -> pdf generation to not waste time building .eps *after*
+# 		the pdf already exists.
+# 	* Changed log copies to include MAKE_RESTARTS as part of the name.
+# 	* Fixed missing include file detection (also makes use of the paragraph
+# 		stuff) to detect missing scripted include files.
 # Chris Monson (2010-03-15):
 # 	* Bumped version to 2.2.0-beta3
 # 	* issue 71: Made the tput dependency optional
@@ -582,14 +591,14 @@ DEFAULT_GPI_PDF_FONTSIZE	?= 12
 FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(ECHO))
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 
-define determine-gnuplot-pdf-capability
+define determine-gnuplot-output-extension
 $(if $(shell $(WHICH) $(GNUPLOT)),
      $(if $(findstring unknown or ambiguous, $(shell $(GNUPLOT) -e "set terminal pdf" 2>&1)),
-	  no, yes),
+	  eps, pdf),
      none)
 endef
 
-GNUPLOT_PDF	?= $(strip $(call determine-gnuplot-pdf-capability))
+GNUPLOT_OUTPUT_EXTENSION	?= $(strip $(call determine-gnuplot-output-extension))
 
 # Directory into which we place "binaries" if it exists.
 # Note that this can be changed on the commandline or in Makefile.ini:
@@ -1101,6 +1110,7 @@ allowed_source_suffixes	:= \
 allowed_source_patterns		:= $(addprefix %.,$(allowed_source_suffixes))
 
 allowed_graphic_suffixes	:= \
+	pdf \
 	eps \
 	gpihead.make \
 	gpi.d
@@ -1155,8 +1165,8 @@ specified_batch_graphic_targets	:= $(strip \
 	$(filter $(allowed_batch_graphic_targets),$(real_goals)) \
 	)
 
-specified_gpi_targets	:= $(patsubst %.gpi,%.eps,\
-	$(filter $(patsubst %.eps,%.gpi,$(specified_graphic_targets)),\
+specified_gpi_targets	:= $(patsubst %.gpi,%.$(default_graphic_extension),\
+	$(filter $(patsubst %.$(default_graphic_extension),%.gpi,$(specified_graphic_targets)),\
 		$(all_files.gpi)) \
 	)
 
@@ -1267,6 +1277,35 @@ $(SED) \
 $1 | $(SORT) | $(UNIQ)
 endef
 
+# $(call get-inputs,<log file>,<target files>)
+define get-missing-inputs
+$(SED) \
+-e '$$ b para' \
+-e '/^$$/b para' \
+-e 'H' \
+-e 'd' \
+-e ':para' \
+-e 'x' \
+-e '/^$$/d' \
+-e 's/^\n*//' \
+-e '/^! LaTeX Error: File /{' \
+-e '  s/^/::DOUBLE_PARAGRAPH::/' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e 's/^::DOUBLE_PARAGRAPH:://' \
+-e '/Default extension: /!d' \
+-e 's/[[:space:]]\{1,\}/ /g' \
+-e 's/\n\{1,\}/ /g' \
+-e 's/^.*File `//' \
+-e 's/'"'"' not found\..*//' \
+-e '/\.tex/!s/$$/.tex/' \
+-e 's/^/TARGETS=/' \
+-e 's/[[:space:]]/\\ /g' \
+-e 's/^TARGETS=/$2: /' \
+$1 | $(SORT) | $(UNIQ)
+endef
+
 # Outputs all of the graphical dependencies to stdout.  The first argument is
 # the stem of the source file being built, the second is a list of suffixes
 # that will show up as dependencies in the generated .d file.
@@ -1282,16 +1321,35 @@ endef
 # extension, otherwise compilation barfs on the first missing file.  Truly
 # annoying, but there you have it.
 #
+# It turns out that the graphics errors, although they have lines with empty
+# space, are only made of two paragraphs.  So, we just use some sed magic to
+# get everything into paragraphs, detect when it's a paragraph that interests
+# us, and double it up.  Then we get the filename only if we're missing
+# extensions (a sign that it's graphicx complaining).
+#
 # $(call get-graphics,<parsed file>,<target files>)
 define get-graphics
 $(SED) \
--e '/ LaTeX Error: File `/!d' \
--e 'N' \
--e 's/\n//g' \
+-e '$$ b para' \
+-e '/^$$/b para' \
+-e 'H' \
+-e 'd' \
+-e ':para' \
+-e 'x' \
+-e '/^$$/d' \
+-e 's/^\n*//' \
+-e '/^! LaTeX Error: File `/{' \
+-e '  s/^/::DOUBLE_PARAGRAPH::/' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e 's/^::DOUBLE_PARAGRAPH:://' \
+-e '/could not locate the file with any of these extensions:/!d' \
+-e 's/\n\{1,\}/ /g' \
+-e 's/[[:space:]]\{1,\}/ /g' \
 -e 's/^.*File `//' \
--e 's/'"'"' not found.*$$//' \
--e 's/\.[^.]*\.bb$$//' \
--e 's/$$/\.$(default_graphic_extension)/' \
+-e 's/'"'"' not found\..*//' \
+-e '/\.$(default_graphic_extension)/!s/$$/.$(default_graphic_extension)/' \
 -e 's/^/TARGETS=/' \
 -e 's/[[:space:]]/\\\\\\&/g' \
 -e 's/^TARGETS=/$2: /' \
@@ -1410,8 +1468,8 @@ endef
 define make-gpi-d
 $(ECHO) '# vim: ft=make' > $2; \
 $(ECHO) 'ifndef INCLUDED_$(call cleanse-filename,$2)' >> $2; \
-$(ECHO) 'INCLUDED_$(call cleanse-filename,$2) = 1' >> $2; \
-$(call get-gpi-deps,$1,$(addprefix $(2:%.gpi.d=%).,eps gpi.d)) >> $2; \
+$(ECHO) 'INCLUDED_$(call cleanse-filename,$2) := 1' >> $2; \
+$(call get-gpi-deps,$1,$(addprefix $(2:%.gpi.d=%).,$(GNUPLOT_OUTPUT_EXTENSION) gpi.d)) >> $2; \
 $(ECHO) 'endif' >> $2;
 endef
 
@@ -1458,22 +1516,31 @@ endef
 # $(call colorize-latex-errors,<log file>)
 define colorize-latex-errors
 $(SED) \
--e '/ LaTeX Error: File .*eps'"'"' not found\.$$/d' \
--e 's/.* LaTeX Error: Missing .begin.document..*/& -- Are you trying to build an include file?/' \
+-e '$$ b para' \
+-e '/^$$/b para' \
+-e 'H' \
+-e 'd' \
+-e ':para' \
+-e 'x' \
+-e '/^$$/d' \
+-e 's/^\n*//' \
+-e '/^! LaTeX Error: File /{' \
+-e '  s/^/::DOUBLE_PARAGRAPH::/' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e 's/^::DOUBLE_PARAGRAPH:://' \
+-e '/could not locate the file with any of these extensions:/d' \
+-e '/Missing .begin.document/{' \
+-e '  h' \
+-e '  s/.*/Are you trying to build an include file?/' \
+-e '  x' \
+-e '  G' \
+-e '}' \
 -e '/ LaTeX Error: Cannot determine size/d' \
--e '/.* LaTeX Error/,/^$$/{' \
--e '  H' \
--e '  /^$$/{' \
--e '    x' \
--e '    s/^.*$$/$(C_ERROR)&$(C_RESET)/' \
--e '    p' \
--e '  }' \
--e '}' \
--e '/^Error: pdflatex /{' \
--e '  N' \
--e '  s/^Error: pdflatex (file \([^)]*\)): cannot find image file.*/$(C_ERROR)Could not find image file \1: You might want to list it without the extension; pdflatex graphics work better that way.$(C_RESET)/p' \
--e '}' \
--e '/^\*hyperref using.*driver \(.*\)\*$$/{' \
+-e 's/.* LaTeX Error .*/$(C_ERROR)&$(C_RESET)/p' \
+-e 's/Error: pdflatex (file .*/$(C_ERROR)& - try specifying it without an extension$(C_RESET)/p' \
+-e '/.*\*hyperref using.*driver \(.*\)\*.*/{' \
 -e '  s//\1/' \
 -e '  /^$(hyperref_driver_pattern)$$/!{' \
 -e '    s/.*//' \
@@ -1542,7 +1609,7 @@ $(SED) \
 -e '/, line [0-9]*:/{' \
 -e '  H' \
 -e '  /unknown.*terminal type/{' \
--e '    s/.*/--- Try changing the GNUPLOT_PDF variable to 'no'./' \
+-e '    s/.*/--- Try changing the GNUPLOT_OUTPUT_EXTENSION variable to 'eps'./' \
 -e '	H' \
 -e '  }' \
 -e '  /gpihead/{' \
@@ -1721,7 +1788,7 @@ endef
 # LaTeX invocations
 #
 # $(call latex,<tex file>,[<extra LaTeX args>])
-run-latex	= $(latex_build_program) --interaction=batchmode -file-line-error $(if $2,$2,) $1 > /dev/null
+run-latex	= $(latex_build_program) --interaction=batchmode $(if $2,$2,) $1 > /dev/null
 
 # $(call latex-color-log,<LaTeX stem>)
 latex-color-log	= $(color_tex) $1.log
@@ -2064,7 +2131,17 @@ endif
 # MAIN TARGETS
 #
 
-%: %.pdf ;
+# Note that we don't just say %: %.pdf here - this can tend to mess up our
+# includes, which detect what kind of file we are asking for.  For example,
+# asking to build foo.pdf is much different than asking to build foo when
+# foo.gpi exists, because we look through all of the goals for *.pdf that
+# matches *.gpi, then use that to determine which include files we need to
+# build.
+#
+# Thus, we invoke make recursively with better arugments instead, restarting
+# all of the appropriate machinery.
+%: ;
+	$(QUIET)$(MAKE) $*.pdf
 
 # This builds and displays the wanted file.
 .PHONY: $(addsuffix ._show,$(stems_ssg))
@@ -2189,7 +2266,7 @@ endif
 				$(call echo-build,$*.tex,$@,$$i)\
 			); \
 			$(call run-latex,$*); \
-			$(CP) '$*.log' '$*.'$$i'.log'; \
+			$(CP) '$*.log' '$*.'$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0)-$$i'.log'; \
 			$(call test-run-again,$*) || break; \
 		done; \
 	else \
@@ -2287,8 +2364,8 @@ ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
-ifeq "$(strip $(GNUPLOT_PDF))" "yes"
-%.pdf:	%.gpi $(gpi_sed)
+ifeq "$(strip $(GNUPLOT_OUTPUT_EXTENSION))" "pdf"
+%.pdf:	%.gpi %.gpi.d $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 endif
@@ -2299,7 +2376,7 @@ endif
 
 endif
 
-%.eps:	%.gpi $(gpi_sed)
+%.eps:	%.gpi %.gpi.d $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 
@@ -2378,13 +2455,14 @@ endif
 	$(QUIET)$(call echo-build,$<,$*.d $*.$(build_target_extension),1)
 	$(QUIET)\
 	$(call run-latex,$<,--recorder) || $(sh_true); \
-	$(CP) '$*.log' '$*.1.log'; \
+	$(CP) '$*.log' '$*.$(if $(MAKE_RESTARTS),$(MAKE_RESTARTS),0)-1.log'; \
 	$(call die-on-dot2tex,$*.log); \
 	$(call die-on-no-aux,$*); \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
 	$(ECHO) "# vim: ft=make" > $*.d; \
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
 	$(call get-inputs,$*.fls,$(addprefix $*.,aux aux.make d $(build_target_extension))) >> $*.d; \
+	$(call get-missing-inputs,$*.log,$(addprefix $*.,aux aux.make d $(build_target_extension))) >> $*.d; \
 	$(call get-graphics,$*.log,$(addprefix $*.,d $(build_target_extension) _graphics)) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,d aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
