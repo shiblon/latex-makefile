@@ -1574,7 +1574,7 @@ $(SED) \
 -e '  h' \
 -e '  b' \
 -e '}' \
--e 's/.*\(\n! .*\)/$(C_ERROR)\1$(C_RESET)/p' \
+-e 's/.*\(\n\{0,\}! .*\)/$(C_ERROR)\1$(C_RESET)/p' \
 -e 'd' \
 $1
 endef
