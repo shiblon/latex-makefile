@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta4
+version		:= 2.2.0-beta5
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -105,11 +105,7 @@ export LC_ALL		?= C
 #
 # CHANGES:
 # Chris Monson (2010-03-17):
-# 	* Bumped version to 2.2.0-beta4
-# 	* issue 70: .pdf not moved out of the way properly on first
-# 		compilation, resulting in early error detection failure.
-# 	* issue 74: fixed broken error on missing .aux files: the
-# 		implementation was masking real errors.
+# 	* Bumped version to 2.2.0-beta5
 # 	* Fixed graphic detection to be much more focused - splits log file
 # 		into paragraphs before doing pattern matching.
 # 	* Fixed make foo to work properly (recursively calls make foo.pdf)
@@ -118,6 +114,12 @@ export LC_ALL		?= C
 # 	* Changed log copies to include MAKE_RESTARTS as part of the name.
 # 	* Fixed missing include file detection (also makes use of the paragraph
 # 		stuff) to detect missing scripted include files.
+# Chris Monson (2010-03-16):
+# 	* Bumped version to 2.2.0-beta4
+# 	* issue 70: .pdf not moved out of the way properly on first
+# 		compilation, resulting in early error detection failure.
+# 	* issue 74: fixed broken error on missing .aux files: the
+# 		implementation was masking real errors.
 # Chris Monson (2010-03-15):
 # 	* Bumped version to 2.2.0-beta3
 # 	* issue 71: Made the tput dependency optional
