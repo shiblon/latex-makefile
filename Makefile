@@ -108,8 +108,6 @@ export LC_ALL		?= C
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for apacann style
 # 	* Fixed informational output to reflect which LaTeX run we're on
-# 	* Updated to only run scripts once even when make is invoked
-# 		recursively (e.g., when not specifying the .pdf extension)
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -1831,7 +1829,7 @@ level=$(MAKELEVEL); \
 [ ! -e '$2.cookie' ] && $(ECHO) $$restarts > $2.cookie && $(ECHO) $$level >> $2.cookie; \
 lastrestarts=`$(SED) -e '1p' -e 'd' $2.cookie`; \
 lastlevel=`$(SED) -e '2p' -e 'd' $2.cookie`; \
-run=`$(EXPR) $$level '<=' $$lastlevel '&' $$restarts '<=' $$lastrestarts`; \
+run=`$(EXPR) $$restarts '<=' $$lastrestarts`; \
 if [ x"$$run" = x"1" ]; then \
 	$(call echo-build,$2,$3); \
 	$1 '$2' '$3'; \
@@ -2314,12 +2312,12 @@ endif
 		$(call run-bibtex,$*); \
 		$(TOUCH) $@.cookie; \
 	) \
-	if $(EGREP) 'bibstyle.apacann' '$*.aux'; then \
-		$(call echo-build,** apacann intermediate latex **,$@); \
+	if $(EGREP) -q 'bibstyle.apacann' '$*.aux'; then \
+		$(call echo-build,** apacann extra latex **,output ignored); \
 		$(call run-latex,$*); \
 		$(CP) '$*.log' '$*.$(RESTARTS)-apacann.log'; \
 		$(if $(filter %.bib,$^),\
-			$(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
+			$(call echo-build,** apacann extra bibtex ** $(filter %.bib,$?) $*.aux,$@); \
 			$(call run-bibtex,$*); \
 			$(TOUCH) $@.cookie; \
 		) \
