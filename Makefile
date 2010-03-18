@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta6
+version		:= 2.2.0-beta7
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-03-18):
+# 	* Bumped version to 2.2.0-beta7
+# 	* Issue 72: Fix latex/bibtex invocation order for apacann style
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -2304,7 +2307,16 @@ endif
 		$(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
 		$(call run-bibtex,$*); \
 		$(TOUCH) $@.cookie; \
-	)
+	) \
+	if $(EGREP) 'bibstyle.apacann' '$*.aux'; then \
+		$(call echo-build,** apacann intermediate latex **,$@); \
+		$(call run-latex,$*); \
+		$(if $(filter %.bib,$^),\
+			$(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
+			$(call run-bibtex,$*); \
+			$(TOUCH) $@.cookie; \
+		) \
+	fi
 
 # Create the index file - note that we do *not* depend on %.tex here, since
 # that unnecessarily restricts the kinds of indices that we can build to those
