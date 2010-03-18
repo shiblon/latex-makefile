@@ -107,6 +107,7 @@ export LC_ALL		?= C
 # Chris Monson (2010-03-18):
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for apacann style
+# 	* Fixed informational output to reflect which LaTeX run we're on
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -2276,8 +2277,8 @@ endif
 		$(call remove-files,$@.1st.make); \
 		for i in 2 3 4 5; do \
 			$(if $(findstring 3.79,$(MAKE_VERSION)),\
-				$(call echo-build,$*.tex,$@,$$$$i),\
-				$(call echo-build,$*.tex,$@,$$i)\
+				$(call echo-build,$*.tex,$@,$(RESTARTS)-$$$$i),\
+				$(call echo-build,$*.tex,$@,$(RESTARTS)-$$i)\
 			); \
 			$(call run-latex,$*); \
 			$(CP) '$*.log' '$*.'$(RESTARTS)-$$i'.log'; \
