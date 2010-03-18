@@ -2311,6 +2311,7 @@ endif
 	if $(EGREP) 'bibstyle.apacann' '$*.aux'; then \
 		$(call echo-build,** apacann intermediate latex **,$@); \
 		$(call run-latex,$*); \
+		$(CP) '$*.log' '$*.$(RESTARTS)-apacann.log'; \
 		$(if $(filter %.bib,$^),\
 			$(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
 			$(call run-bibtex,$*); \
