@@ -106,7 +106,7 @@ export LC_ALL		?= C
 # CHANGES:
 # Chris Monson (2010-03-18):
 # 	* Bumped version to 2.2.0-beta7
-# 	* Issue 72: Fix latex/bibtex invocation order for apacann style
+# 	* Issue 72: Fix latex/bibtex invocation order for annotated bib styles
 # 	* Fixed informational output to reflect which LaTeX run we're on
 # 	* Fixed graphic detection to include graphics that are already there in
 # 		.d files
@@ -2361,15 +2361,17 @@ endif
 		$(call run-bibtex,$*); \
 		$(TOUCH) $@.cookie; \
 	) \
-	if $(EGREP) -q 'bibstyle.apacann' '$*.aux'; then \
-		$(call echo-build,** apacann extra latex **,output ignored); \
+	if $(EGREP) -q 'bibstyle.(apacann|chcagoa|[^}]*annot)' '$*.aux'; then \
+		$(call echo-build,** annotated extra latex **,output ignored,$(RESTARTS)-1); \
 		$(call run-latex,$*); \
-		$(CP) '$*.log' '$*.$(RESTARTS)-apacann.log'; \
+		$(CP) '$*.log' '$*.$(RESTARTS)-annotated.log'; \
 		$(if $(filter %.bib,$^),\
-			$(call echo-build,** apacann extra bibtex ** $(filter %.bib,$?) $*.aux,$@); \
+			$(call echo-build,** annotated extra bibtex ** $(filter %.bib,$?) $*.aux,$@); \
 			$(call run-bibtex,$*); \
 			$(TOUCH) $@.cookie; \
 		) \
+		$(call echo-build,** annotated extra latex **,output ignored,$(RESTARTS)-2); \
+		$(call run-latex,$*); \
 	fi
 
 # Create the index file - note that we do *not* depend on %.tex here, since
