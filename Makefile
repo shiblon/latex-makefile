@@ -108,6 +108,8 @@ export LC_ALL		?= C
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for apacann style
 # 	* Fixed informational output to reflect which LaTeX run we're on
+# 	* Fixed graphic detection to include graphics that are already there in
+# 		.d files
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -1349,18 +1351,26 @@ $(SED) \
 -e 'x' \
 -e '/^$$/d' \
 -e 's/^\n*//' \
--e '/^! LaTeX Error: File `/{' \
+-e '/^! LaTeX Error: File \`/{' \
 -e '  s/^/::DOUBLE_PARAGRAPH::/' \
 -e '  h' \
 -e '  d' \
 -e '}' \
 -e 's/^::DOUBLE_PARAGRAPH:://' \
--e '/could not locate the file with any of these extensions:/!d' \
--e 's/\n\{1,\}/ /g' \
--e 's/[[:space:]]\{1,\}/ /g' \
--e 's/^.*File `//' \
--e 's/'"'"' not found\..*//' \
--e '/\.$(default_graphic_extension)/!s/$$/.$(default_graphic_extension)/' \
+-e '/could not locate the file with any of these extensions:/{' \
+-e '  s/\n\{1,\}/ /g' \
+-e '  s/[[:space:]]\{1,\}/ /g' \
+-e '  s/^.*File \`//' \
+-e '  s/'"'"' not found\..*//' \
+-e '  /\.$(default_graphic_extension)/!s/$$/.$(default_graphic_extension)/' \
+-e '  b addtargets' \
+-e '}' \
+-e '/.*File: \(.*\) Graphic file (type [^)]*).*/{' \
+-e '  s//\1/' \
+-e '  b addtargets' \
+-e '}' \
+-e 'd' \
+-e ':addtargets' \
 -e 's/^/TARGETS=/' \
 -e 's/[[:space:]]/\\\\\\&/g' \
 -e 's/^TARGETS=/$2: /' \
@@ -1368,7 +1378,7 @@ $(SED) \
 -e 's/[^:]*: \(.*\)\(\.[^.]*\)$$/-include \1.gpi.d/' \
 -e 'p' \
 -e 'd' \
-$1 | $(SORT) | $(UNIQ)
+$1
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
