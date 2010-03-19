@@ -110,6 +110,11 @@ export LC_ALL		?= C
 # 	* Fixed informational output to reflect which LaTeX run we're on
 # 	* Fixed graphic detection to include graphics that are already there in
 # 		.d files
+# 	* Tightened up the .d file output to only make .d depend on graphic
+# 		*source* files.  This means that building foo.d no longer
+# 		builds all of the graphics files on which foo.tex depends.
+# 		Had to use .SECONDEXPANSION trickery to make it work.
+# 	* Changed get-graphics to only accept a stem.
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -1015,15 +1020,12 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
 all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,all)
-all_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot,all)
 
 default_files_source	:= $(call concat-files,tex,default)
 default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,default)
-default_files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot,default)
 
 files_source	:= $(call concat-files,tex)
 files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst)
-files_graphics	:= $(call concat-files,fig gpi eps.gz xvg svg png jpg dot)
 
 # Utility function for obtaining stems
 # $(call get-stems,suffix,[prefix])
@@ -1079,26 +1081,38 @@ stems.eps.gz		:= $(call get-stems,eps.gz)
 # $(call concat-stems,suffixes,[prefix])
 concat-stems	= $(sort $(foreach s,$1,$($(if $2,$2_,)stems.$s)))
 
+# The most likely to be source but not finished product go first
+graphic_source_extensions	:= fig \
+				   gpi \
+				   xvg \
+				   svg \
+				   dot \
+				   eps.gz
+
+ifneq "$(strip $(BUILD_STRATEGY))" "pdflatex"
+graphic_source_extensions	+= png jpg
+graphic_target_extensions	:= eps ps
+else
+graphic_source_extensions	+= eps
+graphic_target_extensions	:= pdf png jpg mps tif
+endif
+
 all_stems_source	:= $(call concat-stems,tex,all)
 all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,all)
-all_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot,all)
-all_stems_gg		:= $(sort $(all_stems_graphic))
+all_stems_graphic	:= $(call concat-stems,$(graphic_source_extensions),all)
 all_stems_ss		:= $(sort $(all_stems_source) $(all_stems_script))
 all_stems_sg		:= $(sort $(all_stems_script))
 all_stems_ssg		:= $(sort $(all_stems_ss))
 
 default_stems_source	:= $(call concat-stems,tex,default)
 default_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,default)
-default_stems_graphic	:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot,default)
-default_stems_gg	:= $(sort $(default_stems_graphic))
-default_stems_ss	:= $(sort \
-	$(default_stems_source) $(default_stems_script))
+default_stems_ss	:= $(sort $(default_stems_source) $(default_stems_script))
 default_stems_sg	:= $(sort $(default_stems_script))
 default_stems_ssg	:= $(sort $(default_stems_ss))
 
 stems_source		:= $(call concat-stems,tex)
 stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py rst)
-stems_graphic		:= $(call concat-stems,fig gpi eps.gz xvg svg png jpg dot)
+stems_graphic		:= $(call concat-stems,$(graphic_source_extensions))
 stems_gg		:= $(sort $(stems_graphic))
 stems_ss		:= $(sort $(stems_source) $(stems_script))
 stems_sg		:= $(sort $(stems_script))
@@ -1319,6 +1333,26 @@ $(SED) \
 $1 | $(SORT) | $(UNIQ)
 endef
 
+# Get source file for specified graphics stem.
+#
+# $(call graphics-source,<stem>)
+define graphics-source
+$(strip $(firstword \
+	$(wildcard \
+		$(addprefix $1.,\
+			$(graphic_source_extensions))) \
+	$1 \
+))
+endef
+
+# Get the target file for the specified graphics file/stem
+#
+# $(call graphics-target,<stem>)
+define graphics-target
+$(strip $(if 	$(filter $(addprefix %.,$(graphic_target_extensions)),$1), $1,
+	$(firstword $(patsubst $(addprefix %.,$(graphic_source_extensions) $(graphic_target_extensions)), %, $1).$(default_graphic_extension)) $1.$(default_graphic_extension)))
+endef
+
 # Outputs all of the graphical dependencies to stdout.  The first argument is
 # the stem of the source file being built, the second is a list of suffixes
 # that will show up as dependencies in the generated .d file.
@@ -1340,7 +1374,8 @@ endef
 # us, and double it up.  Then we get the filename only if we're missing
 # extensions (a sign that it's graphicx complaining).
 #
-# $(call get-graphics,<parsed file>,<target files>)
+# $(call get-graphics,<target file stem>)
+#.log,$(addprefix $*.,d $(build_target_extension) _graphics)
 define get-graphics
 $(SED) \
 -e '$$ b para' \
@@ -1362,7 +1397,6 @@ $(SED) \
 -e '  s/[[:space:]]\{1,\}/ /g' \
 -e '  s/^.*File \`//' \
 -e '  s/'"'"' not found\..*//' \
--e '  /\.$(default_graphic_extension)/!s/$$/.$(default_graphic_extension)/' \
 -e '  b addtargets' \
 -e '}' \
 -e '/.*File: \(.*\) Graphic file (type [^)]*).*/{' \
@@ -1371,14 +1405,19 @@ $(SED) \
 -e '}' \
 -e 'd' \
 -e ':addtargets' \
--e 's/^/TARGETS=/' \
 -e 's/[[:space:]]/\\\\\\&/g' \
--e 's/^TARGETS=/$2: /' \
+-e 'h' \
+-e 's/.*/-include &.gpi.d/' \
 -e 'p' \
--e 's/[^:]*: \(.*\)\(\.[^.]*\)$$/-include \1.gpi.d/' \
+-e 'g' \
+-e 's/.*/$(addprefix $1,.d): $$$$(call graphics-source,&)/' \
+-e 'p' \
+-e 's/.*//' \
+-e 'x' \
+-e 's/.*/$(addprefix $1.,$(build_target_extension) _graphics): $$$$(call graphics-target,&)/' \
 -e 'p' \
 -e 'd' \
-$1
+$*.log
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
@@ -2501,7 +2540,8 @@ endif
 	$(ECHO) ".PHONY: $*._graphics" >> $*.d; \
 	$(call get-inputs,$*.fls,$(addprefix $*.,aux aux.make d $(build_target_extension))) >> $*.d; \
 	$(call get-missing-inputs,$*.log,$(addprefix $*.,aux aux.make d $(build_target_extension))) >> $*.d; \
-	$(call get-graphics,$*.log,$(addprefix $*.,d $(build_target_extension) _graphics)) >> $*.d; \
+	$(ECHO) ".SECONDEXPANSION:" >> $*.d; \
+	$(call get-graphics,$*) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,d aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \
@@ -2669,11 +2709,6 @@ _scripts:
 _graphic_outputs:
 	$(QUIET)$(ECHO) "== Graphic Outputs =="
 	$(QUIET)$(call echo-list,$(sort $(all_graphics_targets)))
-
-.PHONY: _graphic_sources
-_graphic_sources:
-	$(QUIET)$(ECHO) "== Graphic Sources =="
-	$(QUIET)$(call echo-list,$(sort $(files_graphics)))
 
 .PHONY: _env
 _env:
@@ -2999,9 +3034,6 @@ define help_text
 #        A list of .d files that would be included in this run if _includes
 #        weren't specified.  This target may be used alone or in conjunction
 #        with other targets.
-#
-#    _graphic_sources:
-#        A list of all files that can create .eps files
 #
 #    _graphic_outputs:
 #        A list of all generated .eps files
