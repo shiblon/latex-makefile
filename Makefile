@@ -31,6 +31,12 @@ fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
 version		:= 2.2.0-beta7
 #
+# Note that the user-global version is imported *after* the source directory,
+# so that you can use stuff like ?= to get proper override behavior.
+.PHONY: Makefile GNUmakefile Makefile.ini $(HOME)/.latex-makefile/Makefile.ini
+-include Makefile.ini
+-include $(HOME)/.latex-makefile/Makefile.ini
+#
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
 BUILD_STRATEGY		?= pdflatex
@@ -76,12 +82,14 @@ export LC_ALL		?= C
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
 # Makefile.
-#
-# Note that the user-global version is imported *after* the source directory,
-# so that you can use stuff like ?= to get proper override behavior.
-.PHONY: Makefile GNUmakefile Makefile.ini $(HOME)/.latex-makefile/Makefile.ini
--include Makefile.ini
--include $(HOME)/.latex-makefile/Makefile.ini
+
+# List the scripts you want to run all the time here.  If you want this
+# behavior on all scripts, set it to $(all_files_scripts).
+# NOTE: This can cause infinite make recursion if you do this for a non-include
+# file.  I don't recommend it, but sometimes it can be useful.
+ALWAYS_RUN_SCRIPTS	?=
+
+.PHONY: $(ALWAYS_RUN_SCRIPTS)
 
 # KNOWN ISSUES:
 #	* The following occurs:
@@ -115,6 +123,16 @@ export LC_ALL		?= C
 # 		builds all of the graphics files on which foo.tex depends.
 # 		Had to use .SECONDEXPANSION trickery to make it work.
 # 	* Changed get-graphics to only accept a stem.
+# 	* Removed "always build" funcionality for scripted .tex output (issue
+# 		63).  The proper way of dealing with this now (when scripts
+# 		need to always be run) is to declare the script file .PHONY in
+# 		makefile.ini.  This change was introduced originally in 2.1.43
+# 		and is now being rolled back.  The logic to keep multiple
+# 		script runs from happening at varying make levels is still in
+# 		place.  * Added "ALWAYS_RUN_SCRIPTS" variable so that people
+# 		can do this if they really want to.
+# 	* Made get-inputs sed script more maintainable.
+# 	* Moved Makefile.ini import up higher.
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -1291,20 +1309,21 @@ gpi_global	:= $(strip \
 define get-inputs
 $(SED) \
 -e '/^INPUT/!d' \
--e 's!^INPUT \(\./\)\{0,1\}!TARGETS=!' \
+-e 's!^INPUT \(\./\)\{0,1\}!!' \
 -e 's/[[:space:]]/\\ /g' \
--e 's/^TARGETS=/$2: /' \
--e 's/\(.*\)\.aux$$/\1.tex/p' \
--e '/\.tex$$/p' \
--e '/\.cls$$/p' \
--e '/\.sty$$/p' \
--e '/\.pstex_t$$/p' \
--e '/\.dot_t$$/p' \
+-e 's/\(.*\)\.aux$$/\1.tex/' \
+-e '/\.tex$$/b addtargets' \
+-e '/\.cls$$/b addtargets' \
+-e '/\.sty$$/b addtargets' \
+-e '/\.pstex_t$$/b addtargets' \
+-e '/\.dot_t$$/b addtargets' \
 -e 'd' \
+-e ':addtargets' \
+-e 's/^/$2: /' \
 $1 | $(SORT) | $(UNIQ)
 endef
 
-# $(call get-inputs,<log file>,<target files>)
+# $(call get-missing-inputs,<log file>,<target files>)
 define get-missing-inputs
 $(SED) \
 -e '$$ b para' \
@@ -2397,11 +2416,8 @@ endif
 
 # SCRIPTED LaTeX TARGETS
 #
-# Keep the generated .tex files around for debugging if needed, but mark the
+# Keep the generated .tex files around for debugging if needed.
 .SECONDARY: $(all_tex_targets)
-# Ensure that builds are attempted every time.  Scripts don't always change,
-# but their output often does.
-.PHONY: $(all_files_scripts)
 
 %.tex::	%.tex.sh
 	$(QUIET)$(call run-script,$(SHELL),$<,$@)
