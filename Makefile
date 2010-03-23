@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta7
+version		:= 2.2.0-beta8
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -104,7 +104,11 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2010-03-18):
+# Chris Monson (2010-03-23):
+#	* Bumped version to 2.2.0-beta8
+#	* Work on issue 76: bad backtick escape for some sed versions, failure
+#		to clear out the hold buffer when outputting MISSING comment.
+# Chris Monson (2010-03-22):
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for annotated bib styles
 # 	* Fixed informational output to reflect which LaTeX run we're on
@@ -1341,14 +1345,15 @@ $(SED) \
 -e '/Default extension: /!d' \
 -e 's/[[:space:]]\{1,\}/ /g' \
 -e 's/\n\{1,\}/ /g' \
--e 's/^.*File \`//' \
+-e 's/^.*File `//' \
 -e 's/'"'"' not found\..*//' \
 -e '/\.tex/!s/$$/.tex/' \
 -e 's/[[:space:]]/\\ /g' \
 -e 'h' \
 -e 's/.*/# MISSING input "&" - (presence of comment affects build)/' \
 -e 'p' \
--e 'g' \
+-e 's/.*//' \
+-e 'x' \
 -e 's/^/$2: /' \
 $1 | $(SORT) | $(UNIQ)
 endef
@@ -1406,7 +1411,7 @@ $(SED) \
 -e 'x' \
 -e '/^$$/d' \
 -e 's/^\n*//' \
--e '/^! LaTeX Error: File \`/{' \
+-e '/^! LaTeX Error: File `/{' \
 -e '  s/^/::DOUBLE_PARAGRAPH::/' \
 -e '  h' \
 -e '  d' \
@@ -1415,7 +1420,7 @@ $(SED) \
 -e '/could not locate the file with any of these extensions:/{' \
 -e '  s/\n\{1,\}/ /g' \
 -e '  s/[[:space:]]\{1,\}/ /g' \
--e '  s/^.*File \`//' \
+-e '  s/^.*File `//' \
 -e '  s/'"'"' not found\..*//' \
 -e '  h' \
 -e '  s/.*/# MISSING stem "&" - (presence of comment affects build)/' \
