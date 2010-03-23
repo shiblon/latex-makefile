@@ -82,15 +82,7 @@ export LC_ALL		?= C
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
 # Makefile.
-
-# List the scripts you want to run all the time here.  If you want this
-# behavior on all scripts, set it to $(all_files_scripts).
-# NOTE: This can cause infinite make recursion if you do this for a non-include
-# file.  I don't recommend it, but sometimes it can be useful.
-ALWAYS_RUN_SCRIPTS	?=
-
-.PHONY: $(ALWAYS_RUN_SCRIPTS)
-
+#
 # KNOWN ISSUES:
 #	* The following occurs:
 #		file with: \usepackage{named}\bibliographystyle{named}
@@ -123,16 +115,10 @@ ALWAYS_RUN_SCRIPTS	?=
 # 		builds all of the graphics files on which foo.tex depends.
 # 		Had to use .SECONDEXPANSION trickery to make it work.
 # 	* Changed get-graphics to only accept a stem.
-# 	* Removed "always build" funcionality for scripted .tex output (issue
-# 		63).  The proper way of dealing with this now (when scripts
-# 		need to always be run) is to declare the script file .PHONY in
-# 		makefile.ini.  This change was introduced originally in 2.1.43
-# 		and is now being rolled back.  The logic to keep multiple
-# 		script runs from happening at varying make levels is still in
-# 		place.  * Added "ALWAYS_RUN_SCRIPTS" variable so that people
-# 		can do this if they really want to.
+# 	* Fixed build-once logic for scripted .tex to work better
 # 	* Made get-inputs sed script more maintainable.
 # 	* Moved Makefile.ini import up higher.
+# 	* Changed bare stems to not recursively invoke make
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -1039,6 +1025,8 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 all_files_source	:= $(call concat-files,tex,all)
 all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,all)
 
+.PHONY: $(all_files_scripts)
+
 default_files_source	:= $(call concat-files,tex,default)
 default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,default)
 
@@ -1892,17 +1880,14 @@ endef
 #
 # $(call run-script,<interpreter>,<input>,<output>)
 define run-script
-restarts=$(RESTARTS); \
-level=$(MAKELEVEL); \
-[ ! -e '$2.cookie' ] && $(ECHO) $$restarts > $2.cookie && $(ECHO) $$level >> $2.cookie; \
-lastrestarts=`$(SED) -e '1p' -e 'd' $2.cookie`; \
-lastlevel=`$(SED) -e '2p' -e 'd' $2.cookie`; \
-run=`$(EXPR) $$restarts '<=' $$lastrestarts`; \
-if [ x"$$run" = x"1" ]; then \
-	$(call echo-build,$2,$3); \
+[ ! -e '$2.cookie' ] && $(ECHO) "restarts=$(RESTARTS)" > $2.cookie && $(ECHO) "level=$(MAKELEVEL)" >> $2.cookie; \
+. '$2.cookie'; \
+run=`$(EXPR) $(RESTARTS) '<=' $$restarts`; \
+if $(EXPR) $(MAKELEVEL) '<=' $$level '&' $(RESTARTS) '<=' $$restarts >/dev/null; then \
+	$(call echo-build,$2,$3,$(RESTARTS)-$(MAKELEVEL)); \
 	$1 '$2' '$3'; \
-	$(ECHO) $$restarts > $2.cookie; \
-	$(ECHO) $$level >> $2.cookie; \
+	$(ECHO) "restarts=$(RESTARTS)" > '$2.cookie'; \
+	$(ECHO) "level=$(MAKELEVEL)" >> '$2.cookie'; \
 fi
 endef
 
@@ -1996,17 +1981,6 @@ convert-fig-pstex-t	= $(FIG2DEV) -L pstex_t -p $3 $1 $2 > /dev/null 2>&1
 # Creation of .dot_t files from .dot files
 # #(call convert-dot-tex,<dot file>,<dot_t file>)
 convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
-
-# Creation of .tex files from .rst files
-# TODO: Fix paper size so that it can be specified in the file itself
-# $(call convert-rst,<rst file>,<tex file>)
-rst_style_file=$(wildcard _rststyle_._include_.tex)
-define convert-rst
-$(RST2LATEX) \
-	--documentoptions=letterpaper \
-	$(if $(rst_style_file),--stylesheet=$(rst_style_file),) \
-	$1 $2
-endef
 
 # Converts svg files into .eps files
 #
@@ -2162,7 +2136,7 @@ make-pdf	= \
 	$(call ps2pdf,$1,$2,$(filter 1,$(shell $(CAT) '$4'))) > '$3' 2>&1
 
 # Display information about what is being done
-# $(call echo-build,<output file>,[<run number>])
+# $(call echo-build,<input file>,<output file>,[<run number>])
 echo-build	= $(ECHO) "$(C_BUILD)= $1 --> $2$(if $3, ($3),) =$(C_RESET)"
 echo-graphic	= $(ECHO) "$(C_GRAPHIC)= $1 --> $2 =$(C_RESET)"
 echo-dep	= $(ECHO) "$(C_DEP)= $1 --> $2 =$(C_RESET)"
@@ -2226,8 +2200,8 @@ endif
 # Thus, we invoke make recursively with better arugments instead, restarting
 # all of the appropriate machinery.
 .PHONY: $(default_stems_ss)
-$(default_stems_ss): %:
-	$(QUIET)$(MAKE) $*.pdf
+$(default_stems_ss): %: %.pdf
+	#$(QUIET)$(MAKE) $*.pdf
 
 # This builds and displays the wanted file.
 .PHONY: $(addsuffix ._show,$(stems_ssg))
@@ -2429,8 +2403,10 @@ endif
 	$(QUIET)$(call run-script,$(PERL),$<,$@)
 
 %.tex::	%.rst $(rst_style_file)
-	$(QUIET)$(call echo-build,$<,$@)
-	$(QUIET)$(call convert-rst,$<,$@)
+	$(QUIET)\
+	$(call run-script,$(RST2LATEX)\
+		--documentoptions=letterpaper\
+		$(if $(rst_style_file),--stylesheet=$(rst_style_file),),$<,$@)
 
 #
 # GRAPHICS TARGETS
