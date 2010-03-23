@@ -108,6 +108,8 @@ export LC_ALL		?= C
 #	* Bumped version to 2.2.0-beta8
 #	* Work on issue 76: bad backtick escape for some sed versions, failure
 #		to clear out the hold buffer when outputting MISSING comment.
+#	* Backed out change from 2>&1 to &> - there is even a comment in here
+#		telling me not to go that way with sh!  Sigh.
 # Chris Monson (2010-03-22):
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for annotated bib styles
@@ -786,7 +788,7 @@ replace-if-different-and-remove	= \
 
 # Note that $(DIFF) returns success when the files are the SAME....
 # $(call test-different,sfile,dfile)
-test-different		= ! $(DIFF) -q '$1' '$2' &>/dev/null
+test-different		= ! $(DIFF) -q '$1' '$2' >/dev/null 2>&1
 test-exists-and-different	= \
 	$(call test-exists,$2) && $(call test-different,$1,$2)
 
@@ -2571,7 +2573,7 @@ endif
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \
 	for s in toc out lot lof lol nav; do \
 		if [ -e "$*.$$s" ]; then \
-			if ! $(DIFF) -q $*.$$s $*.$$s.make &>/dev/null; then \
+			if ! $(DIFF) -q $*.$$s $*.$$s.make >/dev/null 2>&1; then \
 				$(TOUCH) $*.run.cookie; \
 			fi; \
 			$(CP) $*.$$s $*.$$s.make; \
