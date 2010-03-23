@@ -108,8 +108,8 @@ export LC_ALL		?= C
 #	* Bumped version to 2.2.0-beta8
 #	* Work on issue 76: bad backtick escape for some sed versions, failure
 #		to clear out the hold buffer when outputting MISSING comment.
-#	* Backed out change from 2>&1 to &> - there is even a comment in here
-#		telling me not to go that way with sh!  Sigh.
+#		- Backed out 2>&1 to &> (doesn't work in sh)
+#		- Backed out using . to source variables
 # Chris Monson (2010-03-22):
 # 	* Bumped version to 2.2.0-beta7
 # 	* Issue 72: Fix latex/bibtex invocation order for annotated bib styles
