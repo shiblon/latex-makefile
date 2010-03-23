@@ -1905,8 +1905,8 @@ endef
 # $(call run-script,<interpreter>,<input>,<output>)
 define run-script
 [ ! -e '$2.cookie' ] && $(ECHO) "restarts=$(RESTARTS)" > $2.cookie && $(ECHO) "level=$(MAKELEVEL)" >> $2.cookie; \
-. '$2.cookie'; \
-run=`$(EXPR) $(RESTARTS) '<=' $$restarts`; \
+restarts=`$(SED) -n -e 's/^restarts=//p' $2.cookie`; \
+level=`$(SED) -n -e 's/^level=//p' $2.cookie`; \
 if $(EXPR) $(MAKELEVEL) '<=' $$level '&' $(RESTARTS) '<=' $$restarts >/dev/null; then \
 	$(call echo-build,$2,$3,$(RESTARTS)-$(MAKELEVEL)); \
 	$1 '$2' '$3'; \
