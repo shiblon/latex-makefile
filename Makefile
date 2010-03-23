@@ -119,6 +119,15 @@ export LC_ALL		?= C
 # 	* Made get-inputs sed script more maintainable.
 # 	* Moved Makefile.ini import up higher.
 # 	* Changed bare stems to not recursively invoke make
+# 	* Updated diff output to be more silent everywhere
+# 	* Added a MISSING comment to the .d file if stuff isn't found - forces
+# 		removal of .1st.make file, which often forces it to try again.
+# 	* Fixed broken graphics-target function
+# 	* Added sleep to .d file generation when stuff is missing - if it
+# 		builds too fast, make doesn't realize it needs to be reloaded,
+# 		and thus never discovers some deeper dependencies (especially
+# 		evident when graphics are included from scripted include
+# 		files).
 # Chris Monson (2010-03-17):
 # 	* Bumped version to 2.2.0-beta6
 # 	* Fixed bareword builds to actually work (requires static patterns)
@@ -564,6 +573,7 @@ TOUCH		?= touch
 UNIQ		?= uniq
 WHICH		?= which
 XARGS		?= xargs
+SLEEP		?= sleep
 # == LaTeX (tetex-provided) ==
 BIBTEX		?= bibtex
 DVIPS		?= dvips
@@ -772,7 +782,7 @@ replace-if-different-and-remove	= \
 
 # Note that $(DIFF) returns success when the files are the SAME....
 # $(call test-different,sfile,dfile)
-test-different		= ! $(DIFF) -q '$1' '$2' >/dev/null 2>&1
+test-different		= ! $(DIFF) -q '$1' '$2' &>/dev/null
 test-exists-and-different	= \
 	$(call test-exists,$2) && $(call test-different,$1,$2)
 
@@ -1331,12 +1341,15 @@ $(SED) \
 -e '/Default extension: /!d' \
 -e 's/[[:space:]]\{1,\}/ /g' \
 -e 's/\n\{1,\}/ /g' \
--e 's/^.*File `//' \
+-e 's/^.*File \`//' \
 -e 's/'"'"' not found\..*//' \
 -e '/\.tex/!s/$$/.tex/' \
--e 's/^/TARGETS=/' \
 -e 's/[[:space:]]/\\ /g' \
--e 's/^TARGETS=/$2: /' \
+-e 'h' \
+-e 's/.*/# MISSING input "&" - (presence of comment affects build)/' \
+-e 'p' \
+-e 'g' \
+-e 's/^/$2: /' \
 $1 | $(SORT) | $(UNIQ)
 endef
 
@@ -1357,7 +1370,7 @@ endef
 # $(call graphics-target,<stem>)
 define graphics-target
 $(strip $(if 	$(filter $(addprefix %.,$(graphic_target_extensions)),$1), $1,
-	$(firstword $(patsubst $(addprefix %.,$(graphic_source_extensions) $(graphic_target_extensions)), %, $1).$(default_graphic_extension)) $1.$(default_graphic_extension)))
+	$(firstword $(patsubst $(addprefix %.,$(graphic_source_extensions) $(graphic_target_extensions)), %, $1).$(default_graphic_extension) $1.$(default_graphic_extension))))
 endef
 
 # Outputs all of the graphical dependencies to stdout.  The first argument is
@@ -1404,6 +1417,10 @@ $(SED) \
 -e '  s/[[:space:]]\{1,\}/ /g' \
 -e '  s/^.*File \`//' \
 -e '  s/'"'"' not found\..*//' \
+-e '  h' \
+-e '  s/.*/# MISSING stem "&" - (presence of comment affects build)/' \
+-e '  p' \
+-e '  g' \
 -e '  b addtargets' \
 -e '}' \
 -e '/.*File: \(.*\) Graphic file (type [^)]*).*/{' \
@@ -2200,8 +2217,7 @@ endif
 # Thus, we invoke make recursively with better arugments instead, restarting
 # all of the appropriate machinery.
 .PHONY: $(default_stems_ss)
-$(default_stems_ss): %: %.pdf
-	#$(QUIET)$(MAKE) $*.pdf
+$(default_stems_ss): %: %.pdf ;
 
 # This builds and displays the wanted file.
 .PHONY: $(addsuffix ._show,$(stems_ssg))
@@ -2522,6 +2538,14 @@ endif
 #	Create cookies for various suffixes that may represent files that
 #	need to be read by LaTeX in order for it to function properly.
 #
+#	Note that if some of the dependencies are discovered because they turn
+#	up missing in the log file, we really need the .d file to be reloaded.
+#	Adding a sleep command helps with this.  Otherwise make is extremely
+#	nondeterministic, sometimes working, sometimes not.
+#
+#	Usually we can force this by simply removing the generated pdf file and
+#	not creating a .1st.make file..
+#
 %.$(build_target_extension).1st.make %.d %.aux %.aux.make %.fls: %.tex
 	$(QUIET)$(call echo-build,$<,$*.d $*.$(build_target_extension).1st.make,$(RESTARTS)-1)
 	$(QUIET)\
@@ -2538,10 +2562,11 @@ endif
 	$(call get-graphics,$*) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,d aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
+	$(EGREP) -q "# MISSING" $*.d && $(SLEEP) 1 && $(RM) $*.pdf; \
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \
 	for s in toc out lot lof lol nav; do \
 		if [ -e "$*.$$s" ]; then \
-			if ! $(DIFF) -q $*.$$s $*.$$s.make 2>/dev/null; then \
+			if ! $(DIFF) -q $*.$$s $*.$$s.make &>/dev/null; then \
 				$(TOUCH) $*.run.cookie; \
 			fi; \
 			$(CP) $*.$$s $*.$$s.make; \
