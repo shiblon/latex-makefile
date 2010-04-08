@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-beta8
+version		:= 2.2.0-rc1
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -104,6 +104,10 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-04-08):
+# 	* Bumped version to 2.2.0-rc1
+# 	* Added back in the rst_style_file stuff that got broken when switching
+# 		rst -> tex to use the script mechanism
 # Chris Monson (2010-03-23):
 #	* Bumped version to 2.2.0-beta8
 #	* Work on issue 76: bad backtick escape for some sed versions, failure
@@ -622,6 +626,9 @@ PS_COMPATIBILITY	?= 1.4
 # Defaults for GPI
 DEFAULT_GPI_EPS_FONTSIZE	?= 22
 DEFAULT_GPI_PDF_FONTSIZE	?= 12
+
+# Style file for ReST
+RST_STYLE_FILE			?= $(wildcard _rststyle_._include_.tex)
 
 # This ensures that even when echo is a shell builtin, we still use the binary
 # (the builtin doesn't always understand -n)
@@ -2425,11 +2432,11 @@ endif
 %.tex::	%.tex.pl
 	$(QUIET)$(call run-script,$(PERL),$<,$@)
 
-%.tex::	%.rst $(rst_style_file)
+%.tex::	%.rst $(RST_STYLE_FILE)
 	$(QUIET)\
 	$(call run-script,$(RST2LATEX)\
 		--documentoptions=letterpaper\
-		$(if $(rst_style_file),--stylesheet=$(rst_style_file),),$<,$@)
+		$(if $(RST_STYLE_FILE),--stylesheet=$(RST_STYLE_FILE),),$<,$@)
 
 #
 # GRAPHICS TARGETS
