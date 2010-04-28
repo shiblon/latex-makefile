@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-04-28):
+# 	* Bumped version to 2.2.0-rc2
+# 	* Fixed %._show target
 # Chris Monson (2010-04-08):
 # 	* Bumped version to 2.2.0-rc1
 # 	* Added back in the rst_style_file stuff that got broken when switching
@@ -2235,7 +2238,7 @@ $(default_stems_ss): %: %.pdf ;
 
 # This builds and displays the wanted file.
 .PHONY: $(addsuffix ._show,$(stems_ssg))
-%._show: %.pdf
+$(addsuffix ._show,$(stems_ssg)): %._show: %.pdf
 	$(QUIET)$(VIEW_PDF) $< &
 
 ifneq "$(strip $(BUILD_STRATEGY))" "pdflatex"
