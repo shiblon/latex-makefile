@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc2
+version		:= 2.2.0-rc3
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-06-08):
+# 	* Bumped version to 2.2.0-rc3
+# 	* Fixed bug with ! error detection (issue 88 - terrible hack)
 # Chris Monson (2010-04-28):
 # 	* Bumped version to 2.2.0-rc2
 # 	* Fixed %._show target
@@ -1638,6 +1641,7 @@ $(SED) \
 -e '  x' \
 -e '  G' \
 -e '}' \
+-e '/LaTeX Info: Redefining \\!/d' \
 -e '/ LaTeX Error: Cannot determine size/d' \
 -e 's/.* LaTeX Error .*/$(C_ERROR)&$(C_RESET)/p' \
 -e 's/Error: pdflatex (file .*/$(C_ERROR)& - try specifying it without an extension$(C_RESET)/p' \
