@@ -104,9 +104,10 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
-# Chris Monson (2010-06-08):
+# Chris Monson (2010-06-20):
 # 	* Bumped version to 2.2.0-rc3
 # 	* Attempt to fix bug with ! error detection (issue 88)
+# 	* Added svg->pdf direct support (issue 89)
 # Chris Monson (2010-04-28):
 # 	* Bumped version to 2.2.0-rc2
 # 	* Fixed %._show target
@@ -2022,7 +2023,7 @@ convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 # Converts svg files into .eps files
 #
 # $(call convert-svg,<svg file>,<eps file>,[gray])
-convert-svg	= $(INKSCAPE) --export-eps='$2' '$1'
+convert-svg	= $(INKSCAPE) $(if $(filter %.pdf,$2)--export-pdf=,--export-eps)='$2' '$1'
 
 # Converts xvg files into .eps files
 #
@@ -2480,6 +2481,10 @@ endif
 %.pdf:	%.fig
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-fig,$<,$@,$(GRAY))
+
+%.pdf:	%.svg
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-svg,$<,$@,$(GRAY))
 
 endif
 
