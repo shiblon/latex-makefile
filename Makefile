@@ -106,7 +106,7 @@ export LC_ALL		?= C
 # CHANGES:
 # Chris Monson (2010-06-08):
 # 	* Bumped version to 2.2.0-rc3
-# 	* Fixed bug with ! error detection (issue 88 - terrible hack)
+# 	* Attempt to fix bug with ! error detection (issue 88)
 # Chris Monson (2010-04-28):
 # 	* Bumped version to 2.2.0-rc2
 # 	* Fixed %._show target
@@ -1641,7 +1641,6 @@ $(SED) \
 -e '  x' \
 -e '  G' \
 -e '}' \
--e '/LaTeX Info: Redefining \\!/d' \
 -e '/ LaTeX Error: Cannot determine size/d' \
 -e 's/.* LaTeX Error .*/$(C_ERROR)&$(C_RESET)/p' \
 -e 's/Error: pdflatex (file .*/$(C_ERROR)& - try specifying it without an extension$(C_RESET)/p' \
@@ -1672,7 +1671,7 @@ $(SED) \
 -e '  h' \
 -e '  b' \
 -e '}' \
--e 's/.*\(\n\{0,\}! .*\)/$(C_ERROR)\1$(C_RESET)/p' \
+-e 's/.*\(\n\{2,\}![[:space:]][^[:space:]]*[[:space:]]Error .*\)/$(C_ERROR)\1$(C_RESET)/p' \
 -e 'd' \
 $1
 endef
