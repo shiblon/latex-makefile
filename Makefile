@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc3
+version		:= 2.2.0-rc4
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-07-28):
+# 	* Bumped version to 2.2.0-rc4
+# 	* Bail out when we find the use of the import.sty package
 # Chris Monson (2010-06-20):
 # 	* Bumped version to 2.2.0-rc3
 # 	* Attempt to fix bug with ! error detection (issue 88)
@@ -1478,6 +1481,17 @@ if $(EGREP) -q '^! LaTeX Error: File .*\.pstex.* not found' $1; then \
 fi
 endef
 
+# Checks for the use of import.sty and bails - we don't support subdirectories
+#
+# $(call die-on-import-sty,<log file>)
+define die-on-import-sty
+if $(EGREP) -s '/import.sty\)' '$1'; then \
+	$(ECHO) "$(C_ERROR)import.sty is not supported - included files must"; \
+	$(ECHO) "$(C_ERROR)be in the same directory as the primary document$(C_RESET)"; \
+	exit 1; \
+fi
+endef
+
 # Checks for build failure due to dot2tex, and gives instructions.
 #
 # $(call die-on-dot2tex,<parsed file>)
@@ -1502,6 +1516,7 @@ if [ ! -e '$1.aux' ]; then \
 	exit 1; \
 fi
 endef
+
 
 # Outputs all index files to stdout.  Arg 1 is the source file stem, arg 2 is
 # the list of targets for the discovered dependency.
@@ -2576,6 +2591,7 @@ endif
 	$(QUIET)\
 	$(call run-latex,$<,--recorder) || $(sh_true); \
 	$(CP) '$*.log' '$*.$(RESTARTS)-1.log'; \
+	$(call die-on-import-sty,$*.log); \
 	$(call die-on-dot2tex,$*.log); \
 	$(call die-on-no-aux,$*); \
 	$(call flatten-aux,$*.aux,$*.aux.make); \
