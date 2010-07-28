@@ -107,9 +107,9 @@ export LC_ALL		?= C
 # Chris Monson (2010-07-28):
 # 	* Bumped version to 2.2.0-rc4
 # 	* Bail out when we find the use of the import.sty package
-# 	* Add -z to dvips invocation
-# 	* Add xelatex support
-# 	* Add warning about make 3.80
+# 	* Issue 90: Add -z to dvips invocation
+# 	* Issue 67: Add xelatex support (thanks to Nikolai Prokoschenko for the patch!)
+# 	* Issue 85: Add warning about make 3.80
 # Chris Monson (2010-06-20):
 # 	* Bumped version to 2.2.0-rc3
 # 	* Attempt to fix bug with ! error detection (issue 88)
