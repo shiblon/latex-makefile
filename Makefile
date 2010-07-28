@@ -109,6 +109,7 @@ export LC_ALL		?= C
 # 	* Bail out when we find the use of the import.sty package
 # 	* Add -z to dvips invocation
 # 	* Add xelatex support
+# 	* Add warning about make 3.80
 # Chris Monson (2010-06-20):
 # 	* Bumped version to 2.2.0-rc3
 # 	* Attempt to fix bug with ! error detection (issue 88)
@@ -2249,6 +2250,11 @@ show: all
 #
 source_includes	:= $(addsuffix .d,$(source_stems_to_include))
 graphic_includes := $(addsuffix .gpi.d,$(graphic_stems_to_include))
+
+# Check the version of the makefile
+ifneq "" "$(filter 3.79 3.80,$(MAKE_VERSION))"
+$(warning $(C_WARNING)Your version of make is too old.  Please upgrade.$(C_RESET))
+endif
 
 # Include only the dependencies used
 ifneq "" "$(source_includes)"
