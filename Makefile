@@ -107,6 +107,7 @@ export LC_ALL		?= C
 # Chris Monson (2010-07-28):
 # 	* Bumped version to 2.2.0-rc4
 # 	* Bail out when we find the use of the import.sty package
+# 	* Add -z to dvips invocation
 # Chris Monson (2010-06-20):
 # 	* Bumped version to 2.2.0-rc3
 # 	* Attempt to fix bug with ! error detection (issue 88)
@@ -2180,7 +2181,7 @@ endef
 # Convert DVI to Postscript
 # $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>])
 make-ps		= \
-	$(DVIPS) -o '$2' $(if $(filter-out BEAMER,$4),-t$(firstword $4),) '$1' \
+	$(DVIPS) -z -o '$2' $(if $(filter-out BEAMER,$4),-t$(firstword $4),) '$1' \
 		$(if $(filter BEAMER,$4),| $(enlarge_beamer)) > $3 2>&1
 
 # Convert Postscript to PDF
