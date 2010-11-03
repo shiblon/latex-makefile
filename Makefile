@@ -790,8 +790,8 @@ remove-temporary-files	= $(if $1,$(RM) $1,:)
 cleanse-filename	= $(subst .,_,$(subst /,__,$1))
 
 # Escape dots
-# $(call escape-dots,str)
-escape-dots		= $(subst .,\\.,$1)
+# $(call escape-fname-regex,str)
+escape-fname-regex	= $(subst /,\\/,$(subst .,\\.,$1))
 
 # Test that a file exists
 # $(call test-exists,file)
@@ -1927,7 +1927,7 @@ test-run-again	= $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.)$$' $1.log
 # $(call test-log-for-need-to-run,<source stem>)
 define test-log-for-need-to-run
 $(SED) \
--e '/^No file $(call escape-dots,$1)\.aux\./d' \
+-e '/^No file $(call escape-fname-regex,$1)\.aux\./d' \
 $1.log \
 | $(EGREP) -q '^(.*Rerun .*|No file $1\.[^.]+\.|No file .+\.tex\.|LaTeX Warning: File.*)$$'
 endef
