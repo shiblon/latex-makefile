@@ -29,7 +29,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc5
+version		:= 2.2.0-rc6
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-11-03):
+# 	* Bumped version to 2.2.0-rc6
+# 	* issue 96: Fix sed errors when using make variables in substitutions
 # Chris Monson (2010-07-28):
 # 	* Bumped version to 2.2.0-rc5 (rc4 is broken)
 # 	* Bail out when we find the use of the import.sty package
@@ -1362,7 +1365,7 @@ $(SED) \
 -e '/\.dot_t$$/b addtargets' \
 -e 'd' \
 -e ':addtargets' \
--e 's/^/$2: /' \
+-e 's!^!$2: !' \
 $1 | $(SORT) | $(UNIQ)
 endef
 
@@ -1395,7 +1398,7 @@ $(SED) \
 -e 'p' \
 -e 's/.*//' \
 -e 'x' \
--e 's/^/$2: /' \
+-e 's!^!$2: !' \
 $1 | $(SORT) | $(UNIQ)
 endef
 
@@ -1480,11 +1483,11 @@ $(SED) \
 -e 's/.*/-include &.gpi.d/' \
 -e 'p' \
 -e 'g' \
--e 's/.*/$(addprefix $1,.d): $$$$(call graphics-source,&)/' \
+-e 's!.*!$(addprefix $1,.d): $$$$(call graphics-source,&)!' \
 -e 'p' \
 -e 's/.*//' \
 -e 'x' \
--e 's/.*/$(addprefix $1.,$(build_target_extension) _graphics): $$$$(call graphics-target,&)/' \
+-e 's!.*!$(addprefix $1.,$(build_target_extension) _graphics): $$$$(call graphics-target,&)!' \
 -e 'p' \
 -e 'd' \
 $*.log
@@ -1550,9 +1553,9 @@ $(SED) \
 -e 's/[[:space:]]/\\&/g' \
 -e '/^TARGETS=/{' \
 -e '  h' \
--e '  s/^TARGETS=/$2: /p' \
+-e '  s!^TARGETS=!$2: !p' \
 -e '  g' \
--e '  s/^TARGETS=\(.*\)/\1: $1.tex/p' \
+-e '  s!^TARGETS=\(.*\)!\1: $1.tex!p' \
 -e '}' \
 -e 'd' \
 '$1.log' | $(SORT) | $(UNIQ)
@@ -1584,7 +1587,7 @@ $(SED) \
 -e 's/ \{1,\}$$//' \
 $1 | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
--e 's/^/$2: /' | \
+-e 's!^!$2: !' | \
 \$(SORT) | $(UNIQ)
 endef
 
