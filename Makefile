@@ -1538,6 +1538,7 @@ endef
 define die-on-no-aux
 if [ ! -e '$1.aux' ]; then \
 	$(call colorize-latex-errors,$1.log); \
+	$(ECHO) "$(C_ERROR)Error: failed to create $1.aux$(C_RESET)"; \
 	exit 1; \
 fi
 endef
@@ -1674,6 +1675,11 @@ $(SED) \
 -e '  d' \
 -e '}' \
 -e 's/^::DOUBLE_PARAGRAPH:://' \
+-e '/\.cls'"'"' not found/{' \
+-e '  s/\(.*not found\.\).*/$(C_ERROR)\1$(C_RESET)/' \
+-e '  p' \
+-e '  d' \
+-e '}' \
 -e '/could not locate the file with any of these extensions:/d' \
 -e '/Missing .begin.document/{' \
 -e '  h' \
