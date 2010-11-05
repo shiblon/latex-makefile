@@ -791,7 +791,7 @@ cleanse-filename	= $(subst .,_,$(subst /,__,$1))
 
 # Escape dots
 # $(call escape-fname-regex,str)
-escape-fname-regex	= $(subst /,\/,$(subst .,\\.,$1))
+escape-fname-regex	= $(subst /,\\/,$(subst .,\\.,$1))
 
 # Test that a file exists
 # $(call test-exists,file)
