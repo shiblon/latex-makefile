@@ -1996,7 +1996,7 @@ endef
 #
 define convert-gpi
 $(ECHO) 'set terminal $(if $(filter %.pdf,$2),pdf enhanced,postscript enhanced eps)' \
-$(if $(filter %.pdf,$2),fsize ,)$(call get-default,$(strip \
+$(if $(filter %.pdf,$2),font ,)'", '$(call get-default,$(strip \
 $(firstword \
 	$(shell \
 		$(SED) \
@@ -2005,7 +2005,7 @@ $(firstword \
 			$1 $(strip $(gpi_global)) \
 	) \
 ) \
-),$(if $(filter %.pdf,$2),$(DEFAULT_GPI_PDF_FONTSIZE),$(DEFAULT_GPI_EPS_FONTSIZE))) \
+),$(if $(filter %.pdf,$2),$(DEFAULT_GPI_PDF_FONTSIZE),$(DEFAULT_GPI_EPS_FONTSIZE)))'"' \
 $(strip $(if $3,monochrome,$(if \
 $(shell $(EGREP) '^\#\#[[:space:]]*GRAY[[:space:]]*$$' $< $(gpi_global)),\
 ,color))) > $1head.make; \
