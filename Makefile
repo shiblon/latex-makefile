@@ -109,6 +109,9 @@ export LC_ALL		?= C
 # 	* issue 92: broken hyperref driver detection fixed
 # 	* issue 101: Broken inkscape conversion
 # 	* issue 102: Broken specification of font size for gnuplot pdfcairo
+# 	* Added KEEP_TEMP so that we can avoid deleting useful temporaries for debugging
+# 	* Restructured gnuplot code to be easier to follow
+# 	* Fixed a bug in convert-gpi where we were using $< instead of $1
 # Chris Monson (2010-11-03):
 # 	* Bumped version to 2.2.0-rc6
 # 	* issue 96: Fix sed errors when using make variables in substitutions
@@ -645,6 +648,9 @@ VIEW_GRAPHICS	?= display
 PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
 PS_COMPATIBILITY	?= 1.4
 
+# If set to something, will cause temporary files to not be deleted immediately
+KEEP_TEMP	?=
+
 # Defaults for GPI
 DEFAULT_GPI_EPS_FONTSIZE	?= 22
 DEFAULT_GPI_PDF_FONTSIZE	?= 12
@@ -665,6 +671,23 @@ $(if $(shell $(WHICH) $(GNUPLOT)),
 endef
 
 GNUPLOT_OUTPUT_EXTENSION	?= $(strip $(call determine-gnuplot-output-extension))
+
+# Internal code should use this because of :=.  This means that the potentially
+# expensive script invocation used to determine whether pdf is available will
+# only be run once.
+GPI_OUTPUT_EXTENSION := $(strip $(GNUPLOT_OUTPUT_EXTENSION))
+
+# Note, if the terminal *does* understand fsize, then we expect this call to
+# create a specific error here: "fsize: expecting font size".  Otherwise, we
+# assume that fsize is not understood.
+GPI_FSIZE_SYNTAX := $(strip \
+$(if \
+  $(filter pdf,$(GPI_OUTPUT_EXTENSION)),\
+  $(if \
+    $(findstring fsize: expecting font size,$(shell $(GNUPLOT) -e "set terminal pdf fsize" 2>&1)),\
+    fsize FONTSIZE,\
+    font ",FONTSIZE"),\
+  FONTSIZE))
 
 # Directory into which we place "binaries" if it exists.
 # Note that this can be changed on the commandline or in Makefile.ini:
@@ -788,7 +811,7 @@ endef
 # the file generation as quickly as the system does, so $(wildcard ...) doesn't
 # work right.  Blech.
 # $(call remove-temporary-files,filenames)
-remove-temporary-files	= $(if $1,$(RM) $1,:)
+remove-temporary-files	= $(if $(KEEP_TEMP),:,$(if $1,$(RM) $1,:))
 
 # Create an identifier from a file name
 # $(call cleanse-filename,filename)
@@ -1619,7 +1642,7 @@ define make-gpi-d
 $(ECHO) '# vim: ft=make' > $2; \
 $(ECHO) 'ifndef INCLUDED_$(call cleanse-filename,$2)' >> $2; \
 $(ECHO) 'INCLUDED_$(call cleanse-filename,$2) := 1' >> $2; \
-$(call get-gpi-deps,$1,$(addprefix $(2:%.gpi.d=%).,$(GNUPLOT_OUTPUT_EXTENSION) gpi.d)) >> $2; \
+$(call get-gpi-deps,$1,$(addprefix $(2:%.gpi.d=%).,$(GPI_OUTPUT_EXTENSION) gpi.d)) >> $2; \
 $(ECHO) 'endif' >> $2;
 endef
 
@@ -1993,23 +2016,48 @@ $(EPSTOPDF) '$1.cookie' --outfile='$2' > $1.log; \
 $(call colorize-epstopdf-errors,$1.log);
 endef
 
+# $(call default-gpi-fontsize,<output file>)
+#
+# Find the default fontsize given the *output* file (it is based on the output extension)
+#
+default-gpi-fontsize = $(if $(filter %.pdf,$1),$(DEFAULT_GPI_PDF_FONTSIZE),$(DEFAULT_GPI_EPS_FONTSIZE))
+
+# $(call gpi-fontsize,<gpi file>,<output file>)
+#
+# Find out what the gnuplot fontsize should be.  Tries, in this order:
+# - ##FONTSIZE comment in gpi file
+# - ##FONTSIZE comment in global gpi file
+# - default fontsize based on output type
+define gpi-fontsize
+$(strip $(firstword \
+	$(shell $(SED) -e 's/^\#\#FONTSIZE=\([[:digit:]]\{1,\}\)/\1/p' -e 'd' $1 $(strip $(gpi_global))) \
+	$(call default-gpi-fontsize,$2)))
+endef
+
+# $(call gpi-monochrome,<gpi file>,[gray])
+define gpi-monochrome
+$(strip $(if $2,monochrome,$(if $(shell $(EGREP) '^\#\#[[:space:]]*GRAY[[:space:]]*$$' $1 $(gpi_global)),monochrome,color)))
+endef
+
+# $(call gpi-font-entry,<output file>,<fontsize>)
+#
+# Get the font entry given the output file (type) and the font size.  For PDF
+# it uses fsize or font, for eps it just uses the bare number.
+gpi-font-entry = $(if $(filter %.pdf,$1),$(subst FONTSIZE,$2,$(GPI_FSIZE_SYNTAX)),$2)
+
+# $(call gpi-terminal,<gpi file><output file>,[gray])
+#
+# Get the terminal settings for a given gpi and its intended output file
+define gpi-terminal
+$(if $(filter %.pdf,$2),pdf enhanced,postscript enhanced eps) \
+$(call gpi-font-entry,$2,$(call gpi-fontsize,$1,$2)) \
+$(call gpi-monochrome,$1,$3)
+endef
+
 # $(call convert-gpi,<gpi file>,<output file>,[gray])
 #
 define convert-gpi
-$(ECHO) 'set terminal $(if $(filter %.pdf,$2),pdf enhanced,postscript enhanced eps)' \
-$(if $(filter %.pdf,$2),font ,)'", '$(call get-default,$(strip \
-$(firstword \
-	$(shell \
-		$(SED) \
-			-e 's/^\#\#FONTSIZE=\([[:digit:]]\{1,\}\)/\1/p' \
-			-e 'd' \
-			$1 $(strip $(gpi_global)) \
-	) \
-) \
-),$(if $(filter %.pdf,$2),$(DEFAULT_GPI_PDF_FONTSIZE),$(DEFAULT_GPI_EPS_FONTSIZE)))'"' \
-$(strip $(if $3,monochrome,$(if \
-$(shell $(EGREP) '^\#\#[[:space:]]*GRAY[[:space:]]*$$' $< $(gpi_global)),\
-,color))) > $1head.make; \
+$(ECHO) 'set terminal $(call gpi-terminal,$1,$2,$3)' > $1head.make; \
 $(ECHO) 'set output "$2"' >> $1head.make; \
 $(if $(gpi_global),$(CAT) $(gpi_global) >> $1head.make;,) \
 fnames='$1head.make $1';\
@@ -2527,7 +2575,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
-ifeq "$(strip $(GNUPLOT_OUTPUT_EXTENSION))" "pdf"
+ifeq "$(strip $(GPI_OUTPUT_EXTENSION))" "pdf"
 %.pdf:	%.gpi %.gpi.d $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
@@ -2547,7 +2595,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "xelatex"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
-ifeq "$(strip $(GNUPLOT_OUTPUT_EXTENSION))" "pdf"
+ifeq "$(strip $(GPI_OUTPUT_EXTENSION))" "pdf"
 %.pdf:	%.gpi %.gpi.d $(gpi_sed)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
@@ -2931,6 +2979,12 @@ define help_text
 #        debugging tricks is to do this:
 #
 #        make -d SHELL_DEBUG=1 VERBOSE=1 2>&1 | less
+#
+#    KEEP_TEMP:
+#        When set, this allows .make and other temporary files to stick around
+#        long enough to do some debugging.  This can be useful when trying to
+#        figure out why gnuplot is not doing the right things, for example
+#        (e.g., look for *head.make).
 #
 # STANDARD AUXILIARY FILES:
 #
