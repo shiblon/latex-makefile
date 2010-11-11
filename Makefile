@@ -2072,7 +2072,7 @@ convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 # Converts svg files into .eps files
 #
 # $(call convert-svg,<svg file>,<eps file>,[gray])
-convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf=,--export-eps)='$2' '$1'
+convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf,--export-eps)='$2' '$1'
 
 # Converts xvg files into .eps files
 #
