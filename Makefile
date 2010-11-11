@@ -104,6 +104,9 @@ export LC_ALL		?= C
 #		graceful solution to this issue.
 #
 # CHANGES:
+# Chris Monson (2010-11-11):
+# 	* Bumped version to 2.2.0-rc7
+# 	* issue 101: Broken inkscape conversion
 # Chris Monson (2010-11-03):
 # 	* Bumped version to 2.2.0-rc6
 # 	* issue 96: Fix sed errors when using make variables in substitutions
@@ -2068,7 +2071,7 @@ convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 # Converts svg files into .eps files
 #
 # $(call convert-svg,<svg file>,<eps file>,[gray])
-convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2)--export-pdf=,--export-eps)='$2' '$1'
+convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf=,--export-eps)='$2' '$1'
 
 # Converts xvg files into .eps files
 #
