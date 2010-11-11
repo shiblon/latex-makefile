@@ -108,6 +108,7 @@ export LC_ALL		?= C
 # 	* Bumped version to 2.2.0-rc7
 # 	* issue 92: broken hyperref driver detection fixed
 # 	* issue 101: Broken inkscape conversion
+# 	* issue 102: Broken specification of font size for gnuplot pdfcairo
 # Chris Monson (2010-11-03):
 # 	* Bumped version to 2.2.0-rc6
 # 	* issue 96: Fix sed errors when using make variables in substitutions
