@@ -106,6 +106,7 @@ export LC_ALL		?= C
 # CHANGES:
 # Chris Monson (2010-11-11):
 # 	* Bumped version to 2.2.0-rc7
+# 	* issue 92: broken hyperref driver detection fixed
 # 	* issue 101: Broken inkscape conversion
 # Chris Monson (2010-11-03):
 # 	* Bumped version to 2.2.0-rc6
@@ -1693,7 +1694,7 @@ $(SED) \
 -e '/ LaTeX Error: Cannot determine size/d' \
 -e 's/.* LaTeX Error .*/$(C_ERROR)&$(C_RESET)/p' \
 -e 's/Error: pdflatex (file .*/$(C_ERROR)& - try specifying it without an extension$(C_RESET)/p' \
--e '/.*\*hyperref using.*driver \(.*\)\*.*/{' \
+-e '/.*\*hyperref using .*driver \([^\*]*\)\*.*/{' \
 -e '  s//\1/' \
 -e '  /^$(hyperref_driver_pattern)$$/!{' \
 -e '    s/.*//' \
