@@ -8,7 +8,6 @@ don't escape $ to $$.
 
 from __future__ import print_function, division
 
-from pprint import pprint
 from util import template
 import os
 import sys
@@ -21,8 +20,6 @@ def main(argv):
                         transform_after=ns.xfunc_sed_lines_to_args())
   sed_args.extend(text.split('\n'))
   sed_args.extend(argv[2:])
-
-  pprint(sed_args, stream=sys.stderr)
 
   with os.popen(" ".join(sed_args)) as f:
     print(f.read())
