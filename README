@@ -1,1 +1,0 @@
-Most of the files in this directory are here for testing purposes.  If you are looking to use the makefile, you need only use the file "Makefile".  The rest is just there for regression, debugging, and building reasonable tarballs.
