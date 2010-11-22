@@ -1,5 +1,3 @@
-/* LaTeX Dependency Graph */
-
 digraph "g" {
     rankdir=TB
     size="9,9"
@@ -8,16 +6,22 @@ digraph "g" {
 
     eps [
         shape=Mrecord
-        label="{{<gpi> GNUplot|<fig> XFig|<epsgz> GZip|<dot> Dot}|<eps> eps}"
+        label="{{<gpi> GNUplot|<epsgz> GZip|<dot> Dot|<fig> XFig}|<eps> eps}"
         ]
+    pstex [label="%.pstex"]
+    pstex_t [label="%.pstex_t"]
     tex_outputs [shape=point]
     extra_tex_files [shape=point]
     gpi_data [label="<data>"]
     gpi_includes [label="_include_.gpi"]
     aux [label="%.aux"]
     fls [label="%.fls"]
+    idx [label="%.idx"]
+    glo [label="%.glo"]
+    ind [label="%.ind"]
     log [label="%.log"]
     tex_sh [label="%.tex.sh"]
+    rst [label="%.rst"]
     tex [
         shape=record
         label="<tex> %.tex|<include> _include_.tex"
@@ -35,15 +39,25 @@ digraph "g" {
 
     gpi_files [shape=point]
 
+    rst -> tex:tex [label="reST"]
     tex_sh -> tex:tex [label="sh"]
+    tex_pl -> tex:tex [label="perl"]
+    tex_py -> tex:tex [label="python"]
     tex -> tex_outputs [label="latex"]
     tex_outputs -> dvi
     tex_outputs -> aux
     tex_outputs -> log
     tex_outputs -> fls
+    tex_outputs -> idx
     tex_outputs -> include_aux
     aux -> bbl [label="bibtex"]
     file_bib -> bbl [label="bibtex"]
+    idx -> ind [label="makeindex"]
+    glo -> gls [label="makeindex"]
+    nlo -> nls [label="makeindex"]
+    gls -> extra_tex_files
+    nls -> extra_tex_files
+    ind -> extra_tex_files
     bbl -> extra_tex_files
     eps -> extra_tex_files
     extra_tex_files -> dvi [label="latex"]
@@ -53,6 +67,9 @@ digraph "g" {
     gpi_includes -> gpi_files
     eps_gz -> eps:epsgz [label="gunzip"]
     fig -> eps:fig [label="fig2dev"]
+    fig -> pstex [label="fig2dev"]
+    fig -> pstex_t [label="fig2dev"]
+    pstex -> pstex_t [label="fig2dev"]
     dot -> eps:dot [label="dot"]
     dvi -> ps [label="dvips"]
     include_aux -> bbl [label="bibtex"]
@@ -67,6 +84,9 @@ digraph "g" {
     log -> fig [label="Graphic file"]
     log -> eps_gz [label="Graphic file"]
     log -> dot [label="Graphic file"]
+    log -> idx [label="No file *.ind"]
+    log -> glo [label="No file *.gls"]
+    log -> nlo [label="No file *.nls"]
     gpi -> gpi_data [label="plot '...'"]
     gpi -> gpi_includes [label="load '...'"]
     tex:tex -> ps [label="paper"]
