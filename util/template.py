@@ -26,6 +26,13 @@ class Template(object):
         self._defaults = kargs.copy()
         return None
 
+    def TPL_include(self, fname):
+        return self.expand_file(fname)
+
+    def TPL_include_raw(self, fname):
+        with open(fname) as f:
+            return f.read()
+
     def TPL_include_script(self, cmd, script_file_name, transform_before,
                            transform_after, *script_args, **script_variables):
         cmd_args = [cmd]
