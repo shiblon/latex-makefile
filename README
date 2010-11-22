@@ -1,0 +1,9 @@
+The makefile is built from mutiple individual components.
+
+To obtain a makefile, just run from this directory:
+
+  ./build
+
+To obtain a tarball suitable for a codesite download, run
+
+  ./buildforweb

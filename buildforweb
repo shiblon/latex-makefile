@@ -12,4 +12,5 @@ outputfile=latex-makefile-$version.tar.gz
 
 echo Creating $outputfile
 
+./build
 tar czf $outputfile ${files[@]}

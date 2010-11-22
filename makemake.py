@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 
 import sys
-import template
+from util import template
 
 
 def main(argv):

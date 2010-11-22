@@ -9,7 +9,7 @@ don't escape $ to $$.
 from __future__ import print_function, division
 
 from pprint import pprint
-import template
+from util import template
 import os
 import sys
 
