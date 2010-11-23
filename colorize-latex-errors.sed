@@ -54,9 +54,16 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   s//\1/
   # Handle file missing errors where we are looking for a particular extension
   /could not locate.*any of these extensions:/{
-    s/\(not found\.\).*extensions:.\([^[:cntrl:]]*\).*/\1  Extensions tried: \2/
-    s/,/, /g
-    b error
+    # We don't do anything with these - they are missing graphics.
+    d
+    # NOTE: this is here just in case we need it later.  In general, we don't
+    # treat missing graphics as an error because they end up as dependencies,
+    # which causes other errors in other ways.  If we colorize this, it ends up
+    # as a fatal error to be missing a graphic.  We'd rather see it just add the
+    # dependency and move on.
+    #s/\(not found\.\).*extensions:.\([^[:cntrl:]]*\).*/\1  Extensions tried: \2/
+    #s/,/, /g
+    #b error
   }
   # Handle everything else
   s/\(not found\.\).*/\1/
