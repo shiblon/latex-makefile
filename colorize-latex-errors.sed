@@ -25,9 +25,6 @@
   G
 }
 
-# Find hyperref driver errors and higlight them as they are
-s/^Package hyperref Warning:/!!! &/
-
 # File not found errors (e.g., for class and package files) require two more
 # paragraphs to process properly And they don't start with a line number - that
 # comes later by the "Emergency stop" output.
