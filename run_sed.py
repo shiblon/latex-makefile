@@ -27,6 +27,9 @@ def main(opts, args):
     import pprint
     pprint.pprint(sed_args, stream=sys.stderr)
 
+  # Ensure that sed still works with international characters (and doesn't just
+  # hang)
+  os.putenv("LANG", "C")
   with os.popen(" ".join(sed_args)) as f:
     print(f.read())
 

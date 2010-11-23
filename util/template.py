@@ -15,6 +15,7 @@ class Template(object):
         self._defaults = {}
         for k, v in kargs.iteritems():
             setattr(self, k, v)
+        self._pre_expand_transform_stack = []
 
     def TPL_defaults(self, **kargs):
         """Set default variable values for this namespace.
@@ -44,6 +45,10 @@ class Template(object):
         cmd_args.extend(script_args)
         return " \\\n".join(cmd_args)
 
+    # TODO(shiblon):
+    # This is busted when we have nested templates!  The make characters have
+    # tobe escaped after the include, but before all other expansions.  Figure
+    # that out.
     def TPL_include_sed(self, cmd, fname, *args, **variables):
         return self.TPL_include_script(cmd, fname,
                                        self.xfunc_escape_character("$", "$$"),
@@ -76,6 +81,8 @@ class Template(object):
 
     def xfunc_escape_character(self, character, replacement):
         def xf_escape_character(text):
+            print("hello {0} {1}".format(character, replacement), file=sys.stderr)
+            print("text replaced with {0!r}".format(text.replace(character, replacement)), file=sys.stderr)
             return text.replace(character, replacement)
         return xf_escape_character
 
@@ -137,10 +144,28 @@ class Template(object):
         return self._tmpl_re.sub(self._var_replace_func(variables), text)
 
     def expand_file(self, fname, variables=None,
-                    transform_after=lambda x:x,
-                    transform_before=lambda x:x):
+                    transform_after=None,
+                    transform_before=None):
+        if transform_after is None:
+            transform_after = lambda x:x
+        if transform_before is None:
+            # We keep a pre-expansion transform stack, since files that include
+            # other files will want to have them inherit their pre-expansion
+            # transforms.
+
+            # We don't need to do the same for transform_after since that
+            # happens post-expansion, after include files have been pulled in
+            # and expanded.  So, those happen on flattened files.
+            if self._pre_expand_transform_stack:
+                transform_before = self._pre_expand_transform_stack[-1]
+            else:
+                transform_before = lambda x:x
+
+        self._pre_expand_transform_stack.append(transform_before)
         with open(fname) as f:
-            return transform_after(
+            text = transform_after(
                 self.expand_vars(transform_before(f.read()), variables))
+        self._pre_expand_transform_stack.pop()
+        return text
 
 # vim: et sts=4 sw=4

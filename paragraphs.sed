@@ -1,21 +1,20 @@
 # This uses a neat trick from the Sed & Awk Book from O'Reilly:
-# 1) Ensure that the last line of the file gets appended to the hold buffer,
-#   and blank it out to trigger end-of-paragraph logic below.
-# 2) When encountering a non-blank line, add to the hold buffer and delete.
-# 3) When encountering a blank line
-#    a) swap the hold buffer and pattern buffer
-#    b) move the newline from the front to the back
-# 4) Now the pattern buffer contains a full paragraph
+# Ensure that the last line looks like the end of a paragraph; if it isn't
+# blank, hold it and blank it out.
 ${
   /^$/!{
     H
     s/.*//
   }
 }
+# Non-blank lines get held in the hold buffer
 /^$/!{
   H
   d
 }
+# Blank lines signify the end of a paragraph.
+# Swap blank into hold buffer (bringing paragraph into pattern buffer).
+# Move newline prefix to end of paragraph.
 /^$/{
   x
   s/^\(\n\)\(.*\)/\2\1/
