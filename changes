@@ -1,3 +1,10 @@
+Chris Monson (2010-11-23):
+* Changed to multi-part makefile build (split out sed scripts)
+* Added build script and supporting infrastructure
+* Updated test directory format
+* Added notes about needed test cases
+* Changed to use -file-line-error and fixed multiple inclusion/error bugs
+* Added run_sed.py to allow easy testing of sed scripts outside of make
 Chris Monson (2010-11-11):
 * Bumped version to 2.2.0-rc7
 * issue 92: broken hyperref driver detection fixed
