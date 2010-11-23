@@ -81,8 +81,6 @@ class Template(object):
 
     def xfunc_escape_character(self, character, replacement):
         def xf_escape_character(text):
-            print("hello {0} {1}".format(character, replacement), file=sys.stderr)
-            print("text replaced with {0!r}".format(text.replace(character, replacement)), file=sys.stderr)
             return text.replace(character, replacement)
         return xf_escape_character
 

@@ -25,14 +25,6 @@
   G
 }
 
-# With -file-line-error specified in latex options, we get things like
-# ./blah.tex:2: LaTeX Error
-# (among other things).  We find all lines that look like they might contain a
-# filename and line number and add an easy-to-find prefix to them.  That way we
-# can easily find most errors, stuff that isn't called out here explicitly.
-s/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:/!!! &/
-s/^.*[[:cntrl:]]\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/!!! \1/
-
 # Find hyperref driver errors and higlight them as they are
 s/^Package hyperref Warning:/!!! &/
 
@@ -42,6 +34,20 @@ s/^Package hyperref Warning:/!!! &/
 /^! LaTeX Error: File /{
   b needtwomore
 }
+
+# With -file-line-error specified in latex options, we get things like
+# ./blah.tex:2: LaTeX Error
+# (among other things).  We find all lines that look like they might contain a
+# filename and line number and add an easy-to-find prefix to them.  That way we
+# can easily find most errors, stuff that isn't called out here explicitly.
+s/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:/!!! &/
+# Note that we preserve all of the stuff before the !!! because it might
+# contain useful errors that we have to find below.  Of particular interest is
+# the File `something.cls' not found case.
+# Note that any time we need to negate \n, we use [^[:cntrl:]] instead, since
+# [^\n] doesn't work in POSIX sed.
+s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
+
 # Graphics files that go missing need only two paragraphs, and the
 # filename:line: is at the beginning of the error message.
 /^!!! .* LaTeX Error: File /{
@@ -61,10 +67,10 @@ s/^Package hyperref Warning:/!!! &/
 # l.2 ^^M
 #        
 # *** (cannot \read from terminal in nonstop modes)
-/^::0::! \(.*LaTeX Error: File.*not found\.\)/{
+/^::0::! \(LaTeX Error: File.*not found\.\)/{
   # Remove paragraph prefix
   s//\1/
-  s/^\(.*not found.\).*Enter file name:.*[[:cntrl:]]\(.*[[:digit:]]\{1,\}\): Emergency stop.*/\2: \1/
+  s/^\(.*not found.\).*Enter file name:.*\n\(.*[[:digit:]]\{1,\}\): Emergency stop.*/\2: \1/
   b error
 }
 
@@ -120,13 +126,18 @@ s/^Package hyperref Warning:/!!! &/
 # and I'll forget about whatever was undefined.
 /^\(!!! .*Undefined control sequence\)[^[:cntrl:]]*\(.*\)/{
   s//\1: \2/
-  s/[[:cntrl:]]l\.[[:digit:]][^[:cntrl:]]*\(\\[^\\[:cntrl:]]*\).*/\1/
+  s/\nl\.[[:digit:]][^[:cntrl:]]*\(\\[^\\[:cntrl:]]*\).*/\1/
   b error
 }
 
 # Finally, we handle anything that looks remotely like an error that we
-# haven't already caught
+# haven't already caught.  We have to do this twice because POSIX sed doesn't handle things like ^|\n well.  In fact, it doesn't do branching expressions at all, and it can't match \n.
 /^\(!!! [^[:cntrl:]]*\).*/{
+  # Take only the first line and indicate that more info is in the log
+  s//\1.  See log for more information./
+  b error
+}
+/.*\n\(!!! [^[:cntrl:]]*\).*/{
   # Take only the first line and indicate that more info is in the log
   s//\1.  See log for more information./
   b error
