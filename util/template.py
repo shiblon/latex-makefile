@@ -89,7 +89,7 @@ class Template(object):
         def xf_sed_lines_to_args(text):
             return "\n".join("-e '{0}'".format(x.replace("'", """'"'"'"""))
                              for x in text.split("\n")
-                             if x and not x.startswith("#"))
+                             if x and not x.lstrip().startswith("#"))
         return xf_sed_lines_to_args
 
     def _var_replace_func(self, variables=None):

@@ -2,29 +2,6 @@
 
 #(##include("paragraphs.sed")##)
 
-# When we encounter ::2::, it means that we need two more paragraphs.  As we
-# have one of them already (when ::2:: was added, the original paragraph was
-# placed into the hold buffer, then the paragraph logic above added a second
-# one), we switch the value down to ::1:: and delete the pattern buffer.
-/^::2::/{
-  s//::1::/
-  G
-  h
-  b end
-}
-# When we encounter ::1::, it means that we just added our last paragraph.  We
-# add ::0:: to indicate that this is a multi-paragraph pattern that is
-# complete, and then let processing continue.
-# Why don't we just delete the ::0::?  Because then the pattern used to
-# indicate the need for multiple paragraphs in the first place will just
-# trigger again and we'll keep adding paragraphs forever.  This allows us to
-# test for <pattern> to start the accumulation process and for ::0::<pattern>
-# to do the final processing on all paragraphs together.
-/^::1::/{
-  s//::0::/
-  G
-}
-
 # File not found errors (e.g., for class and package files) require two more
 # paragraphs to process properly And they don't start with a line number - that
 # comes later by the "Emergency stop" output.
@@ -141,29 +118,11 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 }
 
 # Anything not dealt with above gets dumped into the trash.
-b end
+d
 
 # If we have an error (starts with !!! and we get this far), then strip the
-# prefix and colorize it.
+# prefix, colorize, and output.
 :error
 s/^!!! \(.*\)/(##color_error##)\1(##color_reset##)/
 p
-b end
-
-# Branch here if we need to add one more paragraph before processing.
-:needonemore
-s/^/::1::/
-G
-h
-b end
-
-# Branch here if we need two more paragraphs before processing.
-:needtwomore
-s/^/::2::/
-G
-h
-b end
-
-# Trash!
-:end
 d

@@ -880,35 +880,8 @@ endef
 
 # $(call get-missing-inputs,<log file>,<target files>)
 define get-missing-inputs
-$(SED) \
--e '$$ b para' \
--e '/^$$/b para' \
--e 'H' \
--e 'd' \
--e ':para' \
--e 'x' \
--e '/^$$/d' \
--e 's/^\n*//' \
--e '/^! LaTeX Error: File /{' \
--e '  s/^/::DOUBLE_PARAGRAPH::/' \
--e '  h' \
--e '  d' \
--e '}' \
--e 's/^::DOUBLE_PARAGRAPH:://' \
--e '/Default extension: /!d' \
--e 's/[[:space:]]\{1,\}/ /g' \
--e 's/\n\{1,\}/ /g' \
--e 's/^.*File `//' \
--e 's/'"'"' not found\..*//' \
--e '/\.tex/!s/$$/.tex/' \
--e 's/[[:space:]]/\\ /g' \
--e 'h' \
--e 's/.*/# MISSING input "&" - (presence of comment affects build)/' \
--e 'p' \
--e 's/.*//' \
--e 'x' \
--e 's!^!$2: !' \
-$1 | $(SORT) | $(UNIQ)
+(##include_sed("$(SED)", "get-missing-inputs.sed", "'$1'")
+##) | $(SORT) | $(UNIQ)
 endef
 
 # Get source file for specified graphics stem.
@@ -955,51 +928,10 @@ endef
 # $(call get-graphics,<target file stem>)
 #.log,$(addprefix $*.,d $(build_target_extension) _graphics)
 define get-graphics
-$(SED) \
--e '$$ b para' \
--e '/^$$/b para' \
--e 'H' \
--e 'd' \
--e ':para' \
--e 'x' \
--e '/^$$/d' \
--e 's/^\n*//' \
--e '/^! LaTeX Error: File `/{' \
--e '  s/^/::DOUBLE_PARAGRAPH::/' \
--e '  h' \
--e '  d' \
--e '}' \
--e 's/^::DOUBLE_PARAGRAPH:://' \
--e '/could not locate the file with any of these extensions:/{' \
--e '  s/\n\{1,\}/ /g' \
--e '  s/[[:space:]]\{1,\}/ /g' \
--e '  s/^.*File `//' \
--e '  s/'"'"' not found\..*//' \
--e '  h' \
--e '  s/.*/# MISSING stem "&" - (presence of comment affects build)/' \
--e '  p' \
--e '  g' \
--e '  b addtargets' \
--e '}' \
--e '/.*File: \(.*\) Graphic file (type [^)]*).*/{' \
--e '  s//\1/' \
--e '  b addtargets' \
--e '}' \
--e 'd' \
--e ':addtargets' \
--e 's/[[:space:]]/\\\\\\&/g' \
--e 'h' \
--e 's/.*/-include &.gpi.d/' \
--e 'p' \
--e 'g' \
--e 's!.*!$(addprefix $1,.d): $$$$(call graphics-source,&)!' \
--e 'p' \
--e 's/.*//' \
--e 'x' \
--e 's!.*!$(addprefix $1.,$(build_target_extension) _graphics): $$$$(call graphics-target,&)!' \
--e 'p' \
--e 'd' \
-$*.log
+(##include_sed("$(SED)", "get-graphics.sed", "$1.log",
+	       stem="$1",
+	       build_target_extension="$(build_target_extension)")
+##)
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
@@ -1057,18 +989,9 @@ endef
 #
 # $(call get-log-index,<log file stem>,<target files>)
 define get-log-index
-$(SED) \
--e 's/^No file \(.*\.ind\)\.$$/TARGETS=\1/' \
--e 's/^No file \(.*\.[gn]ls\)\.$$/TARGETS=\1/' \
--e 's/[[:space:]]/\\&/g' \
--e '/^TARGETS=/{' \
--e '  h' \
--e '  s!^TARGETS=!$2: !p' \
--e '  g' \
--e '  s!^TARGETS=\(.*\)!\1: $1.tex!p' \
--e '}' \
--e 'd' \
-'$1.log' | $(SORT) | $(UNIQ)
+(##include_sed("$(SED)", "get-log-index.sed", "'$1.log'",
+	       stem="$1", target_files="$2")
+##) | $(SORT) | $(UNIQ)
 endef
 
 
