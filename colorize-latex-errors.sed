@@ -1,4 +1,4 @@
-#(##defaults(color_error="__E__", color_reset="__R__")##)
+#(##defaults(color_error="<E>", color_reset="<R>")##)
 
 #(##include("paragraphs.sed")##)
 

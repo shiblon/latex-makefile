@@ -3,11 +3,8 @@
 from __future__ import print_function, division
 
 import sys
+import util.ensure_version
 from util import template
-
-if sys.version_info < (2, 6):
-  print("You must use Python version 2.6 or higher")
-  sys.exit(-1)
 
 
 def main():

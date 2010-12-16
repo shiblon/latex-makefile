@@ -1,5 +1,6 @@
-#(##defaults(color_error="", color_pages="", color_success="", color_reset="",
-#             color_warning="", color_overfull="", color_underfull="")
+#(##defaults(color_error="<E>", color_pages="<P>", color_success="<S>",
+#            color_reset="<R>", color_warning="<W>", color_overfull="<O>",
+#            color_underfull="<U>")
 ##)
 #
 # This uses a neat trick from the Sed & Awk Book from O'Reilly:
