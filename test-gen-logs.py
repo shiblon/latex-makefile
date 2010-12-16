@@ -23,7 +23,7 @@ for dirpath, dirnames, filenames in os.walk("test"):
       ret = subprocess.call(args=(command, "-interaction=batchmode", name),
                             cwd=dirpath)
       subprocess.call(args=("mv", "-f", "{0}.log".format(name),
-                            "{0}-{1}.log".format(name, command)),
+                            "log.{0}--{1}".format(name, command)),
                       cwd=dirpath)
 
       rm_files = ["{0}.{1}".format(name, x) for x in rm_ext]
