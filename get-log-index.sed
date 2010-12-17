@@ -1,4 +1,4 @@
-#(##defaults(target_files="TARGET_FILES")##)
+#(##defaults(target_files="TARGET_FILES", stem="STEM")##)
 
 # Look for missing index or glossary files.
 s/^No file \(.*\.ind\)\.$/TARGETS=\1/

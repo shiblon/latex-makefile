@@ -1,0 +1,3 @@
+# MISSING input "not-here.tex" - (presence of comment affects build)
+TARGET_FILES: not-here.tex
+

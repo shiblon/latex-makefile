@@ -1,0 +1,15 @@
+LaTeX Error: File `missing.cls' not found.
+
+
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: cls)
+
+Enter file name: 
+! Emergency stop.
+<read *> 
+         
+l.2 ^^M
+       
+*** (cannot \read from terminal in nonstop modes)
+
+

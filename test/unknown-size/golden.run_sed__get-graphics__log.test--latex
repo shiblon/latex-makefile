@@ -1,0 +1,4 @@
+-include badextension.ps.gpi.d
+TESTSTEM.d: $$(call graphics-source,badextension.ps)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.ps)
+

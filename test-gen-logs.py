@@ -9,7 +9,7 @@ import util.ensure_version
 
 commands = "latex", "pdflatex", "xelatex"
 
-rm_ext = "dvi", "pdf", "aux"
+rm_ext = "dvi", "pdf", "aux", "out"
 
 for dirpath, dirnames, filenames in os.walk("test"):
   for fname in filenames:

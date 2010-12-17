@@ -1,0 +1,15 @@
+LaTeX Error: File `not-here.tex' not found.
+
+
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: tex)
+
+Enter file name: 
+! Emergency stop.
+<read *> 
+         
+l.2 \input{not-here}
+                    ^^M
+*** (cannot \read from terminal in nonstop modes)
+
+
