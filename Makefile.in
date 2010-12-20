@@ -1754,7 +1754,7 @@ endif
 		$(call run-bibtex,$*); \
 		$(TOUCH) $@.cookie; \
 	) \
-	if $(EGREP) -q 'bibstyle.(apacann|chcagoa|[^}]*annot)' '$*.aux'; then \
+	if $(EGREP) -q 'bibstyle.(apacite|apacann|chcagoa|[^}]*annot)' '$*.aux'; then \
 		$(call echo-build,** annotated extra latex **,output ignored,$(RESTARTS)-1); \
 		$(call run-latex,$*); \
 		$(CP) '$*.log' '$*.$(RESTARTS)-annotated.log'; \

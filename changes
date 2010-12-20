@@ -1,3 +1,7 @@
+Chris Monson (2010-12-20):
+* Updated build file to be smarter about Python version detection
+* Created a bunch of test files and supporting scripts
+* Issue 72: added apacite capaability (thanks to matkarat)
 Chris Monson (2010-11-23):
 * Changed to multi-part makefile build (split out sed scripts)
 * Added build script and supporting infrastructure
