@@ -1,3 +1,5 @@
+Chris Monson (2010-12-23):
+* Added gpi_global to gnuplot dependencies so that changes are detected
 Chris Monson (2010-12-20):
 * Updated build file to be smarter about Python version detection
 * Created a bunch of test files and supporting scripts

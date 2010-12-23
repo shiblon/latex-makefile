@@ -1836,7 +1836,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
 ifeq "$(strip $(GPI_OUTPUT_EXTENSION))" "pdf"
-%.pdf:	%.gpi %.gpi.d $(gpi_sed)
+%.pdf:	%.gpi %.gpi.d $(gpi_sed) $(gpi_global)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 endif
@@ -1856,7 +1856,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "xelatex"
 	$(QUIET)$(call convert-eps-to-pdf,$<,$@,$(GRAY))
 
 ifeq "$(strip $(GPI_OUTPUT_EXTENSION))" "pdf"
-%.pdf:	%.gpi %.gpi.d $(gpi_sed)
+%.pdf:	%.gpi %.gpi.d $(gpi_sed) $(gpi_global)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 endif
@@ -1868,7 +1868,7 @@ endif
 endif
 
 
-%.eps:	%.gpi %.gpi.d $(gpi_sed)
+%.eps:	%.gpi %.gpi.d $(gpi_sed) $(gpi_global)
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-gpi,$<,$@,$(GRAY))
 
