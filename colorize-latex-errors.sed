@@ -111,8 +111,15 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   b error
 }
 
+# Handle some fatal error cases
+/^\(!pdfTeX error:.*\)s*/{
+  b error
+}
+
 # Finally, we handle anything that looks remotely like an error that we
-# haven't already caught.  We have to do this twice because POSIX sed doesn't handle things like ^|\n well.  In fact, it doesn't do branching expressions at all, and it can't match \n.
+# haven't already caught.  We have to do this twice because POSIX sed doesn't
+# handle things like ^|\n well.  In fact, it doesn't do branching expressions
+# at all, and it can't match \n.
 /^\(!!! [^[:cntrl:]]*\).*/{
   # Take only the first line and indicate that more info is in the log
   s//\1.  See log for more information./
@@ -130,6 +137,6 @@ d
 # If we have an error (starts with !!! and we get this far), then strip the
 # prefix, colorize, and output.
 :error
-s/^!!! \(.*\)/(##color_error##)\1(##color_reset##)/
+s/^!\(!! \)\{0,1\}\(.*\)/(##color_error##)\2(##color_reset##)/
 p
 d

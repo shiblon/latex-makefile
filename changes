@@ -1,5 +1,6 @@
 Chris Monson (2010-12-31):
 * Issue 100: make hanging because of faulty graphics detection (sed bug)
+* Issue 108: do not ignore fatal errors from pdftex
 Chris Monson (2010-12-23):
 * Added gpi_global to gnuplot dependencies so that changes are detected
 Chris Monson (2010-12-20):
