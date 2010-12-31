@@ -1,15 +1,3 @@
-LaTeX Error: File `nonexistent.sty' not found.
-
-
-Type X to quit or <RETURN> to proceed,
-or enter new name. (Default extension: sty)
-
-Enter file name: 
-! Emergency stop.
-<read *> 
-         
-l.4 ^^M
-       
-*** (cannot \read from terminal in nonstop modes)
-
+<E>./test.tex:4: LaTeX Error: File `nonexistent.sty' not found.<R>
+<E>./test.tex:4:  ==> Fatal error occurred, no output PDF file produced!.  See log for more information.<R>
 

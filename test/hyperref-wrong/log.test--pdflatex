@@ -1,5 +1,6 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=pdflatex 2009.11.7)  16 DEC 2010 16:07
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=pdflatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -156,7 +157,6 @@ Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
 )
 LaTeX Info: Redefining \ref on input line 5.
 LaTeX Info: Redefining \pageref on input line 5.
-(./test.out) (./test.out)
 \@outlinefile=\write3
 \openout3 = `test.out'.
 
@@ -166,8 +166,8 @@ LaTeX Info: Redefining \pageref on input line 5.
 {/usr/local/texlive/2009/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./test
 .aux) ) 
 Here is how much of TeX's memory you used:
- 3451 strings out of 493848
- 51969 string characters out of 3149207
+ 3447 strings out of 493848
+ 51933 string characters out of 3149207
  109335 words of memory out of 3000000
  6732 multiletter control sequences out of 15000+200000
  3640 words of font info for 14 fonts, out of 3000000 for 9000

@@ -1,5 +1,6 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  16 DEC 2010 16:08
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -13,7 +14,7 @@ rmanji, latin, latvian, lithuanian, mongolian, mongolian2a, bokmal, nynorsk, po
 lish, portuguese, romanian, russian, sanskrit, serbian, slovak, slovenian, span
 ish, swedish, turkish, ukenglish, ukrainian, uppersorbian, welsh, loaded.
 
-! LaTeX Error: Missing \begin{document}.
+./test.tex:1: LaTeX Error: Missing \begin{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.

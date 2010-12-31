@@ -1,1 +1,13 @@
+# MISSING stem "nothere" - allowed extensions are ".pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif" - leave comment here - it affects the build
+-include nothere.gpi.d
+TESTSTEM.d: $$(call graphics-source,nothere)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,nothere)
+# MISSING stem "notthere" - allowed extensions are ".pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif" - leave comment here - it affects the build
+-include notthere.gpi.d
+TESTSTEM.d: $$(call graphics-source,notthere)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notthere)
+# MISSING stem "notanywhere" - allowed extensions are ".pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif" - leave comment here - it affects the build
+-include notanywhere.gpi.d
+TESTSTEM.d: $$(call graphics-source,notanywhere)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notanywhere)
 

@@ -1,5 +1,6 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  16 DEC 2010 16:08
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -36,7 +37,7 @@ Type X to quit or <RETURN> to proceed,
 or enter new name. (Default extension: tex)
 
 Enter file name: 
-! Emergency stop.
+./test.tex:2: Emergency stop.
 <read *> 
          
 l.2 \input{not-here}

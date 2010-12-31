@@ -5,6 +5,7 @@
 import os
 import os.path
 import subprocess
+import sys
 import util.ensure_version
 
 log_sed_scripts = ("color-tex.sed",
@@ -13,7 +14,12 @@ log_sed_scripts = ("color-tex.sed",
                    "get-log-index.sed",
                    "get-missing-inputs.sed")
 
-for dirpath, dirnames, filenames in os.walk("test"):
+if len(sys.argv) == 2:
+  initial_dir = os.path.join("test", sys.argv[1])
+else:
+  initial_dir = "test"
+
+for dirpath, dirnames, filenames in os.walk(initial_dir):
   for in_name in filenames:
     if not in_name.startswith("log."):
       continue

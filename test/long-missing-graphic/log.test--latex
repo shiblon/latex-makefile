@@ -51,70 +51,55 @@ File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
 No file test.aux.
 \openout1 = `test.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
 
-./test.tex:6: LaTeX Error: File `nothere' not found.
+./test.tex:7: LaTeX Error: File `this-name-is-really-long' not found.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.6 \includegraphics{nothere}
-                             
+l.7 \includegraphics{this-name-is-really-long}
+                                              
 I could not locate the file with any of these extensions:
 .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./test.tex:8: LaTeX Error: File `notthere' not found.
+./test.tex:9: LaTeX Error: File `so-is-this-one-and-it-pushes-errors-over-the-e
+dge' not found.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.8 \includegraphics{notthere}
-                              
-I could not locate the file with any of these extensions:
-.eps,.ps,.eps.gz,.ps.gz,.eps.Z
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./test.tex:12: LaTeX Error: File `notanywhere' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
+l.9 ...his-one-and-it-pushes-errors-over-the-edge}
                                                   
-l.12 \includegraphics{notanywhere}
-                                  
 I could not locate the file with any of these extensions:
 .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-[1
-
-] (./test.aux) ) 
+(./test.aux) ) 
 Here is how much of TeX's memory you used:
- 524 strings out of 493849
- 6282 string characters out of 3149230
+ 515 strings out of 493849
+ 6358 string characters out of 3149230
  53045 words of memory out of 3000000
- 3855 multiletter control sequences out of 15000+200000
- 4245 words of font info for 16 fonts, out of 3000000 for 9000
+ 3852 multiletter control sequences out of 15000+200000
+ 3640 words of font info for 14 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
- 25i,4n,19p,177b,107s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 25i,1n,19p,177b,36s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on test.dvi (1 page, 268 bytes).
+No pages of output.

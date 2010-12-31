@@ -1,5 +1,6 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  16 DEC 2010 16:07
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -50,7 +51,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
 LaTeX Font Info:    ... okay on input line 3.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
 LaTeX Font Info:    ... okay on input line 3.
-! Missing $ inserted.
+./test.tex:7: Missing $ inserted.
 <inserted text> 
                 $
 l.7 ó
@@ -62,7 +63,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 7.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 7.
-! Extra }, or forgotten $.
+./test.tex:7: Extra }, or forgotten $.
 \maththreesuperior ->{^3}
                          
 l.7 ó
@@ -73,7 +74,7 @@ you forgot something else, as in `\hbox{$x}'. In such cases
 the way to recover is to insert both the forgotten and the
 deleted material, e.g., by typing `I$}'.
 
-! Missing $ inserted.
+./test.tex:8: Missing $ inserted.
 <inserted text> 
                 $
 l.8 

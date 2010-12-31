@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  31 DEC 2010 15:18
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
  file:line:error style messages enabled.
  %&-line parsing enabled.
@@ -18,14 +18,14 @@ Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
 (/usr/local/texlive/2009/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
-\c@part=\count79
-\c@section=\count80
-\c@subsection=\count81
-\c@subsubsection=\count82
-\c@paragraph=\count83
-\c@subparagraph=\count84
-\c@figure=\count85
-\c@table=\count86
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
@@ -41,9 +41,10 @@ Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 ) (/usr/local/texlive/2009/texmf-dist/tex/latex/latexconfig/graphics.cfg
 File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
 )
-Package graphics Info: Driver file: dvips.def on input line 91.
-(/usr/local/texlive/2009/texmf-dist/tex/latex/graphics/dvips.def
-File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+Package graphics Info: Driver file: xetex.def on input line 91.
+(/usr/local/texlive/2009/texmf-dist/tex/xelatex/xetex-def/xetex.def
+File: xetex.def 2009/10/28 v0.93 LaTeX color/graphics driver for XeTeX (RRM, mo
+d. JK)
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
@@ -51,70 +52,55 @@ File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
 No file test.aux.
 \openout1 = `test.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 4.
-LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
 
-./test.tex:6: LaTeX Error: File `nothere' not found.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.6 \includegraphics{nothere}
-                             
-I could not locate the file with any of these extensions:
-.eps,.ps,.eps.gz,.ps.gz,.eps.Z
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
-
-
-./test.tex:8: LaTeX Error: File `notthere' not found.
+./test.tex:7: LaTeX Error: File `this-name-is-really-long' not found.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.8 \includegraphics{notthere}
-                              
+l.7 \includegraphics{this-name-is-really-long}
+                                              
 I could not locate the file with any of these extensions:
-.eps,.ps,.eps.gz,.ps.gz,.eps.Z
+.pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-./test.tex:12: LaTeX Error: File `notanywhere' not found.
+./test.tex:9: LaTeX Error: File `so-is-this-one-and-it-pushes-errors-over-the-e
+dge' not found.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.12 \includegraphics{notanywhere}
-                                  
+l.9 ...his-one-and-it-pushes-errors-over-the-edge}
+                                                  
 I could not locate the file with any of these extensions:
-.eps,.ps,.eps.gz,.ps.gz,.eps.Z
+.pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-[1
-
-] (./test.aux) ) 
+(./test.aux) ) 
 Here is how much of TeX's memory you used:
- 524 strings out of 493849
- 6282 string characters out of 3149230
- 53045 words of memory out of 3000000
- 3855 multiletter control sequences out of 15000+200000
- 4245 words of font info for 16 fonts, out of 3000000 for 9000
- 714 hyphenation exceptions out of 8191
- 25i,4n,19p,177b,107s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 542 strings out of 494665
+ 6539 string characters out of 3163743
+ 53170 words of memory out of 3000000
+ 3830 multiletter control sequences out of 15000+200000
+ 3640 words of font info for 14 fonts, out of 3000000 for 9000
+ 669 hyphenation exceptions out of 8191
+ 25i,1n,19p,178b,36s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on test.dvi (1 page, 268 bytes).
+No pages of output.

@@ -1,5 +1,6 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  16 DEC 2010 16:08
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -29,7 +30,7 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-! Undefined control sequence.
+./test.tex:3: Undefined control sequence.
 l.3 \titl
          {broken control sequence (misspelled `title')}
 The control sequence at the end of the top line
@@ -39,7 +40,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-! LaTeX Error: Missing \begin{document}.
+./test.tex:3: LaTeX Error: Missing \begin{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
@@ -65,7 +66,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 5.
 LaTeX Font Info:    ... okay on input line 5.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 5.
 LaTeX Font Info:    ... okay on input line 5.
-! Undefined control sequence.
+./test.tex:6: Undefined control sequence.
 l.6 \halp
          
 The control sequence at the end of the top line

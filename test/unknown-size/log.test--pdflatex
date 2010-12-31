@@ -1,5 +1,6 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=pdflatex 2009.11.7)  16 DEC 2010 16:08
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=pdflatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -80,7 +81,7 @@ LaTeX Font Info:    ... okay on input line 4.
 LaTeX Warning: File `badextension.ps' not found on input line 8.
 
 
-! LaTeX Error: Unknown graphics extension: .ps.
+./test.tex:8: LaTeX Error: Unknown graphics extension: .ps.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.

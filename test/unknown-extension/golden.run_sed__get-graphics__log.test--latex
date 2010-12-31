@@ -1,3 +1,7 @@
+badextension.epp' not found. See the LaTeX manual or LaTeX Companion for explanation. Type H <return> for immediate help. ... l.8 \includegraphics{badextension.epp} Try typing <return> to proceed. If that doesn't work, type X <return> to quit. 
+-include badextension.epp'\\\ not\\\ found.\\\ See\\\ the\\\ LaTeX\\\ manual\\\ or\\\ LaTeX\\\ Companion\\\ for\\\ explanation.\\\ Type\\\ H\\\ <return>\\\ for\\\ immediate\\\ help.\\\ ...\\\ l.8\\\ \includegraphics{badextension.epp}\\\ Try\\\ typing\\\ <return>\\\ to\\\ proceed.\\\ If\\\ that\\\ doesn't\\\ work,\\\ type\\\ X\\\ <return>\\\ to\\\ quit.\\\ .gpi.d
+TESTSTEM.d: $$(call graphics-source,badextension.epp'\\\ not\\\ found.\\\ See\\\ the\\\ LaTeX\\\ manual\\\ or\\\ LaTeX\\\ Companion\\\ for\\\ explanation.\\\ Type\\\ H\\\ <return>\\\ for\\\ immediate\\\ help.\\\ ...\\\ l.8\\\ \includegraphics{badextension.epp}\\\ Try\\\ typing\\\ <return>\\\ to\\\ proceed.\\\ If\\\ that\\\ doesn't\\\ work,\\\ type\\\ X\\\ <return>\\\ to\\\ quit.\\\ )
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp'\\\ not\\\ found.\\\ See\\\ the\\\ LaTeX\\\ manual\\\ or\\\ LaTeX\\\ Companion\\\ for\\\ explanation.\\\ Type\\\ H\\\ <return>\\\ for\\\ immediate\\\ help.\\\ ...\\\ l.8\\\ \includegraphics{badextension.epp}\\\ Try\\\ typing\\\ <return>\\\ to\\\ proceed.\\\ If\\\ that\\\ doesn't\\\ work,\\\ type\\\ X\\\ <return>\\\ to\\\ quit.\\\ )
 -include badextension.epp.gpi.d
 TESTSTEM.d: $$(call graphics-source,badextension.epp)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp)

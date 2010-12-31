@@ -1,5 +1,6 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  16 DEC 2010 16:08
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -66,7 +67,7 @@ LaTeX Font Info:    ... okay on input line 4.
 
 LaTeX Warning: File `badextension.ps' not found on input line 8.
 
-! Unable to load picture or PDF file 'badextension.ps'.
+./test.tex:8: Unable to load picture or PDF file 'badextension.ps'.
 <to be read again> 
                    }
 l.8 \includegraphics{badextension.ps}
@@ -76,7 +77,7 @@ the file was not found.
 
 File: badextension.ps Graphic file (type QTm)
 <use  "badextension.ps" >
-! Unable to load picture or PDF file 'badextension.ps'.
+./test.tex:8: Unable to load picture or PDF file 'badextension.ps'.
 <to be read again> 
                    \GXT@clipend 
 l.8 \includegraphics{badextension.ps}

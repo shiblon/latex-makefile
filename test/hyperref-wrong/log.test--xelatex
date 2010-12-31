@@ -1,5 +1,6 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  16 DEC 2010 16:07
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
 entering extended mode
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
@@ -160,7 +161,6 @@ Package: refcount 2008/08/11 v3.1 Data extraction from references (HO)
 )
 LaTeX Info: Redefining \ref on input line 5.
 LaTeX Info: Redefining \pageref on input line 5.
-(./test.out) (./test.out)
 \@outlinefile=\write3
 \openout3 = `test.out'.
 
@@ -172,8 +172,8 @@ Package hyperref Warning: Rerun to get /PageLabels entry.
 
 ] (./test.aux) ) 
 Here is how much of TeX's memory you used:
- 3444 strings out of 494665
- 51871 string characters out of 3163743
+ 3440 strings out of 494665
+ 51835 string characters out of 3163743
  109341 words of memory out of 3000000
  6681 multiletter control sequences out of 15000+200000
  3640 words of font info for 14 fonts, out of 3000000 for 9000

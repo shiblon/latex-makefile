@@ -3,6 +3,9 @@
 #(##include("paragraphs.sed")##)
 
 /^[^[:cntrl:]:]*:[[:digit:]]\{1,\}: LaTeX Error: File `/{
+  # Get rid of trailing newlines for every paragraph, since LaTeX errors are
+  # often split at arbitrary (not word) boundaries.
+  s/\n//g
   b needonemore
 }
 # We have all the paragraphs we need - so extract the file name and extensions
