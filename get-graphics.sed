@@ -10,6 +10,15 @@
 }
 # We have all the paragraphs we need - so extract the file name and extensions
 /^::0::.*: LaTeX Error: File `/{
+  # Request one more paragraph if we ended in a newline.  This is a very
+  # strange corner case that hits us when the filename error line ends in a
+  # newline, and latex breaks the error line right before that newline
+  # (creating a double empty line, which looks like an extra empty paragraph).
+  # Yes, LaTeX log output is that weird.
+  /\n\n$/{
+    s/^::0:://
+    b needonemore
+  }
   # Kill all newlines, since the filename information can be split across lines
   s/\n\{1,\}/ /g
   # Collapse spaces

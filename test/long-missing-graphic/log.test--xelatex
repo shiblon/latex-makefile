@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:18
+This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  31 DEC 2010 15:49
 entering extended mode
  file:line:error style messages enabled.
  %&-line parsing enabled.
@@ -93,10 +93,25 @@ I could not locate the file with any of these extensions:
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
+
+./test.tex:11: LaTeX Error: File `this-triggers-two-paragraph-logic' not found.
+
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.11 ...raphics{this-triggers-two-paragraph-logic}
+                                                  
+I could not locate the file with any of these extensions:
+.pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
 (./test.aux) ) 
 Here is how much of TeX's memory you used:
- 542 strings out of 494665
- 6539 string characters out of 3163743
+ 543 strings out of 494665
+ 6572 string characters out of 3163743
  53170 words of memory out of 3000000
  3830 multiletter control sequences out of 15000+200000
  3640 words of font info for 14 fonts, out of 3000000 for 9000

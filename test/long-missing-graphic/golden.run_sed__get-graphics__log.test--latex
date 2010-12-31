@@ -6,4 +6,8 @@ TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,this-name-is-really-lon
 -include so-is-this-one-and-it-pushes-errors-over-the-edge.gpi.d
 TESTSTEM.d: $$(call graphics-source,so-is-this-one-and-it-pushes-errors-over-the-edge)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,so-is-this-one-and-it-pushes-errors-over-the-edge)
+# MISSING stem "this-triggers-two-paragraph-logic" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+-include this-triggers-two-paragraph-logic.gpi.d
+TESTSTEM.d: $$(call graphics-source,this-triggers-two-paragraph-logic)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,this-triggers-two-paragraph-logic)
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  31 DEC 2010 15:18
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009) (format=latex 2009.11.7)  31 DEC 2010 15:49
 entering extended mode
  file:line:error style messages enabled.
  %&-line parsing enabled.
@@ -92,10 +92,25 @@ I could not locate the file with any of these extensions:
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
+
+./test.tex:11: LaTeX Error: File `this-triggers-two-paragraph-logic' not found.
+
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.11 ...raphics{this-triggers-two-paragraph-logic}
+                                                  
+I could not locate the file with any of these extensions:
+.eps,.ps,.eps.gz,.ps.gz,.eps.Z
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
 (./test.aux) ) 
 Here is how much of TeX's memory you used:
- 515 strings out of 493849
- 6358 string characters out of 3149230
+ 518 strings out of 493849
+ 6464 string characters out of 3149230
  53045 words of memory out of 3000000
  3852 multiletter control sequences out of 15000+200000
  3640 words of font info for 14 fonts, out of 3000000 for 9000
