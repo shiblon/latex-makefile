@@ -47,7 +47,7 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # l.2 ^^M
 #        
 # *** (cannot \read from terminal in nonstop modes)
-/^::0::! \(LaTeX Error: File `.*\)/{
+/^::0::! LaTeX Error: File .*/{
   # Request another paragraph if we run into the weird case where an error line
   # is split just before its newline.
   /\n\n$/{
@@ -62,7 +62,7 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 
 # Parse regular old file missing errors (not the special kind like classes and
 # packages, but more mundane ones like missing graphics).
-/^::0::!!! \(.*LaTeX Error: File `.*\)/{
+/^::0::!!! .*LaTeX Error: File .*/{
   # Request another paragraph if we run into the weird case where an error line
   # is split just before its newline.
   /\n\n$/{
