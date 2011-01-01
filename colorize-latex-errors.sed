@@ -6,6 +6,9 @@
 # paragraphs to process properly And they don't start with a line number - that
 # comes later by the "Emergency stop" output.
 /^! LaTeX Error: File /{
+  # Get rid of newlines, since splits on the first paragraph happen in
+  # interesting places.
+  s/\n//g
   b needtwomore
 }
 
@@ -25,6 +28,9 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # Graphics files that go missing need only two paragraphs, and the
 # filename:line: is at the beginning of the error message.
 /^!!! .* LaTeX Error: File /{
+  # Get rid of newlines first, since latex error output is split on column
+  # boundaries regardless of context.
+  s/\n//g
   b needonemore
 }
 
@@ -41,17 +47,30 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # l.2 ^^M
 #        
 # *** (cannot \read from terminal in nonstop modes)
-/^::0::! \(LaTeX Error: File.*not found\.\)/{
+/^::0::! \(LaTeX Error: File `.*\)/{
+  # Request another paragraph if we run into the weird case where an error line
+  # is split just before its newline.
+  /\n\n$/{
+    s/^::0:://
+    b needonemore
+  }
   # Remove paragraph prefix
-  s//\1/
+  s/^::0::! //
   s/^\(.*not found.\).*Enter file name:.*\n\(.*[[:digit:]]\{1,\}\): Emergency stop.*/\2: \1/
   b error
 }
 
 # Parse regular old file missing errors (not the special kind like classes and
 # packages, but more mundane ones like missing graphics).
-/^::0::!!! \(.*LaTeX Error: File.*not found\..*\)/{
-  s//\1/
+/^::0::!!! \(.*LaTeX Error: File `.*\)/{
+  # Request another paragraph if we run into the weird case where an error line
+  # is split just before its newline.
+  /\n\n$/{
+    s/^::0:://
+    b needonemore
+  }
+  # Remove the paragraph prefix
+  s/::0::!!! //
   # Handle file missing errors where we are looking for a particular extension
   /could not locate.*any of these extensions:/{
     # We don't do anything with these - they are missing graphics.
