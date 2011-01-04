@@ -1718,6 +1718,10 @@ endif
 			run=1; \
 			break; \
 		fi; \
+		if [ ! -e $*.1st.*.make ]; then \
+			run=1; \
+			break; \
+		fi; \
 	done; \
 	$(call remove-temporary-files,$*.bbl.cookie $*.run.cookie); \
 	$(MV) $*.auxtarget.cookie $*.auxtarget.make; \
