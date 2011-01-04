@@ -1,6 +1,7 @@
 Chris Monson (2011-01-04):
 * Issue 106: not cleaning eps log files properly
 * Issue 106: not rebuilding after creating .pdf graphics from .eps
+* Issue 94: svg going unnecessarily through eps (can't reproduce)
 Chris Monson (2010-12-31):
 * Issue 100: make hanging because of faulty graphics detection (sed bug)
 * Issue 108: do not ignore fatal errors from pdftex

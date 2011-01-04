@@ -1891,10 +1891,15 @@ endif
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-xvg,$<,$@,$(GRAY))
 
+ifneq "$(default_graphic_extension)" "pdf"
+# We have a perfectly good build rule for svg to pdf, so we eliminate this to
+# avoid confusing make (it sometimes chooses to go svg -> eps -> pdf).
 %.eps: %.svg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-svg,$<,$@,$(GRAY))
 
+# Similarly for these, we don't need eps if we have supported extensions
+# already.
 %.eps: %.jpg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-jpg,$<,$@,$(GRAY))
@@ -1902,6 +1907,7 @@ endif
 %.eps: %.png $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-png,$<,$@,$(GRAY))
+endif
 
 %.eps: %.eps.gz $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
