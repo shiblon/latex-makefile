@@ -553,6 +553,7 @@ files.svg	:= $(call filter-buildable,svg)
 files.png	:= $(call filter-buildable,png)
 files.jpg	:= $(call filter-buildable,jpg)
 files.eps.gz	:= $(call filter-buildable,eps.gz)
+files.eps	:= $(call filter-buildable,eps)
 
 # Make all pstex targets secondary.  The pstex_t target requires the pstex
 # target, and nothing else really depends on it, so it often gets deleted.
@@ -575,6 +576,7 @@ default_files.svg	:= $(call filter-default,svg)
 default_files.png	:= $(call filter-default,png)
 default_files.jpg	:= $(call filter-default,jpg)
 default_files.eps.gz	:= $(call filter-default,eps.gz)
+default_files.eps	:= $(call filter-default,eps)
 
 # Utility function for creating larger lists of files
 # $(call concat-files,suffixes,[prefix])
@@ -626,6 +628,7 @@ default_stems.svg		:= $(call get-stems,svg,default)
 default_stems.png		:= $(call get-stems,png,default)
 default_stems.jpg		:= $(call get-stems,jpg,default)
 default_stems.eps.gz		:= $(call get-stems,eps.gz,default)
+default_stems.eps		:= $(call get-stems,eps,default)
 
 # List of all stems (all possible bare PDF targets created here):
 stems.tex		:= $(call get-stems,tex)
@@ -641,6 +644,7 @@ stems.svg		:= $(call get-stems,svg)
 stems.png		:= $(call get-stems,png)
 stems.jpg		:= $(call get-stems,jpg)
 stems.eps.gz		:= $(call get-stems,eps.gz)
+stems.eps		:= $(call get-stems,eps)
 
 # Utility function for creating larger lists of stems
 # $(call concat-stems,suffixes,[prefix])
@@ -804,7 +808,6 @@ all_dvi_targets		:= $(addsuffix .dvi,$(stems_ssg))
 all_tex_targets		:= $(addsuffix .tex,$(stems_sg))
 all_d_targets		:= $(addsuffix .d,$(stems_ssg))
 all_graphics_targets	:= $(addsuffix .$(default_graphic_extension),$(stems_gg))
-intermediate_graphics_targets	:= $(if $(filter pdf,$(default_graphic_extension)),$(addsuffix .eps,$(stems_gg)),)
 all_pstex_targets	:= $(addsuffix .pstex_t,$(stems.fig))
 all_dot2tex_targets	:= $(addsuffix .dot_t,$(stems.dot))
 
@@ -2173,7 +2176,7 @@ clean-tex: clean-deps
 # even want to keep pstex functionality, so my motivation is not terribly high
 # for doing it right.
 clean-graphics:
-	$(QUIET)$(call clean-files,$(all_graphics_targets) $(intermediate_graphics_targets) *.gpi.d *.pstex *.pstex_t *.dot_t)
+	$(QUIET)$(call clean-files,$(all_graphics_targets) *.gpi.d *.pstex *.pstex_t *.dot_t)
 
 .PHONY: clean-backups
 clean-backups:
@@ -2187,7 +2190,7 @@ clean-auxiliary:
 clean-nographics: clean-tex clean-deps clean-backups clean-auxiliary ;
 
 .PHONY: clean
-clean:	clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary
+clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary ;
 
 #
 # HELP TARGETS
