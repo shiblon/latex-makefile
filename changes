@@ -1,3 +1,6 @@
+Chris Monson (2011-01-05):
+* Bumped version to 2.2.0-rc7
+* Issue 106: existing graphic dependencies not generated correctly
 Chris Monson (2011-01-04):
 * Issue 106: not cleaning eps log files properly
 * Issue 106: not rebuilding after creating .pdf graphics from .eps
