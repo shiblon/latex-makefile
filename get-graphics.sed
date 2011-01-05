@@ -1,5 +1,13 @@
 #(##defaults(stem="TESTSTEM", build_target_extension="pdf")##)
 
+# Existing graphics files look different than missing files.  We still want to
+# extract them, though.  Also, the paragraph structure is much simpler, so we
+# short-circuit paragraph logic and just get the target off the line.
+/^File: \(.*\) Graphic file (type [^)]*)/{
+  s//\1/
+  b addtargets
+}
+
 #(##include("paragraphs.sed")##)
 
 /^[^[:cntrl:]:]*:[[:digit:]]\{1,\}: LaTeX Error: File `/{
@@ -35,10 +43,6 @@
   # Now get the hold buffer back, get rid of extension list, and call addtargets
   g
   s/::::.*//
-  b addtargets
-}
-/.*File: \(.*\) Graphic file (type [^)]*).*/{
-  s//\1/
   b addtargets
 }
 
