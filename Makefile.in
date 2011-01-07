@@ -1066,25 +1066,7 @@ endef
 #
 # $(call get-gpi-deps,<gpi file>,<targets>)
 define get-gpi-deps
-$(SED) \
--e '/^[[:space:]]*s\{0,1\}plot/,/[^\\]$$/{' \
--e ' H' \
--e ' /[^\\]$$/{' \
--e '  s/.*//' \
--e '  x' \
--e '  s/\\\{0,1\}\n//g' \
--e '  s/^[[:space:]]*s\{0,1\}plot[[:space:]]*\(\[[^]]*\][[:space:]]*\)*/,/' \
--e '  s/[[:space:]]*\(['\''"][^'\''"]*['\''"]\)\{0,1\}[^,]*/\1/g' \
--e '  s/,['\''"]-\{0,1\}['\''"]//g' \
--e '  s/[,'\''"]\{1,\}/ /g' \
--e '  s!.*!$2: &!' \
--e '  p' \
--e ' }' \
--e ' d' \
--e '}' \
--e 's/^[[:space:]]*load[[:space:]]*['\''"]\([^'\''"]*\.gpi\)['\''"].*$$/-include \1.d/p' \
--e 'd' \
-$1
+(##include_sed("$(SED)", "gpi-deps.sed", "'$1'", targets="$2")##)
 endef
 
 # Colorizes real, honest-to-goodness LaTeX errors that can't be overcome with
