@@ -10,7 +10,7 @@
   s/[[:space:]]*\(['\''"][^'\''"]*['\''"]\)\{0,1\}[^,]*/\1/g
   s/,['\''"]-\{0,1\}['\''"]//g
   s/[,'\''"]\{1,\}/ /g
-  s/:/\\:/g
+  s/.*:.*/$(error Error: Filenames with colons are not allowed: &)/
   s!.*!(##targets##): &!
   p
  }

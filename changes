@@ -1,5 +1,5 @@
 Chris Monson (2011-01-07):
-* Fixed problems when .gpi files include filenames with : in them.
+* Emit an error if .gpi.d files have dependencies with : in the name
 Chris Monson (2011-01-05):
 * Bumped version to 2.2.0-rc7
 * Issue 106: existing graphic dependencies not generated correctly
