@@ -6,7 +6,7 @@ Makefile \
 
 version=`sed -e '
 s/^version[[:space:]]*.=[[:space:]]*\\(.*\\)[[:space:]]*$/\\1/p
-d' Makefile`
+d' Makefile.in`
 
 outputfile=latex-makefile-$version.tar.gz
 
