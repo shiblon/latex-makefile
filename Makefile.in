@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc7
+version		:= 2.2.0-rc8
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -245,15 +245,7 @@ GRAY	?= $(call get-default,$(GREY),)
 # Utility Functions and Definitions
 #
 
-# While not exactly a make function, this vim macro is useful.  It takes a
-# verbatim sed script and converts each line to something suitable in a command
-# context.  Just paste the script's contents into the editor, yank this into a
-# register (starting at '0') and run the macro once for each line of the
-# original script:
-#
-# 0i	-e :s/\$/$$/eg:s/'/'"'"'/eg^Ela'A' \:nohj
-
-# don't call this directly - it is here to avoid calling wildcard more than
+# Don't call this directly - it is here to avoid calling wildcard more than
 # once in remove-files.
 remove-files-helper	= $(if $1,$(RM) $1,$(sh_true))
 

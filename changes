@@ -1,3 +1,6 @@
+Chris Monson (2011-01-14):
+* Bumped version to 2.2.0-rc8
+* Issue 107: Removed comment with embedded newline, fixing MinGW on Windows 7.
 Chris Monson (2011-01-07):
 * Emit an error if .gpi.d files have dependencies with : in the name
 Chris Monson (2011-01-05):
