@@ -124,7 +124,7 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # misspelled it (e.g., `\hobx'), type `I' and the correct
 # spelling (e.g., `I\hbox'). Otherwise just continue,
 # and I'll forget about whatever was undefined.
-/^\(!!! .*Undefined control sequence\)[^[:cntrl:]]*\(.*\)/{
+/.*\(!!! .*Undefined control sequence\)[^[:cntrl:]]*\(.*\)/{
   s//\1: \2/
   s/\nl\.[[:digit:]][^[:cntrl:]]*\(\\[^\\[:cntrl:]]*\).*/\1/
   b error
@@ -138,13 +138,8 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # Finally, we handle anything that looks remotely like an error that we
 # haven't already caught.  We have to do this twice because POSIX sed doesn't
 # handle things like ^|\n well.  In fact, it doesn't do branching expressions
-# at all, and it can't match \n.
-/^\(!!! [^[:cntrl:]]*\).*/{
-  # Take only the first line and indicate that more info is in the log
-  s//\1.  See log for more information./
-  b error
-}
-/.*\n\(!!! [^[:cntrl:]]*\).*/{
+# at all, and it can't match \n in a class.
+/.*\(!!! [^[:cntrl:]]*\).*/{
   # Take only the first line and indicate that more info is in the log
   s//\1.  See log for more information./
   b error
