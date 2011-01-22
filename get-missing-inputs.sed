@@ -17,6 +17,8 @@
   /Default extension: /!d
   # Get the file name and line information
   s/.*File `\([^']*\)' not found.*/\1/
+  # Get rid of newlines if they are there
+  s/[[:cntrl:]]//
   # Now the pattern buffer contains the bare filename
   # Add .tex if it isn't there already (TODO: is this right?)
   /\.tex/!s/$/.tex/

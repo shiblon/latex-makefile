@@ -1,3 +1,6 @@
+Chris Monson (2011-01-21):
+* Issue 110: Long filenames not produced correctly in .d file
+* Fixed problem with unknown control sequence error parsing
 Chris Monson (2011-01-14):
 * Bumped version to 2.2.0-rc8
 * Issue 107: Removed comment with embedded newline, fixing MinGW on Windows 7.
