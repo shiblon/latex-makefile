@@ -1067,6 +1067,12 @@ endef
 # Note that we only ignore file not found errors for things that we know how to
 # build, like graphics files.
 #
+# Also note that the output of this is piped through sed again to escape any
+# backslashes that might have made it through.  This is to avoid sending things
+# like "\right" to echo, which interprets \r as LF.  In bash, we could just do
+# ${var//\\/\\\\}, but in other popular sh variants (like dash), this doesn't
+# work.
+#
 # $(call colorize-latex-errors,<log file>)
 define colorize-latex-errors
 (##include_sed("$(SED)", "colorize-latex-errors.sed", "'$1'",
@@ -1074,7 +1080,7 @@ define colorize-latex-errors
 	       driver_error="$(hyperref_driver_error)",
 	       color_error="$(C_ERROR)",
 	       color_reset="$(C_RESET)")
-##)
+##) | $(SED) -e 's/\\\\/\\\\\\\\/g'
 endef
 
 # Colorize Makeindex errors
@@ -2034,7 +2040,6 @@ _all_programs:
 _check_programs:
 	$(QUIET)$(ECHO) "== Checking Makefile Dependencies =="; $(ECHO)
 	$(QUIET) \
-	$(ECHO) hi; \
 	allprogs=`\
 	 ($(call output-all-programs)) | \
 	 $(SED) \
