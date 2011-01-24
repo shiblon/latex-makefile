@@ -1,3 +1,5 @@
+Chris Monson (2011-01-24):
+* Issue 111: Added .jpeg as a possible image extension
 Chris Monson (2011-01-21):
 * Issue 110: Long filenames not produced correctly in .d file
 * Fixed problem with unknown control sequence error parsing

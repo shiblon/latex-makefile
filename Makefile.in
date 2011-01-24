@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc8
+version		:= 2.2.0-rc9
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -498,6 +498,7 @@ all_files.xvg		?= $(wildcard *.xvg)
 all_files.svg		?= $(wildcard *.svg)
 all_files.png		?= $(wildcard *.png)
 all_files.jpg		?= $(wildcard *.jpg)
+all_files.jpeg		?= $(wildcard *.jpeg)
 all_files.eps.gz	?= $(wildcard *.eps.gz)
 all_files.eps		?= $(wildcard *.eps)
 
@@ -544,6 +545,7 @@ files.xvg	:= $(call filter-buildable,xvg)
 files.svg	:= $(call filter-buildable,svg)
 files.png	:= $(call filter-buildable,png)
 files.jpg	:= $(call filter-buildable,jpg)
+files.jpeg	:= $(call filter-buildable,jpeg)
 files.eps.gz	:= $(call filter-buildable,eps.gz)
 files.eps	:= $(call filter-buildable,eps)
 
@@ -567,6 +569,7 @@ default_files.xvg	:= $(call filter-default,xvg)
 default_files.svg	:= $(call filter-default,svg)
 default_files.png	:= $(call filter-default,png)
 default_files.jpg	:= $(call filter-default,jpg)
+default_files.jpeg	:= $(call filter-default,jpeg)
 default_files.eps.gz	:= $(call filter-default,eps.gz)
 default_files.eps	:= $(call filter-default,eps)
 
@@ -603,6 +606,7 @@ all_stems.xvg		:= $(call get-stems,xvg,all)
 all_stems.svg		:= $(call get-stems,svg,all)
 all_stems.png		:= $(call get-stems,png,all)
 all_stems.jpg		:= $(call get-stems,jpg,all)
+all_stems.jpeg		:= $(call get-stems,jpeg,all)
 all_stems.eps.gz	:= $(call get-stems,eps.gz,all)
 all_stems.eps		:= $(call get-stems,eps,all)
 
@@ -619,6 +623,7 @@ default_stems.xvg		:= $(call get-stems,xvg,default)
 default_stems.svg		:= $(call get-stems,svg,default)
 default_stems.png		:= $(call get-stems,png,default)
 default_stems.jpg		:= $(call get-stems,jpg,default)
+default_stems.jpeg		:= $(call get-stems,jpeg,default)
 default_stems.eps.gz		:= $(call get-stems,eps.gz,default)
 default_stems.eps		:= $(call get-stems,eps,default)
 
@@ -635,6 +640,7 @@ stems.xvg		:= $(call get-stems,xvg)
 stems.svg		:= $(call get-stems,svg)
 stems.png		:= $(call get-stems,png)
 stems.jpg		:= $(call get-stems,jpg)
+stems.jpeg		:= $(call get-stems,jpeg)
 stems.eps.gz		:= $(call get-stems,eps.gz)
 stems.eps		:= $(call get-stems,eps)
 
@@ -651,18 +657,18 @@ graphic_source_extensions	:= fig \
 				   eps.gz
 
 ifeq "$(strip $(BUILD_STRATEGY))" "latex"
-graphic_source_extensions	+= png jpg
+graphic_source_extensions	+= png jpg jpeg
 graphic_target_extensions	:= eps ps
 endif
 
 ifeq "$(strip $(BUILD_STRATEGY))" "pdflatex"
 graphic_source_extensions	+= eps
-graphic_target_extensions	:= pdf png jpg mps tif
+graphic_target_extensions	:= pdf png jpg jpeg mps tif
 endif
 
 ifeq "$(strip $(BUILD_STRATEGY))" "xelatex"
 graphic_source_extensions	+= eps
-graphic_target_extensions	:= pdf png jpg mps tif
+graphic_target_extensions	:= pdf png jpg jpeg mps tif
 endif
 
 all_stems_source	:= $(call concat-stems,tex,all)
@@ -1335,7 +1341,7 @@ $(PNGTOPNM) "$1" \
 	> "$2"
 endef
 
-# Creation of .eps files from .jpg files
+# Creation of .eps files from .jpg/.jpeg files
 #
 # Thanks to brubakee for this solution.
 #
@@ -1881,6 +1887,10 @@ ifneq "$(default_graphic_extension)" "pdf"
 # Similarly for these, we don't need eps if we have supported extensions
 # already.
 %.eps: %.jpg $(if $(GRAY),$(gray_eps_file))
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-jpg,$<,$@,$(GRAY))
+
+%.eps: %.jpeg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-jpg,$<,$@,$(GRAY))
 
