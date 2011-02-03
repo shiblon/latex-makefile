@@ -31,7 +31,7 @@
   s/.*//
   x
   # Add the actual target file to the dependencies.
-  s!^.*!(##target_files##): &!
+  s!^.*!(##target_files##): $(call path-norm,&)!
   p
 }
 

@@ -1,3 +1,6 @@
+Chris Monson (2011-02-03):
+* Issue 112: Added path normalization for cygwin systems
+* Fixed a bug in get-missing-inputs where we weren't specifying target files
 Chris Monson (2011-01-24):
 * Issue 111: Added .jpeg as a possible image extension
 Chris Monson (2011-01-21):

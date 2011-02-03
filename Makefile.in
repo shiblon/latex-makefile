@@ -100,6 +100,8 @@ MAKEINDEX	?= makeindex
 KPSEWHICH	?= kpsewhich
 GS		?= gs
 # = OPTIONAL PROGRAMS =
+# == For MikTex under Cygwin, to get path names right
+CYGPATH		?= cygpath
 # == Makefile Color Output ==
 TPUT		?= tput
 # == TeX Generation ==
@@ -124,6 +126,19 @@ PSNUP		?= psnup
 VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
+
+# If cygpath is present, then we create a path-norm function that uses it,
+# otherwise the function is just a no-op.  Issue 112 has details.
+USE_CYGPATH := $(if $(shell $(WHICH) $(CYGPATH)),yes,)
+
+# $(call get-cygpath,<path>)
+define get-cygpath
+$(shell $(CYGPATH) -u "$(shell $(CYGPATH) -s -w $1)")
+endef
+
+define path-norm
+$(if $(USE_CYGPATH),$(call get-cygpath,$1),$1)
+endef
 
 # Command options for embedding fonts and postscript->pdf conversion
 PS_EMBED_OPTIONS	?= -dPDFSETTINGS=/printer -dEmbedAllFonts=true -dSubsetFonts=true -dMaxSubsetPct=100
@@ -854,34 +869,15 @@ gpi_global	:= $(strip \
 # be parsed, the second is a list of files that will show up as dependencies in
 # the new .d file created here.
 #
-# NOTE: BSD sed does not understand \|, so we have to do something more
-# clunky to extract suitable extensions.
-#
-# Also, we do a little bit of funny rewriting up front (TARGETS=) to make sure
-# that we can properly backslash-escape spaces in file names (e.g, on Cygwin
-# for tex distributions that have "Program Files" in their name).
-#
 # $(call get-inputs,<parsed file>,<target files>)
 define get-inputs
-$(SED) \
--e '/^INPUT/!d' \
--e 's!^INPUT \(\./\)\{0,1\}!!' \
--e 's/[[:space:]]/\\ /g' \
--e 's/\(.*\)\.aux$$/\1.tex/' \
--e '/\.tex$$/b addtargets' \
--e '/\.cls$$/b addtargets' \
--e '/\.sty$$/b addtargets' \
--e '/\.pstex_t$$/b addtargets' \
--e '/\.dot_t$$/b addtargets' \
--e 'd' \
--e ':addtargets' \
--e 's!^!$2: !' \
-$1 | $(SORT) | $(UNIQ)
+(##include_sed("$(SED)", "get-inputs.sed", "'$1'", target_files="$2")
+##) | $(SORT) | $(UNIQ)
 endef
 
 # $(call get-missing-inputs,<log file>,<target files>)
 define get-missing-inputs
-(##include_sed("$(SED)", "get-missing-inputs.sed", "'$1'")
+(##include_sed("$(SED)", "get-missing-inputs.sed", "'$1'", target_files="$2")
 ##) | $(SORT) | $(UNIQ)
 endef
 
