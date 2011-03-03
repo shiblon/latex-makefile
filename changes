@@ -1,4 +1,8 @@
+Chris Monson (2011-03-03):
+* Bumped version to 2.2.0-rc11
+* Issue 112: Fixed regression introduced by use of cygpath (ugly warnings)
 Chris Monson (2011-02-03):
+* Bumped version to 2.2.0-rc10
 * Issue 112: Added path normalization for cygwin systems
 * Fixed a bug in get-missing-inputs where we weren't specifying target files
 Chris Monson (2011-01-24):
