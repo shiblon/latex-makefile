@@ -2,7 +2,6 @@ Chris Monson (2011-03-15):
 * Issue 119: Annoying warning from which if Gnuplot not installed.
 * Fixed catchall error output to show more info from the log.  Cutting off the
     first line is too jarring.
-* Issue 117: Conditional support for inkscape --export-latex
 Chris Monson (2011-03-03):
 * Bumped version to 2.2.0-rc11
 * Issue 112: Fixed regression introduced by use of cygpath (ugly warnings)

@@ -131,8 +131,6 @@ VIEW_GRAPHICS	?= display
 # otherwise the function is just a no-op.  Issue 112 has details.
 USE_CYGPATH := $(if $(shell $(WHICH) $(CYGPATH) 2>/dev/null),yes,)
 
-INKSCAPE_LATEX_OPTION := $(if $(shell $(INKSCAPE) --help 2>/dev/null | $(EGREP) 'export-latex'),--export-latex,)
-
 # $(call get-cygpath,<path>)
 define get-cygpath
 $(shell $(CYGPATH) -u "$(shell $(CYGPATH) -s -w $1)")
@@ -1368,7 +1366,7 @@ convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 # Converts svg files into .eps files
 #
 # $(call convert-svg,<svg file>,<eps/pdf file>,[gray])
-convert-svg	= $(INKSCAPE) $(INKSCAPE_LATEX_OPTION) --without-gui $(if $(filter %.pdf,$2),--export-pdf,--export-eps)='$2' '$1'
+convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf,--export-eps)='$2' '$1'
 
 # Converts xvg files into .eps files
 #
