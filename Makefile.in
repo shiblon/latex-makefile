@@ -129,7 +129,7 @@ VIEW_GRAPHICS	?= display
 
 # If cygpath is present, then we create a path-norm function that uses it,
 # otherwise the function is just a no-op.  Issue 112 has details.
-USE_CYGPATH := $(if $(shell $(WHICH) $(CYGPATH) >/dev/null 2>&1),yes,)
+USE_CYGPATH := $(if $(shell $(WHICH) $(CYGPATH) 2>/dev/null),yes,)
 
 # $(call get-cygpath,<path>)
 define get-cygpath
@@ -160,7 +160,7 @@ FIXED_ECHO	:= $(if $(findstring -n,$(shell $(ECHO) -n)),$(shell which echo),$(EC
 ECHO		:= $(if $(FIXED_ECHO),$(FIXED_ECHO),$(ECHO))
 
 define determine-gnuplot-output-extension
-$(if $(shell $(WHICH) $(GNUPLOT)),
+$(if $(shell $(WHICH) $(GNUPLOT) 2>/dev/null),
      $(if $(findstring unknown or ambiguous, $(shell $(GNUPLOT) -e "set terminal pdf" 2>&1)),
 	  eps, pdf),
      none)
@@ -1017,7 +1017,7 @@ $(SED) \
 -e 's/ \{1,\}$$//' \
 $1 | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
--e 's!^!$2: !' | \
+-e 's!^!$2: !' \
 \$(SORT) | $(UNIQ)
 endef
 
