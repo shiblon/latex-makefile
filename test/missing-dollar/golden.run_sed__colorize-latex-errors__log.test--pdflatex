@@ -1,4 +1,22 @@
-<E>./test.tex:7: Missing $ inserted..  See log for more information.<R>
-<E>./test.tex:7: Extra }, or forgotten $..  See log for more information.<R>
-<E>./test.tex:8: Missing $ inserted..  See log for more information.<R>
+<E>./test.tex:7: Missing $ inserted.<inserted text> 
+                $
+l.7 ó
+      
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.<R>
+<E>./test.tex:7: Extra }, or forgotten $.\maththreesuperior ->{^3}
+                         
+l.7 ó
+      
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.<R>
+<E>./test.tex:8: Missing $ inserted.<inserted text> 
+                $
+l.8 
+    
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.<R>
 

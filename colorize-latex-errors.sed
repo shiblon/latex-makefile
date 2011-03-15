@@ -136,12 +136,11 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 }
 
 # Finally, we handle anything that looks remotely like an error that we
-# haven't already caught.  We have to do this twice because POSIX sed doesn't
-# handle things like ^|\n well.  In fact, it doesn't do branching expressions
-# at all, and it can't match \n in a class.
-/.*\(!!! [^[:cntrl:]]*\).*/{
-  # Take only the first line and indicate that more info is in the log
-  s//\1.  See log for more information./
+# haven't already caught.
+/.*\(!!! .*\)/{
+  s//\1/
+  s/[[:cntrl:]]//
+  s/[[:cntrl:]]$//
   b error
 }
 
