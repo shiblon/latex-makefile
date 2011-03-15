@@ -1,4 +1,5 @@
 Chris Monson (2011-03-15):
+* Bumped version to 2.2.0-rc12
 * Issue 119: Annoying warning from which if Gnuplot not installed.
 * Fixed catchall error output to show more info from the log.  Cutting off the
     first line is too jarring.
