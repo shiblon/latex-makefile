@@ -1307,14 +1307,13 @@ $(GS) \
 	-dSAFER \
 	-dNOPAUSE \
 	-dBATCH \
-	-sDEVICE=$(if $(filter $(GPI_OUTPUT_EXTENSION),pdf),pdfwrite,pswrite) \
+	-sDEVICE=$(if $(filter pdf,$(GPI_OUTPUT_EXTENSION)),pdfwrite,pswrite) \
 	-sOutputFile='$2' \
 	-sstdout=%stderr \
 	-dCompatibilityLevel=1.5 \
 	-dPDFSETTINGS=/prepress \
 	-c .setpdfwrite \
 	-f '$1'
-
 endef
 
 # $(call convert-gpi,<gpi file>,<output file>,[gray])
