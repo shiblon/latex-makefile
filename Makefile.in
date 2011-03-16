@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc12
+version		:= 2.2.0-rc13
 #
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
@@ -1017,8 +1017,8 @@ $(SED) \
 -e 's/ \{1,\}$$//' \
 $1 | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
--e 's!^!$2: !' \
-\$(SORT) | $(UNIQ)
+-e 's!^!$2: !' | \
+$(SORT) | $(UNIQ)
 endef
 
 # Makes a an aux file that only has stuff relevant to the target in it
@@ -1299,6 +1299,24 @@ $(call gpi-font-entry,$2,$(call gpi-fontsize,$1,$2)) \
 $(call gpi-monochrome,$1,$3)
 endef
 
+# $(call gpi-embed-pdf-fonts,<input file>,<output file>)
+#
+define gpi-embed-pdf-fonts
+$(GS) \
+	-q \
+	-dSAFER \
+	-dNOPAUSE \
+	-dBATCH \
+	-sDEVICE=$(if $(filter $(GPI_OUTPUT_EXTENSION),pdf),pdfwrite,pswrite) \
+	-sOutputFile='$2' \
+	-sstdout=%stderr \
+	-dCompatibilityLevel=1.5 \
+	-dPDFSETTINGS=/prepress \
+	-c .setpdfwrite \
+	-f '$1'
+
+endef
+
 # $(call convert-gpi,<gpi file>,<output file>,[gray])
 #
 define convert-gpi
@@ -1314,6 +1332,12 @@ success=1; \
 if ! $(GNUPLOT) $$fnames 2>$1.log; then \
 	$(call colorize-gnuplot-errors,$1.log); \
 	success=0; \
+else \
+	if ! $(call gpi-embed-pdf-fonts,$2,$2.embed.make); then \
+		success = 0; \
+	else \
+		$(call move-if-exists,$2.embed.make,$2); \
+	fi; \
 fi; \
 $(if $(gpi_sed),$(call remove-temporary-files,$1.temp.make);,) \
 $(call remove-temporary-files,$1head.make); \

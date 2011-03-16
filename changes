@@ -1,3 +1,7 @@
+Chris Monson (2011-03-16):
+* Bumped version to 2.2.0-rc13
+* Fixed a bug in kspewhich invocation - random characters and a missing pipe.
+* Added font embedding to gnuplot output.
 Chris Monson (2011-03-15):
 * Bumped version to 2.2.0-rc12
 * Issue 119: Annoying warning from which if Gnuplot not installed.
