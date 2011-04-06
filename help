@@ -38,7 +38,7 @@ STANDARD OPTIONS:
 
 STANDARD AUXILIARY FILES:
 
-     Makefile.ini
+     Variables.ini (formerly Makefile.ini, which still works)
 
          This file can contain variable declarations that override various
          aspects of the makefile.  For example, one might specify
@@ -56,26 +56,25 @@ STANDARD AUXILIARY FILES:
          There are numerous variables in this file that can be overridden in
          this way.  Search for '?=' to find them all.
 
-         Also, you can put arbitrary targets into it if, for example, you
-         want your source built from something else, e.g.:
+         The Variables.ini is imported before *anything else* is done, so go
+         wild with your ideas for changes to this makefile in there.  It
+         makes it easy to test them before submitting patches.
+
+         If you're adding rules or targets, however, see Targets.ini below.
+
+     Targets.ini
+
+         This is included much later in the makefile, after all variables and
+         targets are defined.  This is where you would put new make rules,
+         e.g.,
 
          generated.tex: generating_script.weird_lang depA depB
             ./generating_script.weird_lang > $$@
 
-         Note that if you are not careful, you can override the default
-         target (what happens when you type "make" without arguments), so if
-         you do use Makefile.ini, you probably want to start it with
-         something like the following line:
-
-         default: all
-
-         Since the first target in any makefile is automatically the default,
-         and the makefile already has a sensible "all" target, this will do
-         what you want.
-
-         The Makefile.ini is imported before *anything else* is done, so go
-         wild with your ideas for changes to this makefile in there.  It
-         makes it easy to test them before submitting patches.
+         In this file, you have access to all of the variables that the
+         makefile creates, like $(onlysources.tex).  While accessing those can
+         be somewhat brittle (they are implementation details and may change),
+         it is a great way to test your ideas when submitting feature requests.
 
 STANDARD ENVIRONMENT VARIABLES:
 

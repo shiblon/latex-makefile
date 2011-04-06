@@ -1,3 +1,9 @@
+Chris Monson (2011-04-06):
+* Bumped version to 2.2.0-rc14
+* Issue 121: Added Targets.ini and corresponding help text for it.
+* Issue 121: Added Variables.ini (Makefile.ini still works, though).
+* Issue 121: Added .DEFAULT_GOAL optional setting.
+* Issue 120: xindy compatibility
 Chris Monson (2011-03-16):
 * Bumped version to 2.2.0-rc13
 * Fixed a bug in kspewhich invocation - random characters and a missing pipe.

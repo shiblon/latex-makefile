@@ -5,13 +5,18 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.0-rc13
+version		:= 2.2.0-rc14
 #
+.DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
 # so that you can use stuff like ?= to get proper override behavior.
 .PHONY: Makefile GNUmakefile Makefile.ini $(HOME)/.latex-makefile/Makefile.ini
 -include Makefile.ini
 -include $(HOME)/.latex-makefile/Makefile.ini
+# Better names for these things
+.PHONY: Variables.ini $(HOME)/.latex-makefile/Variables.ini
+-include Variables.ini
+-include $(HOME)/.latex-makefile/Variables.ini
 #
 # This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
 # BUILD_STRATEGY := latex
@@ -97,6 +102,7 @@ PDFLATEX	?= pdflatex
 XELATEX		?= xelatex
 EPSTOPDF	?= epstopdf
 MAKEINDEX	?= makeindex
+XINDY		?= xindy
 KPSEWHICH	?= kpsewhich
 GS		?= gs
 # = OPTIONAL PROGRAMS =
@@ -126,6 +132,10 @@ PSNUP		?= psnup
 VIEW_POSTSCRIPT	?= gv
 VIEW_PDF	?= xpdf
 VIEW_GRAPHICS	?= display
+
+# Xindy glossaries
+XINDYLANG	?= english
+XINDYENC	?= utf8
 
 # If cygpath is present, then we create a path-norm function that uses it,
 # otherwise the function is just a no-op.  Issue 112 has details.
@@ -1093,6 +1103,15 @@ define colorize-makeindex-errors
 ##)
 endef
 
+# Colorize xindy errors
+# $(call colorize-xindy-errors,<log file>)
+define colorize-xindy-errors
+$(SED) \
+-e 's/^xindy:.*/$(C_ERROR)&$(C_RESET)/p' \
+-e 'd' \
+'$1'
+endef
+
 # Colorize epstopdf errors
 #
 # $(call colorize-epstopdf-errors,<log file>)
@@ -1224,6 +1243,18 @@ define run-makeindex
 success=1; \
 if ! $(MAKEINDEX) -q $1 -t $3 -o $2 $4 > /dev/null || $(EGREP) -q '^!!' $3; then \
 	$(call colorize-makeindex-errors,$3); \
+	$(RM) -f '$2'; \
+	success=0; \
+fi; \
+[ "$$success" = "1" ] && $(sh_true) || $(sh_false);
+endef
+
+
+# $(call run-xindy,<input>,<output>,<module>,<log>)
+define run-xindy
+success=1; \
+if ! $(XINDY) -q -o $2 -L $(XINDYLANG) -C $(XINDYENC) -I xindy -M $3 -t $4 $1 > /dev/null || $(EGREP) -q '^xindy:' $4; then \
+	$(call colorize-xindy-errors,$4); \
 	$(RM) -f '$2'; \
 	success=0; \
 fi; \
@@ -1795,6 +1826,11 @@ endif
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call run-makeindex,$<,$@,$*.glg,-s $*.ist)
 
+# Create a glossary file from a glossary input formatted for xindy
+%.gls:	%.glo %.tex %.xdy
+	$(QUIET)$(call echo-build,$<,$@)
+	$(QUIET)$(call run-xindy,$<,$@,$*,$*.glg)
+
 # Create the glossary file from a nomenclature file
 %.gls:	%.glo %.tex nomencl.ist
 	$(QUIET)$(call echo-build,$<,$@)
@@ -2258,4 +2294,9 @@ define output-dependency-graph
 		$(ECHO) "Cannot determine the name of this makefile."; \
 	fi
 endef
+#
+.PHONY: Targets.ini $(HOME)/.latex-makefile/Targets.ini
+-include Targets.ini
+-include $(HOME)/.latex-makefile/Targets.ini
+#
 # vim: noet sts=0 sw=8 ts=8
