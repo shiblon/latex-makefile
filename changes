@@ -1,3 +1,8 @@
+Chris Monson (2011-05-19):
+* Bumped version to 2.2.0-rc15
+* Issue 125: infinite recursion with nomenclature files
+* Issue 125: removed .d as a target for .nls in get-log-index
+* Cleaned up invocation of run-makeindex to take an optional .ist instead of flags.
 Chris Monson (2011-04-06):
 * Bumped version to 2.2.0-rc14
 * Issue 121: Added Targets.ini and corresponding help text for it.
