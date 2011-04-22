@@ -1,3 +1,6 @@
+Chris Monson (2011-05-22):
+* Bumped version to 2.2.1-alpha1
+* Issue 105: add support for format file detection and compilation
 Chris Monson (2011-05-20):
 * Bumped version to 2.2.0 (release!)
 Chris Monson (2011-05-19):
