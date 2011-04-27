@@ -1,9 +1,16 @@
-Chris Monson (2011-05-22):
+Chris Monson (2011-04-27):
+* Bumped version to 2.2.1-alpha2
+* Issue 126: Broken log parsing for latex pipeline
+* Fixed month in recent changes (had May, should be April)
+* Noticed problems with some existing parsing (colorizing errors, notably) and
+    fixed them.
+* New test case for specified graphic extensions.
+Chris Monson (2011-04-22):
 * Bumped version to 2.2.1-alpha1
 * Issue 105: add support for format file detection and compilation
-Chris Monson (2011-05-20):
+Chris Monson (2011-04-20):
 * Bumped version to 2.2.0 (release!)
-Chris Monson (2011-05-19):
+Chris Monson (2011-04-19):
 * Bumped version to 2.2.0-rc15
 * Issue 125: infinite recursion with nomenclature files
 * Issue 125: removed .d as a target for .nls in get-log-index

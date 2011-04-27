@@ -71,10 +71,16 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   }
   # Remove the paragraph prefix
   s/::0::!!! //
+  # Deal with missing eps files specially (they are usually included graphics,
+  # and are caught by the graphics inclusion logic anyway).  Note that we don't
+  # do the same for pdflatex-included graphics, since those are always included
+  # as stems, and the extension is dynamically determined.  This only shows up
+  # in .eps inclusion using plain latex.
+  /File .*\.e\{0,1\}ps' not found/b skip
   # Handle file missing errors where we are looking for a particular extension
   /could not locate.*any of these extensions:/{
     # We don't do anything with these - they are missing graphics.
-    d
+    b skip
     # NOTE: this is here just in case we need it later.  In general, we don't
     # treat missing graphics as an error because they end up as dependencies,
     # which causes other errors in other ways.  If we colorize this, it ends up
@@ -86,6 +92,8 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   }
   # Handle everything else
   s/\(not found\.\).*/\1/
+  # Add the !!! prefix back, to allow highlighting to occur.
+  s/^/!!! /
   b error
 }
 
@@ -141,10 +149,12 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   s//\1/
   s/[[:cntrl:]]//
   s/[[:cntrl:]]$//
+  /Cannot determine size of graphic .*(no BoundingBox)/b skip
   b error
 }
 
 # Anything not dealt with above gets dumped into the trash.
+:skip
 d
 
 # If we have an error (starts with !!! and we get this far), then strip the

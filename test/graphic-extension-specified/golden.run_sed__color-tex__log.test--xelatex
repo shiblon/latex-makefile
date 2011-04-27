@@ -1,9 +1,9 @@
-<W>LaTeX Warning: File `badextension.epp' not found on input line 8.<R>
+<W>LaTeX Warning: File `badextension.eps' not found on input line 6.<R>
 
-<E>./test.tex:8: Unable to load picture or PDF file 'badextension.epp'.
+<E>./test.tex:6: Unable to load picture or PDF file 'badextension.eps'.
 <to be read again> 
                    }
-l.8 \includegraphics{badextension.epp}
+l.6 \includegraphics{badextension.eps}
                                       
 The requested image couldn't be read because 
 the file was not found.<R>

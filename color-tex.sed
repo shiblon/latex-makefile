@@ -38,9 +38,10 @@ ${
     b end
   }
   / *LaTeX Error:.*/{
-    s/.*\( *LaTeX Error:.*\)/(##color_error##)\1(##color_reset##)/
-    b end
+    s/.*\( *LaTeX Error:.*\)/\1/
+    b error
   }
+  /^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:/b error
   /.*Warning:.*/{
     s//(##color_warning##)&(##color_reset##)/
     b end
@@ -54,6 +55,11 @@ ${
     b end
   }
   d
+
+  :error
+  s/.*/(##color_error##)&(##color_reset##)/
+  b end
+
   :end
   G
 }

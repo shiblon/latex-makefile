@@ -1,3 +1,11 @@
+<E>./test.tex:8: Missing $ inserted.
+<inserted text> 
+                $
+l.8 
+    
+I've inserted a begin-math/end-math symbol since I think
+you left one out. Proceed, with fingers crossed.<R>
+
 <S>Success!<R>  Wrote <P>1<R> page, <P>18606<R> bytes to <S>test.pdf<R>
 
 

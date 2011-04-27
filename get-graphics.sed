@@ -5,6 +5,8 @@
 # short-circuit paragraph logic and just get the target off the line.
 /^File: \(.*\) Graphic file (type [^)]*)/{
   s//\1/
+  # If the file has a ps extension, kill that first.
+  s/\.e\{0,1\}ps$//
   b addtargets
 }
 
@@ -33,8 +35,23 @@
   s/[[:space:]]\{1,\}/ /g
   # Remove information before filename
   s/^.*File `//
-  # Remove suffix and get extensions
-  s/' not found\..*extensions: \([^[:space:]]*\).*/::::\1/
+  # If we have a pdflatex-style error (specifying which extensions are
+  # allowed), handle that.
+  /extensions: /{
+    # Remove suffix and get extensions
+    s/' not found\..*extensions: \([^[:space:]]*\).*/::::\1/
+    b fileparsed
+  }
+  # graphic file names with extensions specified in the .tex file (bad news,
+  # but it happens, especially with old latex-dvi-ps pipelines) don't give the
+  # same error, so we generate an empty extension list.
+  s/' not found\..*/::::/
+  :fileparsed
+
+  # If there are no extensions, that typically means that an extension was
+  # specified.  We only want stems (extensions determined dynamically), so
+  # remove it (but only do so for eps includes - pdf stuff is handled differently).
+  s/\.e\{0,1\}ps::::$/::::/
   # Now we have filename::::extensionlist in the pattern space
   # Place in the hold buffer, add missing stem comment
   h
