@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha2
+version		:= 2.2.1-alpha3
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -1024,16 +1024,10 @@ endef
 #
 # $(call get-bibs,<aux file>,<targets>)
 define get-bibs
+(##include_sed("$(SED)", "get-bibs.sed", "'$1'", target_files="$2")
+##) | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
--e '/^\\bibdata/!d' \
--e 's/\\bibdata{\([^}]*\)}/\1,/' \
--e 's/,\{2,\}/,/g' \
--e 's/[[:space:]]/\\&/g' \
--e 's/,/.bib /g' \
--e 's/ \{1,\}$$//' \
-$1 | $(XARGS) $(KPSEWHICH) '#######' | \
-$(SED) \
--e 's!^!$2: !' | \
+-e 's!.*!$2: $$(call path-norm,&)!' | \
 $(SORT) | $(UNIQ)
 endef
 
@@ -1437,6 +1431,13 @@ convert-xvg	= $(XMGRACE) '$1' -printfile - -hardcopy -hdevice $(if $3,-mono,) EP
 #
 # $(call convert-epsgz,<eps.gz file>,<eps file>,[gray])
 convert-epsgz	= $(GUNZIP) -c '$1' $(if $3,| $(call kill-ps-color)) > '$2'
+
+# Generates a .bb file from a .eps file (sometimes latex really wants this)
+#
+# $(call eps-bb,<eps file>,<eps.bb file>)
+define eps-bb
+(##include_sed("$(SED)", "eps-bb.sed", "$1",) ##) > "$2"
+endef
 
 # Converts .eps files into .eps files (usually a no-op, but can make grayscale)
 #
@@ -1975,6 +1976,10 @@ ifneq "$(default_graphic_extension)" "pdf"
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-png,$<,$@,$(GRAY))
 endif
+
+%.eps.bb: %.eps
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call eps-bb,$<,$@)
 
 %.eps: %.eps.gz $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)

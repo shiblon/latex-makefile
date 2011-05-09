@@ -1,3 +1,6 @@
+Chris Monson (2011-05-09):
+* Bumped version to 2.2.1-alpha3
+* Issue 112: Cygpath fixes
 Chris Monson (2011-04-27):
 * Bumped version to 2.2.1-alpha2
 * Issue 126: Broken log parsing for latex pipeline
@@ -5,6 +8,7 @@ Chris Monson (2011-04-27):
 * Noticed problems with some existing parsing (colorizing errors, notably) and
     fixed them.
 * New test case for specified graphic extensions.
+* Added .bb generation for .eps files (when extensionless in latex pipeline)
 Chris Monson (2011-04-22):
 * Bumped version to 2.2.1-alpha1
 * Issue 105: add support for format file detection and compilation
