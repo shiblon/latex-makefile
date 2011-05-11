@@ -1,3 +1,6 @@
+Chris Monson (2011-05-11):
+* Bumped version to 2.2.1-alpha4
+* Issue 129: nomenclature dependency fix
 Chris Monson (2011-05-09):
 * Bumped version to 2.2.1-alpha3
 * Issue 112: Cygpath fixes

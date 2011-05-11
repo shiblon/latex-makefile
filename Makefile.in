@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha3
+version		:= 2.2.1-alpha4
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -1839,12 +1839,12 @@ endif
 	$(QUIET)$(call run-xindy,$<,$@,$*,$*.glg)
 
 # Create the glossary file from a nomenclature file
-%.gls:	%.glo %.tex nomencl.ist
+%.gls:	%.glo %.tex $(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist)
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call run-makeindex,$<,$@,$*.glg,nomencl.ist)
 
 # Create the nomenclature file
-%.nls:	%.nlo %.tex nomencl.ist
+%.nls:	%.nlo %.tex $(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist)
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call run-makeindex,$<,$@,$*.nlg,nomencl.ist)
 
