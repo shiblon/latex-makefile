@@ -939,12 +939,19 @@ endef
 # extensions (a sign that it's graphicx complaining).
 #
 # $(call get-graphics,<target file stem>)
-#.log,$(addprefix $*.,d $(build_target_extension) _graphics)
 define get-graphics
 (##include_sed("$(SED)", "get-graphics.sed", "$1.log",
 	       stem="$1",
 	       build_target_extension="$(build_target_extension)")
 ##)
+endef
+
+# Get some special comments out of the source file (e.g., paper size, beamer
+# usage, etc.)
+#
+# $(call get-source-specials,<source file name>,<output file>)
+define get-source-specials
+(##include_sed("$(SED)", "get-source-specials.sed", "$1")##) > '$2'
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
@@ -1363,10 +1370,10 @@ if ! $(GNUPLOT) $$fnames 2>$1.log; then \
 	$(call colorize-gnuplot-errors,$1.log); \
 	success=0; \
 else \
-	if ! $(call gpi-embed-pdf-fonts,$2,$2.embed.make); then \
+	if ! $(call gpi-embed-pdf-fonts,$2,$2.embed.tmp.make); then \
 		success = 0; \
 	else \
-		$(call move-if-exists,$2.embed.make,$2); \
+		$(call move-if-exists,$2.embed.tmp.make,$2); \
 	fi; \
 fi; \
 $(if $(gpi_sed),$(call remove-temporary-files,$1.temp.make);,) \
@@ -1567,10 +1574,10 @@ $(call colorize-dot-errors,$3)
 endef
 
 # Convert DVI to Postscript
-# $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>])
+# $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>],[<beamer info>])
 make-ps		= \
-	$(DVIPS) -z -o '$2' $(if $(filter-out BEAMER,$4),-t$(firstword $4),) '$1' \
-		$(if $(filter BEAMER,$4),| $(enlarge_beamer)) > $3 2>&1
+	$(DVIPS) -z -o '$2' $(if $4,-t$(strip $4),) '$1' \
+		$(if $5,| $(enlarge_beamer)) > $3 2>&1
 
 # Convert Postscript to PDF
 # $(call make-pdf,<ps file>,<pdf file>,<log file>,<embed file>)
@@ -1672,10 +1679,11 @@ ifeq "$(strip $(BUILD_STRATEGY))" "latex"
 	fi
 
 .SECONDARY: $(all_ps_targets)
-%.ps: %.dvi %.paper.make
+%.ps: %.dvi %.paper.make %.beamer.make
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call make-ps,$<,$@.temp,$@.log,\
-			$(firstword $(shell $(CAT) $*.paper.make))); \
+			$(strip $(shell $(CAT) $*.paper.make)),
+			$(strip $(shell $(CAT) $*.beamer.make))); \
 	if [ x"$$?" = x"0" ]; then \
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
 	    $(RM) -f '$@'; \
@@ -2082,42 +2090,27 @@ endif
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call make-gpi-d,$<,$@)
 
+# Get source specials, e.g., paper size and special %% comments.
+%.specials.make: %.tex
+	$(QUIET)$(call get-source-specials,$<,$@)
+
+# Get info about whether to enlarge beamer postscript files (for use with
+# dvips, and requires a special comment in the source file).
+.SECONDARY: $(addsuffix .specials.make,$(all_stems_ss))
+%.beamer.make: %.specials.make
+	$(QUIET)$(SED) -e 's/^BEAMER.*/BEAMER/p' -e 'd' '$<' > '$@'
+
 # Store the paper size for this document -- note that if beamer is used we set
 # it to the special BEAMER paper size.  We only do this, however, if the
 # special comment exists, in which case we enlarge the output with psnup.
 #
 #	The paper size is extracted from a documentclass attribute.
-%.paper.make: %.tex
-	$(QUIET)$(SED) \
-	-e '/\\documentclass/,/}/{' \
-	-e '  s/%.*//' \
-	-e '  H' \
-	-e '  /}/{' \
-	-e '    s/.*//' \
-	-e '    x' \
-	-e '    /\\documentclass/!d' \
-	-e '    s/[\n[:space:]]*//g' \
-	-e '    s/\([,{[]\)\([[:alnum:]]\{1,\}\)paper\([],}]\)/\1%-\2-%\3/g' \
-	-e '    s/\([,{[]\)\(landscape\)\([],}]\)/\1%-\2-%\3/g' \
-	-e '    s/^[^%]*%-//' \
-	-e '    s/-%[^%]*$$//' \
-	-e '    s/-%[^%]%-/ /g' \
-	-e '    p' \
-	-e '  }' \
-	-e '  d' \
-	-e '}' \
-	-e 'd' \
-	$< > $@; \
-	$(EGREP) -q '^[^%]*\\documentclass[^{]*{beamer}' $< && \
-	(\
-		$(EGREP) -q '^%%[[:space:]]*BEAMER[[:space:]]*LARGE$$' $< && \
-		$(ECHO) "BEAMER" > $@ || \
-		: > $@ \
-	) || $(sh_true)
+%.paper.make: %.specials.make
+	$(QUIET)$(SED) -e 's/^PAPERSIZE=//p' -e 'd' '$<' > '$@'
 
 # Store embedding instructions for this document using a special comment
-%.embed.make: %.tex
-	$(QUIET)$(EGREP) '^%%[[:space:]]*NO[[:space:]]*EMBED[[:space:]]*$$' $< \
+%.embed.make: %.specials.make
+	$(QUIET)$(EGREP) '^NOEMBED$$' $< \
 		&& $(ECHO) '' > $@ \
 		|| $(ECHO) '1' > $@;
 
