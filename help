@@ -421,6 +421,10 @@ FEATURES:
           assumes that the top-level rst file will change if you want a
           rebuild.
 
+      literate Haskell: %.lhs
+
+          Runs the lhs2tex program to generate a .tex file.
+
    Dependencies:
 
        In general, dependencies are extracted directly from LaTeX output on

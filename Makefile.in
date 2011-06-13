@@ -30,6 +30,7 @@ export LC_ALL		?= C
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
 #onlysources.tex	?= main.tex
+#onlysources.lhs	?=
 #onlysources.tex.sh	?=
 #onlysources.tex.pl	?=
 #onlysources.tex.py	?=
@@ -44,6 +45,7 @@ export LC_ALL		?= C
 #
 # If you list files here, they will be treated as _include_ files
 #includes.tex		?= file1.tex file2.tex
+#includes.lhs		?=
 #includes.tex.sh	?=
 #includes.tex.pl	?=
 #includes.tex.py	?=
@@ -114,6 +116,7 @@ TPUT		?= tput
 PERL		?= perl
 PYTHON		?= python
 RST2LATEX	?= rst2latex.py
+LHS2TEX		?= lhs2tex
 # == EPS Generation ==
 CONVERT		?= convert	# ImageMagick
 DOT		?= dot		# GraphViz
@@ -516,6 +519,7 @@ all_files.tex.sh	?= $(wildcard *.tex.sh)
 all_files.tex.pl	?= $(wildcard *.tex.pl)
 all_files.tex.py	?= $(wildcard *.tex.py)
 all_files.rst		?= $(wildcard *.rst)
+all_files.lhs		?= $(wildcard *.lhs)
 all_files.fig		?= $(wildcard *.fig)
 all_files.gpi		?= $(wildcard *.gpi)
 all_files.dot		?= $(wildcard *.dot)
@@ -563,6 +567,7 @@ files.tex.sh	:= $(call filter-buildable,tex.sh)
 files.tex.pl	:= $(call filter-buildable,tex.pl)
 files.tex.py	:= $(call filter-buildable,tex.py)
 files.rst	:= $(call filter-buildable,rst)
+files.lhs	:= $(call filter-buildable,lhs)
 files.gpi	:= $(call filter-buildable,gpi)
 files.dot	:= $(call filter-buildable,dot)
 files.fig	:= $(call filter-buildable,fig)
@@ -587,6 +592,7 @@ default_files.tex.sh	:= $(call filter-default,tex.sh)
 default_files.tex.pl	:= $(call filter-default,tex.pl)
 default_files.tex.py	:= $(call filter-default,tex.py)
 default_files.rst	:= $(call filter-default,rst)
+default_files.lhs	:= $(call filter-default,lhs)
 default_files.gpi	:= $(call filter-default,gpi)
 default_files.dot	:= $(call filter-default,dot)
 default_files.fig	:= $(call filter-default,fig)
@@ -604,15 +610,15 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
-all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,all)
+all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs,all)
 
 .PHONY: $(all_files_scripts)
 
 default_files_source	:= $(call concat-files,tex,default)
-default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst,default)
+default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs,default)
 
 files_source	:= $(call concat-files,tex)
-files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst)
+files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs)
 
 # Utility function for obtaining stems
 # $(call get-stems,suffix,[prefix])
@@ -624,6 +630,7 @@ all_stems.tex.sh	:= $(call get-stems,tex.sh,all)
 all_stems.tex.pl	:= $(call get-stems,tex.pl,all)
 all_stems.tex.py	:= $(call get-stems,tex.py,all)
 all_stems.rst		:= $(call get-stems,rst,all)
+all_stems.lhs		:= $(call get-stems,lhs,all)
 all_stems.fig		:= $(call get-stems,fig,all)
 all_stems.gpi		:= $(call get-stems,gpi,all)
 all_stems.dot		:= $(call get-stems,dot,all)
@@ -641,6 +648,7 @@ default_stems.tex.sh		:= $(call get-stems,tex.sh,default)
 default_stems.tex.pl		:= $(call get-stems,tex.pl,default)
 default_stems.tex.py		:= $(call get-stems,tex.py,default)
 default_stems.rst		:= $(call get-stems,rst,default)
+default_stems.lhs		:= $(call get-stems,lhs,default)
 default_stems.fig		:= $(call get-stems,fig,default)
 default_stems.gpi		:= $(call get-stems,gpi,default)
 default_stems.dot		:= $(call get-stems,dot,default)
@@ -658,6 +666,7 @@ stems.tex.sh		:= $(call get-stems,tex.sh)
 stems.tex.pl		:= $(call get-stems,tex.pl)
 stems.tex.py		:= $(call get-stems,tex.py)
 stems.rst		:= $(call get-stems,rst)
+stems.lhs		:= $(call get-stems,lhs)
 stems.fig		:= $(call get-stems,fig)
 stems.gpi		:= $(call get-stems,gpi)
 stems.dot		:= $(call get-stems,dot)
@@ -697,20 +706,20 @@ graphic_target_extensions	:= pdf png jpg jpeg mps tif
 endif
 
 all_stems_source	:= $(call concat-stems,tex,all)
-all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,all)
+all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs,all)
 all_stems_graphic	:= $(call concat-stems,$(graphic_source_extensions),all)
 all_stems_ss		:= $(sort $(all_stems_source) $(all_stems_script))
 all_stems_sg		:= $(sort $(all_stems_script))
 all_stems_ssg		:= $(sort $(all_stems_ss))
 
 default_stems_source	:= $(call concat-stems,tex,default)
-default_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst,default)
+default_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs,default)
 default_stems_ss	:= $(sort $(default_stems_source) $(default_stems_script))
 default_stems_sg	:= $(sort $(default_stems_script))
 default_stems_ssg	:= $(sort $(default_stems_ss))
 
 stems_source		:= $(call concat-stems,tex)
-stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py rst)
+stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs)
 stems_graphic		:= $(call concat-stems,$(graphic_source_extensions))
 stems_gg		:= $(sort $(stems_graphic))
 stems_ss		:= $(sort $(stems_source) $(stems_script))
@@ -1886,6 +1895,10 @@ endif
 	$(call run-script,$(RST2LATEX)\
 		--documentoptions=letterpaper\
 		$(if $(RST_STYLE_FILE),--stylesheet=$(RST_STYLE_FILE),),$<,$@)
+
+%.tex::	%.lhs
+	$(QUIET)\
+	$(call run-script,$(LHS2TEX) -o "$@" "%<")
 
 #
 # GRAPHICS TARGETS
