@@ -402,7 +402,7 @@ endif
 # Get the name of this makefile (always right in 3.80, often right in 3.79)
 # This is only really used for documentation, so it isn't too serious.
 ifdef MAKEFILE_LIST
-this_file	:= $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+this_file	:= $(firstword $(MAKEFILE_LIST))
 else
 this_file	:= $(wildcard GNUmakefile makefile Makefile)
 endif

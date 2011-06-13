@@ -1,3 +1,5 @@
+Chris Monson (2011-06-13):
+* Issue 134: name of self corrected for dependency graph
 Chris Monson (2011-05-31):
 * Rewrote specials (%%COMMENTS) to be easier to extend and parse.
 Chris Monson (2011-05-11):
