@@ -1,4 +1,6 @@
 Chris Monson (2011-06-13):
+* Fixed problems with detecting graphics for very long source names.
+Chris Monson (2011-06-13):
 * Issue 134: name of self corrected for dependency graph
 * Issue 133: Added literate Haskell support (lhs2tex)
 Chris Monson (2011-05-31):

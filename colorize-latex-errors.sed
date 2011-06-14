@@ -27,7 +27,7 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 
 # Graphics files that go missing need only two paragraphs, and the
 # filename:line: is at the beginning of the error message.
-/^!!! .* LaTeX Error: File /{
+/^!!! .*[[:space:][:cntrl:]]LaTeX[[:space:][:cntrl:]]Error:[[:space:][:cntrl:]]*File /{
   # Get rid of newlines first, since latex error output is split on column
   # boundaries regardless of context.
   s/\n//g

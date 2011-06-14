@@ -12,7 +12,7 @@
 
 #(##include("paragraphs.sed")##)
 
-/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}: LaTeX Error: File `/{
+/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:[[:space:][:cntrl:]]*LaTeX[[:space:][:cntrl:]]*Error:[[:space:][:cntrl:]]*File `/{
   # Get rid of trailing newlines for every paragraph, since LaTeX errors are
   # often split at arbitrary (not word) boundaries.
   s/\n//g
