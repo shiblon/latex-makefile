@@ -1,4 +1,5 @@
 Chris Monson (2011-06-13):
+* Bumped version to 2.2.1-alpha5
 * Fixed problems with detecting graphics for very long source names.
 Chris Monson (2011-06-13):
 * Issue 134: name of self corrected for dependency graph
