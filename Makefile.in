@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha5
+version		:= 2.2.1-alpha6
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -144,13 +144,8 @@ XINDYENC	?= utf8
 # otherwise the function is just a no-op.  Issue 112 has details.
 USE_CYGPATH := $(if $(shell $(WHICH) $(CYGPATH) 2>/dev/null),yes,)
 
-# $(call get-cygpath,<path>)
-define get-cygpath
-$(shell $(CYGPATH) -u "$(shell $(CYGPATH) -s -w $1)")
-endef
-
 define path-norm
-$(if $(USE_CYGPATH),$(call get-cygpath,$1),$1)
+$(if $(USE_CYGPATH),$(shell $(CYGPATH) -u "$1"),$1)
 endef
 
 # Command options for embedding fonts and postscript->pdf conversion
@@ -586,6 +581,10 @@ files.eps	:= $(call filter-buildable,eps)
 # files in the end.
 .SECONDARY:	$(patsubst %.fig,%.pstex,$(files.fig))
 
+# Make all .tex targets secondary that result .rst and .lhs:
+.SECONDARY:	$(patsubst %.rst,%.tex,$(files.rst))
+.SECONDARY:	$(patsubst %.lhs,%.tex,$(files.lhs))
+
 # Top level sources that are built by default targets
 default_files.tex	:= $(call filter-default,tex)
 default_files.tex.sh	:= $(call filter-default,tex.sh)
@@ -610,15 +609,18 @@ concat-files	= $(foreach s,$1,$($(if $2,$2_,)files.$s))
 
 # Useful file groupings
 all_files_source	:= $(call concat-files,tex,all)
-all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs,all)
+all_files_source_gen	:= $(call concat-files,rst rhs,all)
+all_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py,all)
 
 .PHONY: $(all_files_scripts)
 
-default_files_source	:= $(call concat-files,tex,default)
-default_files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs,default)
+default_files_source		:= $(call concat-files,tex,default)
+default_files_source_gen	:= $(call concat-files,rhs lhs,default)
+default_files_scripts		:= $(call concat-files,tex.sh tex.pl tex.py,default)
 
-files_source	:= $(call concat-files,tex)
-files_scripts	:= $(call concat-files,tex.sh tex.pl tex.py rst lhs)
+files_source		:= $(call concat-files,tex)
+files_source_gen	:= $(call concat-files,rst lhs)
+files_scripts		:= $(call concat-files,tex.sh tex.pl tex.py)
 
 # Utility function for obtaining stems
 # $(call get-stems,suffix,[prefix])
@@ -706,24 +708,27 @@ graphic_target_extensions	:= pdf png jpg jpeg mps tif
 endif
 
 all_stems_source	:= $(call concat-stems,tex,all)
-all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs,all)
+all_stems_source_gen	:= $(call concat-stems,rst lhs,all)
+all_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py,all)
 all_stems_graphic	:= $(call concat-stems,$(graphic_source_extensions),all)
-all_stems_ss		:= $(sort $(all_stems_source) $(all_stems_script))
-all_stems_sg		:= $(sort $(all_stems_script))
+all_stems_ss		:= $(sort $(all_stems_source) $(all_stems_source_gen) $(all_stems_script))
+all_stems_sg		:= $(sort $(all_stems_script) $(all_stems_source_gen))
 all_stems_ssg		:= $(sort $(all_stems_ss))
 
-default_stems_source	:= $(call concat-stems,tex,default)
-default_stems_script	:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs,default)
-default_stems_ss	:= $(sort $(default_stems_source) $(default_stems_script))
-default_stems_sg	:= $(sort $(default_stems_script))
+default_stems_source		:= $(call concat-stems,tex,default)
+default_stems_source_gen	:= $(call concat-stems,rst lhs,default)
+default_stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py,default)
+default_stems_ss	:= $(sort $(default_stems_source) $(default_stems_source_gen) $(default_stems_script))
+default_stems_sg	:= $(sort $(default_stems_script) $(default_stems_source_gen))
 default_stems_ssg	:= $(sort $(default_stems_ss))
 
 stems_source		:= $(call concat-stems,tex)
-stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py rst lhs)
+stems_source_gen	:= $(call concat-stems,rst lhs)
+stems_script		:= $(call concat-stems,tex.sh tex.pl tex.py)
 stems_graphic		:= $(call concat-stems,$(graphic_source_extensions))
 stems_gg		:= $(sort $(stems_graphic))
-stems_ss		:= $(sort $(stems_source) $(stems_script))
-stems_sg		:= $(sort $(stems_script))
+stems_ss		:= $(sort $(stems_source) $(stems_source_gen) $(stems_script))
+stems_sg		:= $(sort $(stems_script) $(stems_source_gen))
 stems_ssg		:= $(sort $(stems_ss))
 
 # Calculate names that can generate the need for an include file.  We can't
@@ -1248,8 +1253,17 @@ endef
 
 # LaTeX invocations
 #
-# $(call latex,<tex file>,[<extra LaTeX args>])
-run-latex	= $(latex_build_program) -interaction=batchmode -file-line-error $(if $2,$2,) $1 > /dev/null
+# Note that we use
+#
+#  -recorder: generates .fls files for things that are input and output
+#  -jobname: to make sure that .fls files are named after the source that created them
+#  -file-line-error: to make sure that we have good line information for error output
+#  -interaction=batchmode: so that we don't stop on errors (we'll parse logs for that)
+#
+# $(call latex,<tex file stem, e.g., $*>,[extra LaTeX args])
+define run-latex
+$(latex_build_program) -jobname='$1' -interaction=batchmode -file-line-error $(if $2,$2,) $1 > /dev/null
+endef
 
 # $(call latex-color-log,<LaTeX stem>)
 latex-color-log	= $(color_tex) $1.log
@@ -1856,12 +1870,12 @@ endif
 	$(QUIET)$(call run-xindy,$<,$@,$*,$*.glg)
 
 # Create the glossary file from a nomenclature file
-%.gls:	%.glo %.tex $(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist)
+%.gls:	%.glo %.tex $(call path-norm,$(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist))
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call run-makeindex,$<,$@,$*.glg,nomencl.ist)
 
 # Create the nomenclature file
-%.nls:	%.nlo %.tex $(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist)
+%.nls:	%.nlo %.tex $(call path-norm,$(shell $(KPSEWHICH) nomencl.ist || $(ECHO) nomencl.ist))
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call run-makeindex,$<,$@,$*.nlg,nomencl.ist)
 
@@ -1869,7 +1883,7 @@ endif
 %.fmt:	%.tex
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)\
-	$(call run-latex,$*,-ini -jobname='$*' "&$(latex_build_program) $*.tex\dump"); \
+	$(call run-latex,$*,-ini "&$(latex_build_program) $*.tex\dump"); \
 	fatal=`$(call colorize-latex-errors,$*.log)`; \
 	if [ x"$$fatal" != x"" ]; then \
 		$(ECHO) "$$fatal"; \
@@ -1898,7 +1912,8 @@ endif
 
 %.tex::	%.lhs
 	$(QUIET)\
-	$(call run-script,$(LHS2TEX) -o "$@" "%<")
+	function run_lhs2tex() { $(LHS2TEX) -o "$$2" "$$1"; }; \
+	$(call run-script,run_lhs2tex,$<,$@)
 
 #
 # GRAPHICS TARGETS
@@ -2060,7 +2075,7 @@ endif
 %.$(build_target_extension).1st.make %.d %.aux %.aux.make %.fls: %.tex
 	$(QUIET)$(call echo-build,$<,$*.d $*.$(build_target_extension).1st.make,$(RESTARTS)-1)
 	$(QUIET)\
-	$(call run-latex,$<,-recorder) || $(sh_true); \
+	$(call run-latex,$*,-recorder) || $(sh_true); \
 	$(CP) '$*.log' '$*.$(RESTARTS)-1.log'; \
 	$(call die-on-import-sty,$*.log); \
 	$(call die-on-dot2tex,$*.log); \
@@ -2216,6 +2231,11 @@ _show_dependency_graph:
 _sources:
 	$(QUIET)$(ECHO) "== Sources =="
 	$(QUIET)$(call echo-list,$(sort $(files.tex)))
+
+.PHONY: _source_gens
+_source_gens:
+	$(QUIET)$(ECHO) "== Generated Sources =="
+	$(QUIET)$(call echo-list,$(sort $(files_source_gen)))
 
 .PHONY: _scripts
 _scripts:

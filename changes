@@ -1,3 +1,12 @@
+Chris Monson (2011-06-23):
+* Bumped version to 2.2.1-alpha6
+* Issue 133: Set jobname to fix .fls generation to always have the source name
+* Removed unnecessary (?) double-invocation of cygpath
+Chris Monson (2011-06-16):
+* Added support for keeping .rst and .lhs tex intermediates around.
+* Separated scripts from source generation files (rst and lhs)
+* Fixed run-script problem for lhs2tex (was invoked incorrectly)
+* Issue 133: Fixed typo from literate Haskell support
 Chris Monson (2011-06-13):
 * Bumped version to 2.2.1-alpha5
 * Fixed problems with detecting graphics for very long source names.
