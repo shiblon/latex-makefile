@@ -1,3 +1,5 @@
+Chris Monson (2011-07-20):
+* Added LATEX_OPTS
 Chris Monson (2011-06-23):
 * Bumped version to 2.2.1-alpha6
 * Issue 133: Set jobname to fix .fls generation to always have the source name
