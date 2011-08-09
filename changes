@@ -1,6 +1,7 @@
 Chris Monson (2011-08-09):
 * Bumped version to 2.2.1-alpha7
 * Issue 138: existing .eps files now included correctly
+* Issue 139: added missing backslash to ps build rule
 Chris Monson (2011-07-20):
 * Added LATEX_OPTS
 Chris Monson (2011-06-23):

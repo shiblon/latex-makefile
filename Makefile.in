@@ -1707,7 +1707,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "latex"
 %.ps: %.dvi %.paper.make %.beamer.make
 	$(QUIET)$(call echo-build,$<,$@)
 	$(QUIET)$(call make-ps,$<,$@.temp,$@.log,\
-			$(strip $(shell $(CAT) $*.paper.make)),
+			$(strip $(shell $(CAT) $*.paper.make)),\
 			$(strip $(shell $(CAT) $*.beamer.make))); \
 	if [ x"$$?" = x"0" ]; then \
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
