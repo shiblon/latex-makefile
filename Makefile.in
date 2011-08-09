@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha6
+version		:= 2.2.1-alpha7
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -695,7 +695,7 @@ graphic_source_extensions	:= fig \
 				   eps.gz
 
 ifeq "$(strip $(BUILD_STRATEGY))" "latex"
-graphic_source_extensions	+= png jpg jpeg
+graphic_source_extensions	+= png jpg jpeg eps
 graphic_target_extensions	:= eps ps
 endif
 
