@@ -1171,27 +1171,10 @@ endef
 #
 # $(call flatten-aux,<toplevel aux>,<output file>)
 define flatten-aux
-$(SED) \
--e '/\\@input{\(.*\)}/{' \
--e     's//\1/' \
--e     's![.:]!\\&!g' \
--e     'h' \
--e     's!.*!\\:\\\\@input{&}:{!' \
--e     'p' \
--e     'x' \
--e     's/\\././g' \
--e     's/.*/r &/p' \
--e     's/.*/d/p' \
--e     's/.*/}/p' \
--e     'd' \
--e '}' \
--e 'd' \
+(##include_sed("$(SED)", "flatten-aux-script.sed")##) \
 '$1' > "$1.$$$$.sed.make"; \
 $(SED) -f "$1.$$$$.sed.make" '$1' > "$1.$$$$.make"; \
-$(SED) \
--e '/^\\relax/d' \
--e '/^\\bibcite/d' \
--e 's/^\(\\newlabel{[^}]\{1,\}}\).*/\1/' \
+(##include_sed("$(SED)", "flat-aux-clean.sed")##) \
 "$1.$$$$.make" | $(SORT) > '$2'; \
 $(call remove-temporary-files,$1.$$$$.make $1.$$$$.sed.make)
 endef
