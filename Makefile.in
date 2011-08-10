@@ -1601,7 +1601,7 @@ endef
 # Convert DVI to Postscript
 # $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>],[<beamer info>])
 make-ps		= \
-	$(DVIPS) -z -o '$2' $(if $4,-t$(strip $4),) '$1' \
+	$(DVIPS) -z -o '$2' $(if $(strip $4),-t$(strip $4),) '$1' \
 		$(if $5,| $(enlarge_beamer)) > $3 2>&1
 
 # Convert Postscript to PDF
