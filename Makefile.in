@@ -1391,7 +1391,7 @@ success=1; \
 if ! $(GNUPLOT) $$fnames 2>$1.log; then \
 	$(call colorize-gnuplot-errors,$1.log); \
 	success=0; \
-else \
+elif [ x"$(suffix $2)" = x".pdf" ]; then \
 	if ! $(call gpi-embed-pdf-fonts,$2,$2.embed.tmp.make); then \
 		success = 0; \
 	else \
