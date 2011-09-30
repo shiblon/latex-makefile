@@ -1393,7 +1393,7 @@ if ! $(GNUPLOT) $$fnames 2>$1.log; then \
 	success=0; \
 elif [ x"$(suffix $2)" = x".pdf" ]; then \
 	if ! $(call gpi-embed-pdf-fonts,$2,$2.embed.tmp.make); then \
-		success = 0; \
+		success=0; \
 	else \
 		$(call move-if-exists,$2.embed.tmp.make,$2); \
 	fi; \
