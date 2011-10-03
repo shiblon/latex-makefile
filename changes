@@ -1,3 +1,7 @@
+Andrew McNabb (2011-09-30):
+* Bumped version to 2.2.1-alpha8
+* Issue 141: No font embedding for gnuplot when not doing pdf
+* Syntax error fixed for gpi handling code
 Chris Monson (2011-09-06):
 * Issue 140: clean mlt*, mlf*, and mtc* files
 * Issue 136: initial support for metapost files
