@@ -72,7 +72,7 @@ STANDARD AUXILIARY FILES:
             ./generating_script.weird_lang > $$@
 
          In this file, you have access to all of the variables that the
-         makefile creates, like $(onlysources.tex).  While accessing those can
+         makefile creates, like $$(onlysources.tex).  While accessing those can
          be somewhat brittle (they are implementation details and may change),
          it is a great way to test your ideas when submitting feature requests.
 
