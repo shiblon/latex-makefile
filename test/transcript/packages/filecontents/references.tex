@@ -1,0 +1,22 @@
+% Expected transcript: latex bibtex latex latex
+\documentclass{article}
+
+\usepackage{filecontents}
+\begin{filecontents}{\jobname.bib}
+  @article{somearticle,
+    author={John Doe},
+    title={Some Article},
+    year={1902},
+    journal={Some Journal},
+    number={3},
+    volume={4}
+  }
+\end{filecontents}
+
+\begin{document}
+
+\nocite{*}
+
+\bibliographystyle{plain}
+\bibliography{\jobname}
+\end{document}
