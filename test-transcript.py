@@ -95,19 +95,25 @@ for dirpath, dirnames, filenames in os.walk(initial_dir):
     '''make testfile'''
     run_make(dirpath, name)
 
-    [actual,justification] = read_transcript(os.path.join(dirpath,name+".transcript.make"))
+    transcript_filename = os.path.join(dirpath,name+".transcript.make")
+
+    [actual,justification] = read_transcript(transcript_filename)
     expected = read_expected_transcript(os.path.join(dirpath,fname))
 
     '''
     Remove transcript and run make a second time to see whether
     fixed-point was reached
     '''
-    os.remove(os.path.join(dirpath,name+".transcript.make"))
+    os.remove(transcript_filename)
     run_make(dirpath, name)
 
-    [actual2,justification2] = read_transcript(os.path.join(dirpath,name+".transcript.make"))
+    second_success = 0
+    if(not os.path.exists(transcript_filename)):
+      second_success = 1
+    else:
+      [actual2,justification2] = read_transcript(os.path.join(dirpath,name+".transcript.make"))
 
-    if actual == expected and actual2 == expected:
+    if actual == expected and second_success:
       passed_tests += 1
       print OKGREEN + " Passed."
     else:
