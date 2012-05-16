@@ -97,7 +97,11 @@ for dirpath, dirnames, filenames in os.walk(initial_dir):
 
     transcript_filename = os.path.join(dirpath,name+".transcript.make")
 
-    [actual,justification] = read_transcript(transcript_filename)
+    if(os.path.exists(transcript_filename)):
+      [actual,justification] = read_transcript(transcript_filename)
+    else:
+      [actual,justification] = [ [], [] ]
+
     expected = read_expected_transcript(os.path.join(dirpath,fname))
 
     '''
