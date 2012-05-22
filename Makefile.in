@@ -285,9 +285,12 @@ WRITE_TRANSCRIPT ?=
 set-run-reason = export run_reason="$1"
 # Log command to the transcript file
 # $(call set-run-reason,command,job_name)
-transcript = $(if $(WRITE_TRANSCRIPT), \
-						 $(ECHO) "Running $1 ($$run_reason)" >> $2.transcript.make; \
-						 export run_reason="",$(sh_true))
+define transcript
+$(if $(WRITE_TRANSCRIPT), \
+	$(ECHO) "Running $1 ($$run_reason)" >> $2.transcript.make; \
+	export run_reason="", \
+	$(sh_true))
+endef
 
 # Don't call this directly - it is here to avoid calling wildcard more than
 # once in remove-files.
@@ -1256,7 +1259,10 @@ color_bib := \
 enlarge_beamer	= $(PSNUP) -l -1 -W128mm -H96mm -pletter
 
 # $(call test-run-again,<source stem>)
-test-run-again	= $(EGREP) '^(.*Rerun .*|No file $1\.[^.]+\.)$$' $1.log | $(EGREP) -q -v '^(Package: rerunfilecheck.*Rerun checks for auxiliary files.*)$$'
+define test-run-again
+$(EGREP) '^(.*Rerun .*|No file $1\.[^.]+\.)$$' $1.log \
+| $(EGREP) -q -v '^(Package: rerunfilecheck.*Rerun checks for auxiliary files.*)$$'
+endef
 
 # This tests whether the build target commands should be run at all, from
 # viewing the log file.
@@ -1295,7 +1301,7 @@ then \
 	$(call colorize-makeindex-errors,$3); \
 	$(RM) -f '$2'; \
 	success=0; \
-  $(call transcript,makeindex,$1) \
+	$(call transcript,makeindex,$1); \
 fi; \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
 endef
@@ -1307,7 +1313,7 @@ if ! $(XINDY) -q -o $2 -L $(XINDYLANG) -C $(XINDYENC) -I xindy -M $3 -t $4 $1 > 
 	$(call colorize-xindy-errors,$4); \
 	$(RM) -f '$2'; \
 	success=0; \
-  $(call transcript,xindy,$1) \
+	$(call transcript,xindy,$1); \
 fi; \
 [ "$$success" = "1" ] && $(sh_true) || $(sh_false);
 endef
@@ -1318,7 +1324,8 @@ endef
 #
 # $(call run-script,<interpreter>,<input>,<output>)
 define run-script
-$(call test-not-exists,$2.cookie) && $(ECHO) "restarts=$(RESTARTS)" > $2.cookie && $(ECHO) "level=$(MAKELEVEL)" >> $2.cookie; \
+$(call test-not-exists,$2.cookie) && $(ECHO) "restarts=$(RESTARTS)" \
+	> $2.cookie && $(ECHO) "level=$(MAKELEVEL)" >> $2.cookie; \
 restarts=`$(SED) -n -e 's/^restarts=//p' $2.cookie`; \
 level=`$(SED) -n -e 's/^level=//p' $2.cookie`; \
 if $(EXPR) $(MAKELEVEL) '<=' $$level '&' $(RESTARTS) '<=' $$restarts >/dev/null; then \
@@ -1825,6 +1832,7 @@ endif
 	$(call remove-temporary-files,$*.bbl.cookie $*.run.cookie); \
 	$(MV) $*.auxtarget.cookie $*.auxtarget.make; \
 	if [ x"$$run" = x"1" ]; then \
+		$(call remove-files,$@.1st.make); \
 		for i in 2 3 4 5; do \
 			$(if $(findstring 3.79,$(MAKE_VERSION)),\
 				$(call echo-build,$*.tex,$@,$(RESTARTS)-$$$$i),\
@@ -1839,7 +1847,7 @@ endif
 			fi; \
 		done; \
 	else \
-		$(CP) '$@.1st.make' '$@'; \
+		$(MV) '$@.1st.make' '$@'; \
 	fi; \
 	$(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	$(call latex-color-log,$*)

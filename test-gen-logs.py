@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """Generate .log files for all .tex files in all test directories."""
 
