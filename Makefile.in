@@ -18,8 +18,13 @@ version		:= 2.2.1-alpha9
 -include Variables.ini
 -include $(HOME)/.latex-makefile/Variables.ini
 #
-# This can be pdflatex or latex - you can change this by adding the following line to your Makefile.ini:
+# This can be pdflatex or latex - you can change this by adding the following
+# line to your Makefile.ini or Variables.ini file:
 # BUILD_STRATEGY := latex
+# Note that for LuaLaTeX, you would leave this alone - the addition of lua
+# scripting has no impact on the build strategy, which is still pdflatex (as
+# opposed to a latex -> dvips -> ps2pdf strategy).  Instead, you would change
+# the PDFLATEX variable to point to lualatex.  See below.
 BUILD_STRATEGY		?= pdflatex
 # This can be used to pass extra options to latex.
 LATEX_OPTS		?=

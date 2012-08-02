@@ -1,3 +1,5 @@
+Chris Monson (2012-08-02):
+* Added comments about LuaLaTeX.
 Chris Monson (2012-06-25):
 * Bumped version to 2.2.1-alpha9
 * Built with Holger Dell's changes to fix multiple unnecessary compilations.
