@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+from __future__ import print_function, division
+
+import sys
+import util.ensure_version
+from util import template
+
+
+def main():
+    ns = template.Template()
+    with open("Makefile", "wb") as f:
+      print(ns.expand_file("Makefile.in"), file=f)
+
+if __name__ == '__main__':
+    main()

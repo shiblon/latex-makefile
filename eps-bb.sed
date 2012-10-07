@@ -1,0 +1,9 @@
+/^%%Title:/p
+/^%%Creator:/p
+/^%%BoundingBox:/p
+/^%%CreationDate:/p
+/^%%EndComments/{
+  d
+  q
+}
+d

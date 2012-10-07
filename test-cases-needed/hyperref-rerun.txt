@@ -1,0 +1,7 @@
+We need a test case for:
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
+Note to self: The beanbasics.tex case causes this.
+
+Right now it bails out with an error, which I am going to suppress.  But, we need a test case for it so that we can have the makefile do the right thing (rerun to do its stuff).

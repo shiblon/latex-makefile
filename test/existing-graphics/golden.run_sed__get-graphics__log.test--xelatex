@@ -1,0 +1,13 @@
+-include g1.pdf.gpi.d
+TESTSTEM.d: $$(call graphics-source,g1.pdf)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g1.pdf)
+-include g2.pdf.gpi.d
+TESTSTEM.d: $$(call graphics-source,g2.pdf)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g2.pdf)
+-include g3.pdf.gpi.d
+TESTSTEM.d: $$(call graphics-source,g3.pdf)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g3.pdf)
+-include g4.pdf.gpi.d
+TESTSTEM.d: $$(call graphics-source,g4.pdf)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g4.pdf)
+

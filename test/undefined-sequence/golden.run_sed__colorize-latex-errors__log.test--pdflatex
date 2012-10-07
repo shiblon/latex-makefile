@@ -1,0 +1,4 @@
+<E>./test.tex:3: Undefined control sequence: \titl<R>
+<E>./test.tex:3: LaTeX Error: Missing \begin{document}. --- Are you trying to build an include file?<R>
+<E>./test.tex:6: Undefined control sequence: \halp<R>
+
