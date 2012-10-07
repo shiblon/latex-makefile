@@ -6,6 +6,9 @@
 # Remove the \bibdata{} from around the pertinent information
 s/\\bibdata{\([^}]*\)}/\1,/
 
+# Ignore -blx files - they change frequently without affecting the build.
+s/[^,]\{1,\}-blx//
+
 # Collapse comma sequences
 s/,\{2,\}/,/g
 
