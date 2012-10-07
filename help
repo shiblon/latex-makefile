@@ -46,12 +46,14 @@ STANDARD AUXILIARY FILES:
          neverclean := *.pdf *.ps
          onlysources.tex := main.tex
          LATEX_COLOR_WARNING := 'bold red uline'
+         PDFLATEX := lualatex
 
          And this would override the neverclean setting to ensure that pdf
          and ps files always remain behind, set the makefile to treat all
          .tex files that are not "main.tex" as includes (and therefore not
          default targets).  It also changes the LaTeX warning output to be
-         red, bold, and underlined.
+         red, bold, and underlined.  Finally, it specifies that you want to
+         allow Lua scripting by invoking lualatex instead of pdflatex.
 
          There are numerous variables in this file that can be overridden in
          this way.  Search for '?=' to find them all.
