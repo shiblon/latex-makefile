@@ -1,3 +1,5 @@
+Chris Monson (2012-11-23):
+* Issue 166: Added clean-extra target and cleanextra user variable.
 Chris Monson (2012-08-02):
 * Added comments about LuaLaTeX.
 Chris Monson (2012-06-25):
