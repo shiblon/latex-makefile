@@ -71,6 +71,10 @@ export LC_ALL		?= C
 # to allow everything to be cleaned.
 #neverclean		?= *.pdf
 #
+# A space-separated list of extra files to clean - you can specify this in the
+# .ini files. Make sure you escape them properly, if that's needed!
+#cleanextra		?=
+#
 # Alternatively (recommended), you can add those lines to a Makefile.ini file
 # and it will get picked up automatically without your having to edit this
 # Makefile.
@@ -2350,8 +2354,11 @@ clean-auxiliary:
 .PHONY: clean-nographics
 clean-nographics: clean-tex clean-deps clean-backups clean-auxiliary ;
 
+.PHONY: clean-extra
+	$(QUIET)$(call clean-files,$(clean-extra))
+
 .PHONY: clean
-clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary ;
+clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary clean-extra ;
 
 #
 # HELP TARGETS
