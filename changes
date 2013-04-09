@@ -1,3 +1,5 @@
+Chris Monson (2013-04-09):
+* Fixed mess with _check_programs - works properly now.
 Chris Monson (2012-08-02):
 * Added comments about LuaLaTeX.
 Chris Monson (2012-06-25):
