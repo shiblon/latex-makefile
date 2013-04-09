@@ -121,7 +121,7 @@ XINDY		?= xindy
 KPSEWHICH	?= kpsewhich
 GS		?= gs
 # = OPTIONAL PROGRAMS =
-# == For MikTex under Cygwin, to get path names right
+# == For MikTex under Cygwin, to get path names right ==
 CYGPATH		?= cygpath
 # == Makefile Color Output ==
 TPUT		?= tput
