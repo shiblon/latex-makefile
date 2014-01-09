@@ -6,7 +6,12 @@
     <div id="content_div" style="font-size:20pt; padding:5px;"></div>
     <script type="text/javascript">
       function manifestReceived(result) {
-        document.getElementById('content_div').innerHTML = result;
+        var s = '';
+        for (var i=0, len=result.data.length; i < len; i++) {
+          var record = result.data[i];
+          s += record["Summary"] + "<br>\n";
+        }
+        document.getElementById('content_div').innerHTML = s;
       }
 
       gadgets.util.registerOnLoadHandler(function () {
