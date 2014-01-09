@@ -1,0 +1,8 @@
+# MISSING stem "badextension.epp" - allowed extensions are "" - leave comment here - it affects the build
+-include badextension.epp.gpi.d
+TESTSTEM.d: $$(call graphics-source,badextension.epp)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp)
+-include badextension.epp.gpi.d
+TESTSTEM.d: $$(call graphics-source,badextension.epp)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp)
+

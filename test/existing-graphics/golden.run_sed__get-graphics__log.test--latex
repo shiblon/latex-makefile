@@ -1,0 +1,17 @@
+# MISSING stem "g1" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+-include g1.gpi.d
+TESTSTEM.d: $$(call graphics-source,g1)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g1)
+# MISSING stem "g2" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+-include g2.gpi.d
+TESTSTEM.d: $$(call graphics-source,g2)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g2)
+# MISSING stem "g3" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+-include g3.gpi.d
+TESTSTEM.d: $$(call graphics-source,g3)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g3)
+# MISSING stem "g4" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+-include g4.gpi.d
+TESTSTEM.d: $$(call graphics-source,g4)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g4)
+

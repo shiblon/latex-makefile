@@ -1,0 +1,11 @@
+% Expected transcript: latex
+\documentclass{article}
+
+\usepackage{filecontents}
+\begin{filecontents}{\jobname-include.tex}
+Aa
+\end{filecontents}
+
+\begin{document}
+\input{\jobname-include}
+\end{document}

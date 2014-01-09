@@ -1,0 +1,13 @@
+<E>./test.tex:8: Unable to load picture or PDF file 'badextension.epp'.<to be read again> 
+                   }
+l.8 \includegraphics{badextension.epp}
+                                      
+The requested image couldn't be read because 
+the file was not found.<R>
+<E>./test.tex:8: Unable to load picture or PDF file 'badextension.epp'.<to be read again> 
+                   \GXT@clipend 
+l.8 \includegraphics{badextension.epp}
+                                      
+The requested image couldn't be read because 
+the file was not found.<R>
+

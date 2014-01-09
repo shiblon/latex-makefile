@@ -1,0 +1,18 @@
+* The following occurs:
+  file with: \usepackage{named}\bibliographystyle{named}
+  Compile
+  change to: \usepackage{apalike}\bibliographystyle{apalike}
+  Compile again -- BARF!
+
+  The workaround: make clean-nographics; make
+
+  Note that we may not be able to fix this.  LaTeX itself barfs
+  on this, not the makefile.  The very first invocation of LaTeX
+  (when something like this has happened) reads the existing .aux
+  file and discovers invalid commands like \citeauthoryear that
+  are only valid in the package that was just removed.  It then
+  tries to parse them and explodes.  It's not at all clear to me
+  how to fix this.  I tried removing the .aux files on the first
+  run of LaTeX, but that necessarily requires more subsequent
+  rebuilds on common edits.  There does not appear to be a
+  graceful solution to this issue.

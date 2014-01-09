@@ -1,0 +1,12 @@
+We need to detect general cases where the command we are trying to execute is
+not on the system.  This should be easy to test by overriding commands with
+things that aren't there, e.g.,
+
+DOT := fakedot
+
+In this case, we get an error on stderr (which ends up in the log):
+
+/bin/sh: fakedot: command not found
+
+There are probably other cases like this that we should make test cases for so
+that we can be sure coloring is working properly.

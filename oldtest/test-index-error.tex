@@ -1,0 +1,27 @@
+\documentclass[
+    letterpaper % use letter paper
+]{book}
+\usepackage{makeidx}
+
+\makeindex
+
+\begin{document}
+
+\tableofcontents
+\listoffigures
+
+\chapter{first chapter}
+
+Some text that has to do with the first chapter.  Frog\index{frog}.
+
+\section{first section}
+
+% produces an error (thanks to abachn for the test case)
+Class \index{class!!class}
+Object \index{object@@object}
+
+\printindex
+
+\end{document}
+
+% vim: lbr

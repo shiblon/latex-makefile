@@ -1,0 +1,568 @@
+$(fileinfo) Version $(version)
+
+by $(author)
+
+Generates a number of possible output files from a LaTeX document and its
+various dependencies.  Handles .bib files, \include and \input, and .eps
+graphics.  All dependencies are handled automatically by running LaTeX over
+the source.
+
+USAGE:
+
+   make [GRAY=1] [VERBOSE=1] [SHELL_DEBUG=1] <target(s)>
+
+STANDARD OPTIONS:
+   GRAY:
+       Setting this variable forces all recompiled graphics to be grayscale.
+       It is useful when creating a document for printing.  The default is
+       to allow colors.  Note that it only changes graphics that need to be
+       rebuilt!  It is usually a good idea to do a 'make clean' first.
+
+   VERBOSE:
+       This turns off all @ prefixes for commands invoked by make.  Thus,
+       you get to see all of the gory details of what is going on.
+
+   SHELL_DEBUG:
+       This enables the -x option for sh, meaning that everything it does is
+       echoed to stderr.  This is particularly useful for debugging
+       what is going on in $$(shell ...) invocations.  One of my favorite
+       debugging tricks is to do this:
+
+       make -d SHELL_DEBUG=1 VERBOSE=1 2>&1 | less
+
+   KEEP_TEMP:
+       When set, this allows .make and other temporary files to stick around
+       long enough to do some debugging.  This can be useful when trying to
+       figure out why gnuplot is not doing the right things, for example
+       (e.g., look for *head.make).
+
+STANDARD AUXILIARY FILES:
+
+     Variables.ini (formerly Makefile.ini, which still works)
+
+         This file can contain variable declarations that override various
+         aspects of the makefile.  For example, one might specify
+
+         neverclean := *.pdf *.ps
+         onlysources.tex := main.tex
+         LATEX_COLOR_WARNING := 'bold red uline'
+         PDFLATEX := lualatex
+
+         And this would override the neverclean setting to ensure that pdf
+         and ps files always remain behind, set the makefile to treat all
+         .tex files that are not "main.tex" as includes (and therefore not
+         default targets).  It also changes the LaTeX warning output to be
+         red, bold, and underlined.  Finally, it specifies that you want to
+         allow Lua scripting by invoking lualatex instead of pdflatex.
+
+         There are numerous variables in this file that can be overridden in
+         this way.  Search for '?=' to find them all.
+
+         The Variables.ini is imported before *anything else* is done, so go
+         wild with your ideas for changes to this makefile in there.  It
+         makes it easy to test them before submitting patches.
+
+         If you're adding rules or targets, however, see Targets.ini below.
+
+     Targets.ini
+
+         This is included much later in the makefile, after all variables and
+         targets are defined.  This is where you would put new make rules,
+         e.g.,
+
+         generated.tex: generating_script.weird_lang depA depB
+            ./generating_script.weird_lang > $$@
+
+         In this file, you have access to all of the variables that the
+         makefile creates, like $$(onlysources.tex).  While accessing those can
+         be somewhat brittle (they are implementation details and may change),
+         it is a great way to test your ideas when submitting feature requests.
+
+STANDARD ENVIRONMENT VARIABLES:
+
+     LATEX_COLOR_WARNING        '$(LATEX_COLOR_WARNING)'
+     LATEX_COLOR_ERROR          '$(LATEX_COLOR_ERROR)'
+     LATEX_COLOR_UNDERFULL      '$(LATEX_COLOR_UNDERFULL)'
+     LATEX_COLOR_OVERFULL       '$(LATEX_COLOR_OVERFULL)'
+     LATEX_COLOR_PAGES          '$(LATEX_COLOR_PAGES)'
+     LATEX_COLOR_BUILD          '$(LATEX_COLOR_BUILD)'
+     LATEX_COLOR_GRAPHIC        '$(LATEX_COLOR_GRAPHIC)'
+     LATEX_COLOR_DEP            '$(LATEX_COLOR_DEP)'
+     LATEX_COLOR_SUCCESS        '$(LATEX_COLOR_SUCCESS)'
+     LATEX_COLOR_FAILURE        '$(LATEX_COLOR_FAILURE)'
+
+  These may be redefined in your environment to be any of the following:
+
+     black
+     red
+     green
+     yellow
+     blue
+     magenta
+     cyan
+     white
+
+  Bold or underline may be used, as well, either alone or in combination
+  with colors:
+
+     bold
+     uline
+
+  Order is not important.  You may want, for example, to specify:
+
+  export LATEX_COLOR_SUCCESS='bold blue uline'
+
+  in your .bashrc file.  I don't know why, but you may want to.
+
+STANDARD TARGETS:
+
+   all:
+       Make all possible documents in this directory.  The documents are
+       determined by scanning for .tex and .tex.sh (described in more detail
+       later) and omitting any file that ends in ._include_.tex or
+       ._nobuild_.tex.  The output is a set of .pdf files.
+
+       If you wish to omit files without naming them with the special
+       underscore names, set the following near the top of the Makefile,
+       or (this is recommended) within a Makefile.ini in the same directory:
+
+        includes.tex := file1.tex file2.tex
+
+       This will cause the files listed to be considered as include files.
+
+       If you have only few source files, you can set
+
+        onlysources.tex := main.tex
+
+       This will cause only the source files listed to be considered in
+       dependency detection.  All other .tex files will be considered as
+       include files.  Note that these options work for *any* source type,
+       so you could do something similar with includes.gpi, for example.
+       Note that this works for *any valid source* target.  All of the
+       onlysources.* variables are commented out in the shipping version of
+       this file, so it does the right thing when they simply don't exist.
+       The comments are purely documentation.  If you know, for example, that
+       file.mycoolformat is supported by this Makefile, but don't see the
+       "onlysources.mycoolformat" declared in the comments, that doesn't mean
+       you can't use it.  Go ahead and set "onlysources.mycoolformat" and it
+       should do the right thing.
+
+   show:
+       Builds and displays all documents in this directory.  It uses the
+       environment-overridable value of VIEW_PDF (currently $(VIEW_PDF)) to
+       do its work.
+
+   all-graphics:
+       Make all of the graphics in this directory.
+
+   all-pstex (only for BUILD_STRATEGY=latex):
+       Build all fig files into pstex and pstex_t files.  Gray DOES NOT WORK.
+
+   all-gray-pstex (only for BUILD_STRATEGY=latex):
+         Build all fig files into grayscale pstex and pstex_t files.
+
+   all-dot2tex:
+         Build all dot files into tex files.
+
+   show-graphics:
+       Builds and displays all graphics in this directory.  Uses the
+       environment-overridable value of VIEW_GRAPHICS (currently
+       $(VIEW_GRAPHICS)) to do its work.
+
+   clean:
+       Remove ALL generated files, leaving only source intact.
+       This will *always* skip files mentioned in the "neverclean" variable,
+       either in this file or specified in Makefile.ini:
+
+        neverclean := *.pdf *.ps
+
+      The neverclean variable works on all "clean" targets below, as well.
+
+   clean-graphics:
+       Remove all generated graphics files.
+
+   clean-backups:
+       Remove all backup files: $(backup_patterns)
+       (XFig and other editors have a nasty habit of leaving them around)
+       Also removes Makefile-generated .temp files
+
+   clean-tex:
+       Remove all files generated from LaTeX invocations except dependency
+       information.  Leaves graphics alone.
+
+   clean-deps:
+       Removes all auto-generated dependency information.
+
+   clean-auxiliary:
+       Removes extra files created by various targets (like the dependency
+       graph output).
+
+   clean-nographics:
+       Cleans everything *except* the graphics files.
+
+   help:
+       This help text.
+
+   version:
+       Version information about this LaTeX makefile.
+
+DEBUG TARGETS:
+
+   _all_programs:
+       A list of the programs used by this makefile.
+
+   _check_programs:
+       Checks your system for the needed software and reports what it finds.
+
+   _check_gpi_files:
+       Checks the .gpi files in the current directory for common errors, such
+       as specification of the terminal or output file inside of the gpi file
+       itself.
+
+   _dependency_graph:
+       Outputs a .dot file to stdout that represents a graph of LaTeX
+       dependencies.  To see it, use the _show_dependency_graph target or
+       direct the output to a file, run dot on it, and view the output, e.g.:
+
+       make _dependency_graph > graph.dot
+       dot -T ps -o graph.eps graph.dot
+       gv graph.eps
+
+   _show_dependency_graph:
+       Makes viewing the graph simple: extracts, builds and displays the
+       dependency graph given in the _dependency_graph target using the value
+       of the environment-overridable VIEW_POSTSCRIPT variable (currently set
+       to $(VIEW_POSTSCRIPT)).  The postscript viewer is used because it
+       makes it easier to zoom in on the graph, a critical ability for
+       something so dense and mysterious.
+
+   _all_sources:
+       List all .tex files in this directory.
+
+   _sources:
+       Print out a list of all compilable sources in this directory.  This is
+       useful for determining what make thinks it will be using as the
+       primary source for 'make all'.
+
+   _scripts:
+       Print out a list of scripts that make knows can be used to generate
+       .tex files (described later).
+
+   _all_stems:
+       Print a list of stems.  These represent bare targets that can be
+       executed.  Listing <stem> as a bare target will produce <stem>.pdf.
+
+   _includes:
+       A list of .d files that would be included in this run if _includes
+       weren't specified.  This target may be used alone or in conjunction
+       with other targets.
+
+   _graphic_outputs:
+       A list of all generated .eps files
+
+   _env:
+       A list of environment variables and their values.  If supported by
+       your version of make, also a list of variables known to make.
+
+FILE TARGETS:
+
+   %, %.pdf:
+       Build a PDF file from the corresponding %.tex file.
+
+       If BUILD_STRATEGY=pdflatex, then this builds the pdf directly.
+       Otherwise, it uses this old-school but effective approach:
+
+           latex -> dvips -> ps2pdf
+
+       The BUILD_STRATEGY can be overridden in Makefile.ini in the same
+       directory.  The default is pdflatex.
+
+       Reasons for using latex -> dvips include the "psfrag" package, and the
+       generation of postscript instead of PDF.  Arguments for using pdflatex
+       include "new and shiny" and "better supported."  I can't argue with
+       either of those, and supporting them both didn't turn out to be that
+       difficult, so there you have it.  Choices.
+
+   %._show:
+       A phony target that builds the pdf file and then displays it using the
+       environment-overridable value of VIEW_PDF ($(VIEW_PDF)).
+
+   %._graphics:
+       A phony target that generates all graphics on which %.pdf (or %.dvi)
+       depends.
+
+   %.ps (only for BUILD_STRATEGY=latex):
+       Build a Postscript file from the corresponding %.tex file.
+       This is done using dvips.  Paper size is automatically
+       extracted from the declaration
+
+       \documentclass[<something>paper]
+
+       or it is the system default.
+
+       If using beamer (an excellent presentation class), the paper
+       size is ignored.  More on this later.
+
+   %.dvi (only for BUILD_STRATEGY=latex):
+       Build the DVI file from the corresponding %.tex file.
+
+   %.ind:
+       Build the index for this %.tex file.
+
+   %.gls:
+       Build the nomenclature glossary for this %.tex file.
+
+   %.nls:
+       Build the (newer) nomenclature file for this %.tex file.
+
+   %.eps:
+       Build an eps file from one of the following file types:
+
+      .dot    : graphviz
+      .gpi    : gnuplot
+      .fig    : xfig
+      .xvg    : xmgrace
+      .svg    : scalable vector graphics (goes through inkscape)
+      .png    : png (goes through NetPBM)
+      .jpg      : jpeg (goes through ImageMagick)
+      .eps.gz : gzipped eps
+
+      The behavior of this makefile with each type is described in
+      its own section below.
+
+   %.pstex{,_t} (only for BUILD_STRATEGY=latex):
+      Build a .pstex_t file from a .fig file.
+
+FEATURES:
+
+   Optional Binary Directory:
+       If you create the _out_ directory in the same place as the makefile,
+       it will automatically be used as a dumping ground for .pdf (or .dvi,
+       .ps, and .pdf) output files.
+
+       Alternatively, you can set the BINARY_TARGET_DIR variable, either as a
+       make argument or in Makefile.ini, to point to your directory of
+       choice.  Note that no pathname wildcard expansion is done in the
+       makefile, so make sure that the path is complete before going in
+       there.  E.g., if you want to specify something in your home directory,
+       use $$HOME/ instead of ~/ so that the shell expands it before it gets
+       to the makefile.
+
+   External Program Dependencies:
+       Every external program used by the makefile is represented by an
+       ALLCAPS variable at the top of this file.  This should allow you to
+       make judgments about whether your system supports the use of this
+       makefile.  The list is available in the ALL_PROGRAMS variable and,
+       provided that you are using GNU make 3.80 or later (or you haven't
+       renamed this file to something weird like "mylatexmakefile" and like
+       invoking it with make -f) can be viewed using
+
+       make _all_programs
+
+       Additionally, the availability of these programs can be checked
+       automatically for you by running
+
+       make _check_programs
+
+       The programs are categorized according to how important they are and
+       what function they perform to help you decide which ones you really
+       need.
+
+   Colorized Output:
+       The output of commands is colorized to highlight things that are often
+       important to developers.  This includes {underfull,overfull}
+       {h,v}boxes, general LaTeX Errors, each stage of document building, and
+       the number of pages in the final document.  The colors are obtained
+       using 'tput', so colorization should work pretty well on any terminal.
+
+       The colors can be customized very simply by setting any of the
+       LATEX_COLOR_<CONTEXT> variables in your environment (see above).
+
+   Predecessors to TeX Files:
+       Given a target <target>, if no <target>.tex file exists but a
+       corresponding script or predecessor file exists, then appropriate
+       action will be taken to generate the tex file.
+
+       Currently supported script or predecessor languages are:
+
+       sh:     %.tex.sh
+       perl:   %.tex.pl
+       python: %.tex.py
+
+          Calls the script using the appropriate interpreter, assuming that
+          its output is a .tex file.
+
+          The script is called thus:
+
+             <interpreter> <script file name> <target tex file>
+
+          and therefore sees exactly one parameter: the name of the .tex
+          file that it is to create.
+
+          Why does this feature exist?  I ran into this while working on
+          my paper dissertation.  I wrote a huge bash script that used a
+          lot of sed to bring together existing papers in LaTeX.  It
+          would have been nice had I had something like this to make my
+          life easier, since as it stands I have to run the script and
+          then build the document with make.  This feature provides hooks
+          for complicated stuff that you may want to do, but that I have
+          not considered.  It should work fine with included dependencies,
+          too.
+
+          Scripts are run every time make is invoked.  Some trickery is
+          employed to make sure that multiple restarts of make don't cause
+          them to be run again.
+
+       reST: %.rst
+
+          Runs the reST to LaTeX converter to generate a .tex file
+          If it finds a file names _rststyle_._include_.tex, uses it as
+          the "stylesheet" option to rst2latex.
+
+          Note that this does not track sub-dependencies in rst files.  It
+          assumes that the top-level rst file will change if you want a
+          rebuild.
+
+      literate Haskell: %.lhs
+
+          Runs the lhs2tex program to generate a .tex file.
+
+   Dependencies:
+
+       In general, dependencies are extracted directly from LaTeX output on
+       your document.  This includes
+
+       *    Bibliography information
+       *    \include or \input files (honoring \includeonly, too)
+       *    Graphics files inserted by the graphicx package
+
+       Where possible, all of these are built correctly and automatically.
+       In the case of graphics files, these are generated from the following
+       file types:
+
+       GraphViz:      .dot
+       GNUPlot:       .gpi
+       XFig:          .fig
+       XMgrace:       .xvg
+       SVG:           .svg
+       PNG:           .png
+       JPEG:          .jpg
+       GZipped EPS:   .eps.gz
+
+       If the file exists as a .eps already, it is merely used (and will not
+       be deleted by 'clean'!).
+
+       LaTeX and BibTeX are invoked correctly and the "Rerun to get
+       cross-references right" warning is heeded a reasonable number of
+       times.  In my experience this is enough for even the most troublesome
+       documents, but it can be easily changed (if LaTeX has to be run after
+       BibTeX more than three times, it is likely that something is moving
+       back and forth between pages, and no amount of LaTeXing will fix
+       that).
+
+       \includeonly is honored by this system, so files that are not
+       specified there will not trigger a rebuild when changed.
+
+   Beamer:
+       A special TeX source comment is recognized by this makefile (only when
+       BUILD_STRATEGY=latex, since this invokes psnup):
+
+       %%[[:space:]]*BEAMER[[:space:]]*LARGE
+
+       The presence of this comment forces the output of dvips through psnup
+       to enlarge beamer slides to take up an entire letter-sized page.  This
+       is particularly useful when printing transparencies or paper versions
+       of the slides.  For some reason landscape orientation doesn't appear
+       to work, though.
+
+       If you want to put multiple slides on a page, use this option and then
+       print using mpage, a2ps, or psnup to consolidate slides.  My personal
+       favorite is a2ps, but your mileage may vary.
+
+       When beamer is the document class, dvips does NOT receive a paper size
+       command line attribute, since beamer does special things with sizes.
+
+   GNUPlot Graphics:
+       When creating a .gpi file, DO NOT INCLUDE the "set terminal" or "set
+       output" commands!  The makefile will include terminal information for
+       you.  Besides being unnecessary and potentially harmful, including the
+       terminal definition in the .gpi file makes it harder for you, the one
+       writing the document, to preview your graphics, e.g., with
+
+          gnuplot -persist myfile.gpi
+
+       so don't do specify a terminal or an output file in your .gpi files.
+
+       When building a gpi file into an eps file, there are several features
+       available to the document designer:
+
+       Global Header:
+           The makefile searches for the files in the variable GNUPLOT_GLOBAL
+           in order:
+
+           ($(GNUPLOT_GLOBAL))
+
+           Only the first found is used.  All .gpi files in the directory are
+           treated as though the contents of GNUPLOT_GLOBAL were directly
+           included at the top of the file.
+
+           NOTE: This includes special comments! (see below)
+
+       Font Size:
+           A special comment in a .gpi file (or a globally included file) of
+           the form
+
+           ## FONTSIZE=<number>
+
+           will change the font size of the GPI output.  If font size is
+           specified in both the global file and the GPI file, the
+           specification in the individual GPI file is used.
+
+       Grayscale Output:
+           GNUplot files also support a special comment to force them to be
+           output in grayscale *no matter what*:
+
+           ## GRAY
+
+           This is not generally advisable, since you can always create a
+           grayscale document using the forms mentioned above.  But, if your
+           plot simply must be grayscale even in a document that allows
+           colors, this is how you do it.
+
+   XFig Graphics:
+           No special handling is done with XFig, except when a global
+           grayscale method is used, e.g.
+
+               make GRAY=1 document
+
+           In these cases the .eps files is created using the -N switch to
+           fig2dev to turn off color output.  (Only works with eps, not pstex
+           output)
+
+   GraphVis Graphics:
+           Color settings are simply ignored here.  The 'dot' program is used
+           to transform a .dot file into a .eps file.
+
+           If you want, you can use the dot2tex program to convert dot files
+           to tex graphics.  The default is to just call dot2tex with no
+           arguments, but you can change the DOT2TEX definition to include
+           options as needed (in your Makefile.ini).
+
+           Note that, as with pstex, the makefile cannot use latex's own
+           output to discover all missing dot_t (output) files, since anytime
+           TeX includes TeX, it has to bail when it can't find the include
+           file.  It can therefore only stop on the first missing file it
+           discovers, and we can't get a large list of them out easily.
+
+           So, the makefile errors out if it's missing an included dot_t
+           file, then prompts the user to run this command manually:
+
+               make all-dot2tex
+
+   GZipped EPS Graphics:
+
+       A .eps.gz file is sometimes a nice thing to have.  EPS files can get
+       very large, especially when created from bitmaps (don't do this if you
+       don't have to).  This makefile will unzip them (not in place) to
+       create the appropriate EPS file.
+
