@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-  <ModulePrefs title="hello world example" />
+  <ModulePrefs title="LaTeX Makefile Downloads" />
   <Content type="html">
-     <![CDATA[
-       Hello, world!
-     ]]>
+    <![CDATA[
+    <div id="content_div" style="font-size:20pt; padding:5px;"></div>
+    <script type="text/javascript">
+      function manifestReceived(result) {
+        document.getElementById('content_div').innerHTML = result;
+      }
+
+      function getManifest() {
+        gadgets.io.makeRequest("http://latex-makefile.googlecode.com/hg/Downloads/MANIFEST.json", manifestReceived);
+      }
+
+      getManifest();
+    </script>
+    Hello, world!
+    ]]>
   </Content>
 </Module>
