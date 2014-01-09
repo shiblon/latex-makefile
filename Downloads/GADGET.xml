@@ -6,14 +6,17 @@
     <div id="content_div" style="font-size:20pt; padding:5px;"></div>
     <script type="text/javascript">
       function manifestReceived(result) {
+        console.debug(result);
         document.getElementById('content_div').innerHTML = result;
       }
 
       function getManifest() {
+        console.debug("manifest");
         gadgets.io.makeRequest("http://latex-makefile.googlecode.com/hg/Downloads/MANIFEST.json", manifestReceived);
+        console.debug("after manifest");
       }
 
-      getManifest();
+      gadgets.util.registerOnLoadHandler(getManifest);
     </script>
     Hello, world!
     ]]>
