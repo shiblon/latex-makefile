@@ -6,7 +6,7 @@
     <div id="content_div" style="font-size:20pt; padding:5px;"></div>
     <script type="text/javascript">
       function manifestReceived(result) {
-        document.getElementById('content_div').innerHTML = result;
+        document.getElementById('content_div').innerHTML = result.length;
       }
 
       function getManifest() {
