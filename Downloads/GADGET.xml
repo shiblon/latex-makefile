@@ -10,7 +10,9 @@
       }
 
       gadgets.util.registerOnLoadHandler(function () {
-        gadgets.io.makeRequest("http://latex-makefile.googlecode.com/hg/Downloads/MANIFEST.json", manifestReceived);
+        var params = {};
+        params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+        gadgets.io.makeRequest("http://latex-makefile.googlecode.com/hg/Downloads/MANIFEST.json", manifestReceived, params);
       });
     </script>
     ]]>
