@@ -1727,9 +1727,7 @@ ifeq "$(strip $(BUILD_STRATEGY))" "latex"
 	$(QUIET)$(call make-pdf,$<,$@.temp,$@.log,$*.embed.make); \
 	if [ x"$$?" = x"0" ]; then \
 	    $(if $(VERBOSE),$(CAT) $@.log,:); \
-	    $(RM) -f '$@'; \
-	    $(MV) '$@.temp' '$@'; \
-	    $(TOUCH) '$@'; \
+	    $(MV) -f '$@.temp' '$@'; \
 	    $(call copy-with-logging,$@,$(BINARY_TARGET_DIR)); \
 	else \
 	    $(CAT) $@.log; \
@@ -2341,7 +2339,7 @@ clean-tex: clean-deps
 # even want to keep pstex functionality, so my motivation is not terribly high
 # for doing it right.
 clean-graphics:
-	$(QUIET)$(call clean-files,$(all_graphics_targets) *.gpi.d *.pstex *.pstex_t *.dot_t)
+	$(QUIET)$(call clean-files,$(all_graphics_targets) *.gpi.d *.pstex *.pstex_t *.dot_t *-converted-to.pdf)
 
 .PHONY: clean-backups
 clean-backups:
