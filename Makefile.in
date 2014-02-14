@@ -556,6 +556,7 @@ all_files.gpi		?= $(wildcard *.gpi)
 all_files.dot		?= $(wildcard *.dot)
 all_files.xvg		?= $(wildcard *.xvg)
 all_files.svg		?= $(wildcard *.svg)
+all_files.dia		?= $(wildcard *.dia)
 all_files.png		?= $(wildcard *.png)
 all_files.jpg		?= $(wildcard *.jpg)
 all_files.jpeg		?= $(wildcard *.jpeg)
@@ -605,6 +606,7 @@ files.mp	:= $(call filter-buildable,mp)
 files.fig	:= $(call filter-buildable,fig)
 files.xvg	:= $(call filter-buildable,xvg)
 files.svg	:= $(call filter-buildable,svg)
+files.dia	:= $(call filter-buildable,dia)
 files.png	:= $(call filter-buildable,png)
 files.jpg	:= $(call filter-buildable,jpg)
 files.jpeg	:= $(call filter-buildable,jpeg)
@@ -635,6 +637,7 @@ default_files.mp	:= $(call filter-default,mp)
 default_files.fig	:= $(call filter-default,fig)
 default_files.xvg	:= $(call filter-default,xvg)
 default_files.svg	:= $(call filter-default,svg)
+default_files.dia	:= $(call filter-default,dia)
 default_files.png	:= $(call filter-default,png)
 default_files.jpg	:= $(call filter-default,jpg)
 default_files.jpeg	:= $(call filter-default,jpeg)
@@ -677,6 +680,7 @@ all_stems.gpi		:= $(call get-stems,gpi,all)
 all_stems.dot		:= $(call get-stems,dot,all)
 all_stems.xvg		:= $(call get-stems,xvg,all)
 all_stems.svg		:= $(call get-stems,svg,all)
+all_stems.dia		:= $(call get-stems,dia,all)
 all_stems.png		:= $(call get-stems,png,all)
 all_stems.jpg		:= $(call get-stems,jpg,all)
 all_stems.jpeg		:= $(call get-stems,jpeg,all)
@@ -696,6 +700,7 @@ default_stems.gpi		:= $(call get-stems,gpi,default)
 default_stems.dot		:= $(call get-stems,dot,default)
 default_stems.xvg		:= $(call get-stems,xvg,default)
 default_stems.svg		:= $(call get-stems,svg,default)
+default_stems.dia		:= $(call get-stems,dia,default)
 default_stems.png		:= $(call get-stems,png,default)
 default_stems.jpg		:= $(call get-stems,jpg,default)
 default_stems.jpeg		:= $(call get-stems,jpeg,default)
@@ -715,6 +720,7 @@ stems.gpi		:= $(call get-stems,gpi)
 stems.dot		:= $(call get-stems,dot)
 stems.xvg		:= $(call get-stems,xvg)
 stems.svg		:= $(call get-stems,svg)
+stems.dia		:= $(call get-stems,dia)
 stems.png		:= $(call get-stems,png)
 stems.jpg		:= $(call get-stems,jpg)
 stems.jpeg		:= $(call get-stems,jpeg)
@@ -731,6 +737,7 @@ graphic_source_extensions	:= mp \
 				   gpi \
 				   xvg \
 				   svg \
+				   dia \
 				   dot \
 				   eps.gz
 
@@ -1488,6 +1495,11 @@ convert-dot-tex		= $(DOT2TEX) '$1' > '$2'
 # $(call convert-svg,<svg file>,<eps/pdf file>,[gray])
 convert-svg	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf,--export-eps)='$2' '$1'
 
+# Converts dia files into .eps files
+#
+# $(call convert-dia,<dia file>,<eps/pdf file>,[gray])
+convert-dia	= $(INKSCAPE) --without-gui $(if $(filter %.pdf,$2),--export-pdf,--export-eps)='$2' '$1'
+
 # Converts xvg files into .eps files
 #
 # $(call convert-xvg,<xvg file>,<eps file>,[gray])
@@ -1999,6 +2011,10 @@ endif
 %.pdf:	%.svg
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-svg,$<,$@,$(GRAY))
+
+%.pdf:	%.dia
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-dia,$<,$@,$(GRAY))
 endif
 
 ifeq "$(strip $(BUILD_STRATEGY))" "xelatex"
@@ -2050,6 +2066,10 @@ ifneq "$(default_graphic_extension)" "pdf"
 %.eps: %.svg $(if $(GRAY),$(gray_eps_file))
 	$(QUIET)$(call echo-graphic,$^,$@)
 	$(QUIET)$(call convert-svg,$<,$@,$(GRAY))
+
+%.eps: %.dia $(if $(GRAY),$(gray_eps_file))
+	$(QUIET)$(call echo-graphic,$^,$@)
+	$(QUIET)$(call convert-dia,$<,$@,$(GRAY))
 
 # Similarly for these, we don't need eps if we have supported extensions
 # already.
