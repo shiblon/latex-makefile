@@ -51,11 +51,12 @@
   # If there are no extensions, that typically means that an extension was
   # specified.  We only want stems (extensions determined dynamically), so
   # remove it (but only do so for eps includes - pdf stuff is handled differently).
+  # TODO: change to s/\(\.e\{0,1\}ps\)::::$/::::\1/ after getting confidence that it's the right thing to do.
   s/\.e\{0,1\}ps::::$/::::/
   # Now we have filename::::extensionlist in the pattern space
   # Place in the hold buffer, add missing stem comment
   h
-  s/\(.*\)::::\(.*\)/# MISSING stem "\1" - allowed extensions are "\2" - leave comment here - it affects the build/
+  s/\(.*\)::::\(.*\)/# MISSING stem "\1" - allowed extensions: \2/
   p
   # Now get the hold buffer back, get rid of extension list, and call addtargets
   g
