@@ -1,12 +1,12 @@
-# MISSING stem "nothere" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+# MISSING stem "nothere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include nothere.gpi.d
 TESTSTEM.d: $$(call graphics-source,nothere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,nothere)
-# MISSING stem "notthere" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+# MISSING stem "notthere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include notthere.gpi.d
 TESTSTEM.d: $$(call graphics-source,notthere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notthere)
-# MISSING stem "notanywhere" - allowed extensions are ".eps,.ps,.eps.gz,.ps.gz,.eps.Z" - leave comment here - it affects the build
+# MISSING stem "notanywhere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include notanywhere.gpi.d
 TESTSTEM.d: $$(call graphics-source,notanywhere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notanywhere)

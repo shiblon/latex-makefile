@@ -51,8 +51,13 @@
   # If there are no extensions, that typically means that an extension was
   # specified.  We only want stems (extensions determined dynamically), so
   # remove it (but only do so for eps includes - pdf stuff is handled differently).
-  # TODO: change to s/\(\.e\{0,1\}ps\)::::$/::::\1/ after getting confidence that it's the right thing to do.
-  s/\.e\{0,1\}ps::::$/::::/
+  # Other extensions get labeled "UNKNOWN" so we can at least debug what's happening.
+  /\(\.e\{0,1\}ps\)::::$/{
+    s//::::\1/
+    b psext
+  }
+  s/\(\.[^.]*\)::::$/:::: UNKNOWN=\1/
+  :psext
   # Now we have filename::::extensionlist in the pattern space
   # Place in the hold buffer, add missing stem comment
   h

@@ -1,12 +1,12 @@
-# MISSING stem "nothere" - allowed extensions are ".png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2" - leave comment here - it affects the build
+# MISSING stem "nothere" - allowed extensions: .png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2
 -include nothere.gpi.d
 TESTSTEM.d: $$(call graphics-source,nothere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,nothere)
-# MISSING stem "notthere" - allowed extensions are ".png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2" - leave comment here - it affects the build
+# MISSING stem "notthere" - allowed extensions: .png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2
 -include notthere.gpi.d
 TESTSTEM.d: $$(call graphics-source,notthere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notthere)
-# MISSING stem "notanywhere" - allowed extensions are ".png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2" - leave comment here - it affects the build
+# MISSING stem "notanywhere" - allowed extensions: .png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2
 -include notanywhere.gpi.d
 TESTSTEM.d: $$(call graphics-source,notanywhere)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notanywhere)
