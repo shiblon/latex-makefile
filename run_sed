@@ -17,26 +17,40 @@ from util import template
 def main(opts, args):
   ns = template.Template()
 
-  sed_args = ["sed"]
+  cmd_args = ["sed"]
   text = ns.expand_file(args[0],
+                        variables=opts.sed_args,
                         transform_after=ns.xfunc_sed_lines_to_args())
-  sed_args.extend(text.split('\n'))
-  sed_args.extend(args[1:])
+  cmd_args.extend(text.split('\n'))
+  cmd_args.extend(args[1:])
 
   if opts.show_cmd:
     import pprint
-    pprint.pprint(sed_args, stream=sys.stderr)
+    pprint.pprint(cmd_args, stream=sys.stderr)
+    print("sed args:")
+    pprint.pprint(opts.sed_args)
 
   # Ensure that sed still works with international characters (and doesn't just
   # hang)
   os.putenv("LANG", "C")
-  with os.popen(" ".join(sed_args)) as f:
+  with os.popen(" ".join(cmd_args)) as f:
     print(f.read())
+
+def on_sed_arg(option, opt_str, value, parser, *args, **kwargs):
+  pieces = value.split('=', 1)
+  if len(pieces) != 2:
+    raise ValueError(
+      "invalid sed argument: expected 'name=val', got {0!r}".format(value))
+  parser.values.ensure_value("sed_args", {})[pieces[0]] = pieces[1]
 
 if __name__ == '__main__':
   op = OptionParser()
   op.add_option("-c", "--show_cmd", dest="show_cmd", default=False,
                 action="store_true", help="show sed script")
+  op.add_option("-a", "--arg", action="callback", callback=on_sed_arg,
+                type="string",
+                help="add an argument to the sed script")
 
   opts, args = op.parse_args()
+  opts.ensure_value("sed_args", {})
   main(opts, args)

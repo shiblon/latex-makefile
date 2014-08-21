@@ -346,7 +346,7 @@ remove-temporary-files	= $(if $(KEEP_TEMP),:,$(if $1,$(RM) $1,:))
 # $(call cleanse-filename,filename)
 cleanse-filename	= $(subst .,_,$(subst /,__,$1))
 
-# Escape dots
+# Escape dots and forward slashes.
 # $(call escape-fname-regex,str)
 escape-fname-regex	= $(subst /,\\/,$(subst .,\\.,$1))
 
@@ -962,7 +962,12 @@ endef
 
 # Get source file for specified graphics stem.
 #
-# $(call graphics-source,<stem>)
+# Takes the first file it finds by appending the various
+# graphic_source_extensions to the stem, each in turn. Thus, the
+# graphic_source_extensions is a prioritized list of possible sources for
+# graphics files.
+#
+# $(call graphics-source,<stem>,<fls stem>)
 define graphics-source
 $(strip $(firstword \
 	$(wildcard \
@@ -973,6 +978,25 @@ $(strip $(firstword \
 endef
 
 # Get the target file for the specified graphics file/stem
+#
+# Works by first trying to determine whether any of the
+# graphic_target_extensions match the "stem" (which obviously isn't, since it
+# has an extension). If so, it returns the stem directly, as it is a valid
+# target already.
+#
+# Otherwise, no extensions match the stem. We then try to match against all
+# possible source *and* target extensions. If any match, the stem is extracted
+# from the filename and the default_graphic_extension is appended to it.
+#
+# If nothing matches, the stem is assumed to actually be a stem, and the
+# default_graphic_extension is appended to it unconditionally.
+#
+# The final outcome of this procedure should be the following:
+# - If a filename with extension is passed, and it is recognized, then it is simply returned.
+# - If a filename without an extension is passed, a suitable extension is added.
+# - If the extension is not at all recognized, then nothing is returned.
+#
+# So, either a valid filename is returned, or the empty string.
 #
 # $(call graphics-target,<stem>)
 define graphics-target
@@ -1015,6 +1039,17 @@ endef
 # $(call get-source-specials,<source file name>,<output file>)
 define get-source-specials
 (##include_sed("$(SED)", "get-source-specials.sed", "$1")##) > '$2'
+endef
+
+# Get the full path to a file from the recorder file
+#
+# Note that we always append the filename to the end of the path so that a path
+# not found results in a no-op.
+#
+# $(call full-path,<base file name>,<recorder file stem (without .fls)>)
+define full-path
+(##include_sed("$(SED)", "get-fls-fullpath.sed",
+	       name="$(call escape-fname-regex,$1)", "$2.fls")##)$1
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.

@@ -47,7 +47,7 @@ class Template(object):
 
     # TODO(shiblon):
     # This is busted when we have nested templates!  The make characters have
-    # tobe escaped after the include, but before all other expansions.  Figure
+    # to be escaped after the include, but before all other expansions.  Figure
     # that out.
     def TPL_include_sed(self, cmd, fname, *args, **variables):
         return self.TPL_include_script(cmd, fname,
