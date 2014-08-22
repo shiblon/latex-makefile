@@ -1,21 +1,15 @@
-This is XeTeX, Version 3.1415926-2.2-0.9995.2 (TeX Live 2009) (format=xelatex 2009.11.7)  21 JAN 2011 15:09
+This is XeTeX, Version 3.1415926-2.5-0.9999.3 (TeX Live 2013) (format=xelatex 2013.5.30)  22 AUG 2014 08:31
 entering extended mode
+ restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
 **test
 (./test.tex
-LaTeX2e <2009/09/24>
-Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
-yphenation, german-x-2009-06-19, ngerman-x-2009-06-19, ancientgreek, ibycus, ar
-abic, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danish, dutc
-h, esperanto, estonian, farsi, finnish, french, galician, german, ngerman, mono
-greek, greek, hungarian, icelandic, indonesian, interlingua, irish, italian, ku
-rmanji, latin, latvian, lithuanian, mongolian, mongolian2a, bokmal, nynorsk, po
-lish, portuguese, romanian, russian, sanskrit, serbian, slovak, slovenian, span
-ish, swedish, turkish, ukenglish, ukrainian, uppersorbian, welsh, loaded.
-(/usr/local/texlive/2009/texmf-dist/tex/latex/base/article.cls
+LaTeX2e <2011/06/27>
+Babel <3.9f> and hyphenation patterns for 78 languages loaded.
+(/usr/local/texlive/2013/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-(/usr/local/texlive/2009/texmf-dist/tex/latex/base/size10.clo
+(/usr/local/texlive/2013/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count80
@@ -29,22 +23,22 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-) (/usr/local/texlive/2009/texmf-dist/tex/latex/graphics/graphicx.sty
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
-(/usr/local/texlive/2009/texmf-dist/tex/latex/graphics/keyval.sty
+(/usr/local/texlive/2013/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
-) (/usr/local/texlive/2009/texmf-dist/tex/latex/graphics/graphics.sty
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
-(/usr/local/texlive/2009/texmf-dist/tex/latex/graphics/trig.sty
+(/usr/local/texlive/2013/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
-) (/usr/local/texlive/2009/texmf-dist/tex/latex/latexconfig/graphics.cfg
-File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+) (/usr/local/texlive/2013/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
 Package graphics Info: Driver file: xetex.def on input line 91.
-(/usr/local/texlive/2009/texmf-dist/tex/xelatex/xetex-def/xetex.def
-File: xetex.def 2009/10/28 v0.93 LaTeX color/graphics driver for XeTeX (RRM, mo
-d. JK)
+(/usr/local/texlive/2013/texmf-dist/tex/xelatex/xetex-def/xetex.def
+File: xetex.def 2013/04/29 v0.96 LaTeX color/graphics driver for XeTeX (RRM/JK)
+
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
@@ -72,7 +66,7 @@ LaTeX Warning: File `badextension.epp' not found on input line 8.
                    }
 l.8 \includegraphics{badextension.epp}
                                       
-The requested image couldn't be read because 
+The requested image couldn't be read because
 the file was not found.
 
 File: badextension.epp Graphic file (type QTm)
@@ -82,19 +76,19 @@ File: badextension.epp Graphic file (type QTm)
                    \GXT@clipend 
 l.8 \includegraphics{badextension.epp}
                                       
-The requested image couldn't be read because 
+The requested image couldn't be read because
 the file was not found.
 
 [1
 
 ] (./test.aux) ) 
 Here is how much of TeX's memory you used:
- 536 strings out of 494665
- 6485 string characters out of 3163743
- 53170 words of memory out of 3000000
- 3832 multiletter control sequences out of 15000+200000
- 3640 words of font info for 14 fonts, out of 3000000 for 9000
- 669 hyphenation exceptions out of 8191
- 25i,4n,19p,178b,107s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 543 strings out of 493938
+ 6554 string characters out of 6148857
+ 57188 words of memory out of 5000000
+ 3913 multiletter control sequences out of 15000+600000
+ 3640 words of font info for 14 fonts, out of 8000000 for 9000
+ 1144 hyphenation exceptions out of 8191
+ 25i,4n,19p,177b,107s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on test.pdf (1 page).

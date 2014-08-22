@@ -1,7 +1,11 @@
-<W>Package hyperref Warning: Wrong driver `hdvips.def';
-(hyperref)                pdfTeX is running in PDF mode.
-(hyperref)                Forcing driver `hpdftex.def'.<R>
+<E>/usr/local/texlive/2013/texmf-dist/tex/latex/hyperref/hyperref.sty:4319: Packag
+e hyperref Error: Wrong DVI mode driver option `dvips',
+(hyperref)                because pdfTeX or LuaTeX is running in PDF mode.<R>
 
-<S>Success!<R>  Wrote <P>1<R> page, <P>11655<R> bytes to <S>test.pdf<R>
+<W>Package rerunfilecheck Warning: File `test.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.<R>
+
+<S>Success!<R>  Wrote <P>1<R> page, <P>10909<R> bytes to <S>test.pdf<R>
 
 
