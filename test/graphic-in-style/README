@@ -1,0 +1,14 @@
+$ mkdir foo
+$ cd foo
+
+$ hg clone https://code.google.com/p/latex-makefile/
+$ cd latex-makefile
+$ python2 build
+$ cd ..
+$ ln -s latex-makefile/Makefile
+
+$ wget https://forge.nicta.com.au/frs/download.php/file/241/nicta-techreport-style-20140808.tar.bz2 -O - | tar xjv
+$ cd nicta-techreport-style-20140808/
+$ make TEXMFHOME=~/.texmf install
+$ cp nictatechreport_doc.tex ..
+$ make
