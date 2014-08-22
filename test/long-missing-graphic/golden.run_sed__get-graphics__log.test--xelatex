@@ -1,12 +1,12 @@
-# MISSING stem "this-name-is-really-long" - allowed extensions: .pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
+# MISSING stem "this-name-is-really-long" - allowed extensions: .pdf,.eps,.ps,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
 -include this-name-is-really-long.gpi.d
 TESTSTEM.d: $$(call graphics-source,this-name-is-really-long)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,this-name-is-really-long)
-# MISSING stem "so-is-this-one-and-it-pushes-errors-over-the-edge" - allowed extensions: .pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
+# MISSING stem "so-is-this-one-and-it-pushes-errors-over-the-edge" - allowed extensions: .pdf,.eps,.ps,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
 -include so-is-this-one-and-it-pushes-errors-over-the-edge.gpi.d
 TESTSTEM.d: $$(call graphics-source,so-is-this-one-and-it-pushes-errors-over-the-edge)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,so-is-this-one-and-it-pushes-errors-over-the-edge)
-# MISSING stem "this-triggers-two-paragraph-logic" - allowed extensions: .pdf,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
+# MISSING stem "this-triggers-two-paragraph-logic" - allowed extensions: .pdf,.eps,.ps,.png,.jpg,.bmp,.pict,.tif,.psd,.mac,.sga,.tga,.gif
 -include this-triggers-two-paragraph-logic.gpi.d
 TESTSTEM.d: $$(call graphics-source,this-triggers-two-paragraph-logic)
 TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,this-triggers-two-paragraph-logic)
