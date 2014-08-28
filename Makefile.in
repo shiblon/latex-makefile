@@ -1049,7 +1049,7 @@ endef
 # $(call full-path,<base file name>,<recorder file stem (without .fls)>)
 define full-path
 (##include_sed("$(SED)", "get-fls-fullpath.sed",
-	       name="$(call escape-fname-regex,$1)", "$2.fls")##)$1
+	       name="$(call escape-fname-regex,$1)", stem="$2.fls")##)$1
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
