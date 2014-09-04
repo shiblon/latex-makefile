@@ -1,17 +1,17 @@
 # MISSING stem "g1" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include g1.gpi.d
-TESTSTEM.d: $$(call graphics-source,g1)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g1)
+TESTSTEM.d: $$(call graphics-source,g1,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g1,TESTSTEM)
 # MISSING stem "g2" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include g2.gpi.d
-TESTSTEM.d: $$(call graphics-source,g2)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g2)
+TESTSTEM.d: $$(call graphics-source,g2,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g2,TESTSTEM)
 # MISSING stem "g3" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include g3.gpi.d
-TESTSTEM.d: $$(call graphics-source,g3)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g3)
+TESTSTEM.d: $$(call graphics-source,g3,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g3,TESTSTEM)
 # MISSING stem "g4" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include g4.gpi.d
-TESTSTEM.d: $$(call graphics-source,g4)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g4)
+TESTSTEM.d: $$(call graphics-source,g4,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,g4,TESTSTEM)
 

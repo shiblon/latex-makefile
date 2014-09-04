@@ -1,13 +1,13 @@
 # MISSING stem "nothere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include nothere.gpi.d
-TESTSTEM.d: $$(call graphics-source,nothere)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,nothere)
+TESTSTEM.d: $$(call graphics-source,nothere,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,nothere,TESTSTEM)
 # MISSING stem "notthere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include notthere.gpi.d
-TESTSTEM.d: $$(call graphics-source,notthere)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notthere)
+TESTSTEM.d: $$(call graphics-source,notthere,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notthere,TESTSTEM)
 # MISSING stem "notanywhere" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
 -include notanywhere.gpi.d
-TESTSTEM.d: $$(call graphics-source,notanywhere)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notanywhere)
+TESTSTEM.d: $$(call graphics-source,notanywhere,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,notanywhere,TESTSTEM)
 

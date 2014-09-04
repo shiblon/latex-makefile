@@ -1,0 +1,4 @@
+-include graphic.pdf.gpi.d
+TESTSTEM.d: $$(call graphics-source,graphic.pdf,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,graphic.pdf,TESTSTEM)
+

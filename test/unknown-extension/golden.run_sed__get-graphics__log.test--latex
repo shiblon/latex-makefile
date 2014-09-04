@@ -1,8 +1,8 @@
 # MISSING stem "badextension" - allowed extensions:  UNKNOWN=.epp
 -include badextension.gpi.d
-TESTSTEM.d: $$(call graphics-source,badextension)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension)
+TESTSTEM.d: $$(call graphics-source,badextension,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension,TESTSTEM)
 -include badextension.epp.gpi.d
-TESTSTEM.d: $$(call graphics-source,badextension.epp)
-TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp)
+TESTSTEM.d: $$(call graphics-source,badextension.epp,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,badextension.epp,TESTSTEM)
 

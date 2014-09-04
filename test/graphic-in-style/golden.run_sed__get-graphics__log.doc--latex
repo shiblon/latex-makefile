@@ -1,0 +1,5 @@
+# MISSING stem "graphic" - allowed extensions: .eps,.ps,.eps.gz,.ps.gz,.eps.Z
+-include graphic.gpi.d
+TESTSTEM.d: $$(call graphics-source,graphic,TESTSTEM)
+TESTSTEM.pdf TESTSTEM._graphics: $$(call graphics-target,graphic,TESTSTEM)
+
