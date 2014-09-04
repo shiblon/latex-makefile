@@ -45,10 +45,9 @@ class Template(object):
         cmd_args.extend(script_args)
         return " \\\n".join(cmd_args)
 
-    # TODO(shiblon):
-    # This is busted when we have nested templates!  The make characters have
-    # to be escaped after the include, but before all other expansions.  Figure
-    # that out.
+    # TODO(shiblon): This is busted when we have nested templates!
+    # The make characters have to be escaped after the include, but before all
+    # other expansions.  Figure that out.
     def TPL_include_sed(self, cmd, fname, *args, **variables):
         return self.TPL_include_script(cmd, fname,
                                        self.xfunc_escape_character("$", "$$"),

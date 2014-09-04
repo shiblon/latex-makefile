@@ -1,9 +1,11 @@
 #(##defaults(name="TEST.EPS")##)
 
 # Given an unqualified basename (name), try to find its full path in the
-# .fls file recorded by latex -recorder mode.
+# .fls file recorded by latex -recorder mode. Note that the file itself is
+# omitted, only the directory is returned. Thus, this is like a "dirname" that
+# expands only for files listed in the .fls file.
 #
-# Finds only the first occurrence, by quitting if it is there, and deletes any
+# Finds only the fjrst occurrence, by quitting if it is there, and deletes any
 # non-matching lines. Thus, only the first match is ever printed and the script
 # immediately exits.
 #

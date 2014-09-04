@@ -83,11 +83,11 @@ g
 
 # Add graphics source files as dependencies of this file - it makes it rebuild
 # when they change.
-s!.*!(##stem##).d: $$(call graphics-source,&)!
+s!.*!(##stem##).d: $$(call graphics-source,&,(##stem##))!
 p
 s/.*//
 x
 # Add graphics dependencies to main document
-s!.*!(##stem##).(##build_target_extension##) (##stem##)._graphics: $$(call graphics-target,&)!
+s!.*!(##stem##).(##build_target_extension##) (##stem##)._graphics: $$(call graphics-target,&,(##stem##))!
 p
 d

@@ -300,6 +300,10 @@ $(if $(WRITE_TRANSCRIPT), \
 	export run_reason="", \
 	$(sh_true))
 endef
+# A debugging helper - warns and returns its first arguments, optionally
+# prepending the second argument as a warning prefix.
+# $(call tee-warning,<expression>,[optional warning prefix])
+tee-warning = $(warning $2$1)$1
 
 # Don't call this directly - it is here to avoid calling wildcard more than
 # once in remove-files.
@@ -968,13 +972,16 @@ endef
 # graphics files.
 #
 # $(call graphics-source,<stem>,<fls stem>)
-define graphics-source
+define graphics-source-helper
 $(strip $(firstword \
 	$(wildcard \
 		$(addprefix $1.,\
 			$(graphic_source_extensions))) \
 	$1 \
 ))
+endef
+define graphics-source
+$(call graphics-source-helper,$(call full-path,$1,$2))
 endef
 
 # Get the target file for the specified graphics file/stem
@@ -998,10 +1005,13 @@ endef
 #
 # So, either a valid filename is returned, or the empty string.
 #
-# $(call graphics-target,<stem>)
-define graphics-target
+# $(call graphics-target,<graphic stem>,<doc stem>)
+define graphics-target-helper
 $(strip $(if 	$(filter $(addprefix %.,$(graphic_target_extensions)),$1), $1,
 	$(firstword $(patsubst $(addprefix %.,$(graphic_source_extensions) $(graphic_target_extensions)), %, $1).$(default_graphic_extension) $1.$(default_graphic_extension))))
+endef
+define graphics-target
+$(call graphics-target-helper,$(call full-path,$1,$2))
 endef
 
 # Outputs all of the graphical dependencies to stdout.  The first argument is
@@ -1041,15 +1051,27 @@ define get-source-specials
 (##include_sed("$(SED)", "get-source-specials.sed", "$1")##) > '$2'
 endef
 
-# Get the full path to a file from the recorder file
+
+# Create a sed script that returns the fls path to a file from the recorder
+# file. A helper for full-path.
 #
-# Note that we always append the filename to the end of the path so that a path
-# not found results in a no-op.
+# If the file is not found, an empty string is returned. If the file is found,
+# the directory in which it is contained is returned (without the filename
+# itself).
 #
-# $(call full-path,<base file name>,<recorder file stem (without .fls)>)
+# Think of this as a dirname function that looks things up in the .fls file.
+#
+# $(call fls-path-cmd,<base file name>,<recorder file stem (without .fls)>)
+define fls-path-cmd
+(##include_sed("$(SED)", "get-fls-fullpath.sed", "$2.fls",
+		name="$(subst /,\/,$(subst .,\.,$1))")##)
+endef
+
+# Get the full path to a file from the recorder file.
+#
+# #(call full-path,<base file name>,<recorder file stem (without .fls)>)
 define full-path
-(##include_sed("$(SED)", "get-fls-fullpath.sed",
-	       name="$(call escape-fname-regex,$1)", "$2.fls")##)$1
+$(strip $(shell $(call fls-path-cmd,$1,$2)))$1
 endef
 
 # Checks for build failure due to pstex inclusion, and gives instructions.
