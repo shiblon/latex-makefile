@@ -1,3 +1,5 @@
+Chris Monson (2014-09-04):
+* Allow graphic dependencies in texmf directories (anything .fls knows about).
 Chris Monson (2014-02-14):
 * Added dia support from issue 174 (thanks to johannes.zarl)
 Chris Monson (2013-04-09):
