@@ -2430,7 +2430,8 @@ clean-auxiliary:
 clean-nographics: clean-tex clean-deps clean-backups clean-auxiliary ;
 
 .PHONY: clean-extra
-	$(QUIET)$(call clean-files,$(clean-extra))
+clean-extra:
+	$(QUIET)$(call clean-files,$(cleanextra))
 
 .PHONY: clean
 clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary clean-extra ;
