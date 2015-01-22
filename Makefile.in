@@ -114,7 +114,7 @@ XARGS		?= xargs
 SLEEP		?= sleep
 # == LaTeX (tetex-provided) ==
 BIBTEX		?= bibtex
-BIBER       ?= biber
+BIBER		?= biber
 DVIPS		?= dvips
 LATEX		?= latex
 PDFLATEX	?= pdflatex
@@ -1354,7 +1354,7 @@ color_bib := \
 # Colorize Biber output.
 color_biber := \
 (##include_sed("$(SED)", "color-biber.sed",
-           color_info="$(C_INFO)",
+	       color_info="$(C_INFO)",
 	       color_warning="$(C_WARNING)",
 	       color_error="$(C_ERROR)",
 	       color_reset="$(C_RESET)")
@@ -1982,30 +1982,30 @@ endif
 	$(QUIET)\
 	$(if $(filter %.bib,$^),\
 		$(if $(use_biblatex), \
-                $(call echo-build,$(filter %.bib,$?) $*.bcf,$@); \
-                $(call set-run-reason,dependencies of $@ changed); \
-                $(call run-biber,$*); \
-			, \
-                $(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
-                $(call set-run-reason,dependencies of $@ changed); \
-                $(call run-bibtex,$*); \
-        ) \
+			$(call echo-build,$(filter %.bib,$?) $*.bcf,$@); \
+			$(call set-run-reason,dependencies of $@ changed); \
+			$(call run-biber,$*); \
+		, \
+			$(call echo-build,$(filter %.bib,$?) $*.aux,$@); \
+			$(call set-run-reason,dependencies of $@ changed); \
+			$(call run-bibtex,$*); \
+		) \
 		$(TOUCH) $@.cookie; \
 	) \
 	if $(EGREP) -q 'bibstyle.(apacite|apacann|chcagoa|[^}]*annot)' '$*.aux'; then \
 		$(call echo-build,** annotated extra latex **,output ignored,$(RESTARTS)-1); \
 		$(call run-latex,$*); \
 		$(CP) '$*.log' '$*.$(RESTARTS)-annotated.log'; \
-		$(if $(filter %.bib,$^),\
-            $(if $(use_biblatex), \
-                $(call echo-build,** annotated extra bibtex ** $(filter %.bib,$?) $*.bcf,$@); \
-                $(call run-biber,$*); \
-			, \
-                $(call echo-build,** annotated extra bibtex ** $(filter %.bib,$?) $*.aux,$@); \
-                $(call run-bibtex,$*); \
-            ) \
-			$(TOUCH) $@.cookie; \
+	$(if $(filter %.bib,$^),\
+		$(if $(use_biblatex), \
+			$(call echo-build,** annotated extra bibtex ** $(filter %.bib,$?) $*.bcf,$@); \
+			$(call run-biber,$*); \
+		, \
+			$(call echo-build,** annotated extra bibtex ** $(filter %.bib,$?) $*.aux,$@); \
+			$(call run-bibtex,$*); \
 		) \
+		$(TOUCH) $@.cookie; \
+	) \
 		$(call echo-build,** annotated extra latex **,output ignored,$(RESTARTS)-2); \
 		$(call run-latex,$*); \
 	fi
@@ -2271,7 +2271,7 @@ endif
 	$(call get-log-index,$*,$(addprefix $*.,aux aux.make)) >> $*.d; \
 	$(if $(use_biblatex),\
 		$(call get-biblatex-bibs,$*.bcf,$(addprefix $*.,bbl aux aux.make bcf)) >> $*.d; \
-    , \
+	, \
 		$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	) \
 	$(EGREP) -q "# MISSING stem" $*.d && $(SLEEP) 1 && $(RM) $*.pdf; \
