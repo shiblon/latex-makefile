@@ -1728,6 +1728,7 @@ echo-list	= for x in $1; do $(ECHO) "$$x"; done
 
 .PHONY: all
 all: $(default_pdf_targets) ;
+	killall -q -SIGHUP mupdf || true
 
 .PHONY: all-pdf
 all-pdf: $(default_pdf_targets) ;
