@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage{minted}
+
+% Note: Requires 'pygmentize' to be installed on the system.
+
+% Results:
+%   'xelatex -shell-escape test' works
+%   'xelatex test' does not work
+
+\begin{document}
+Example Python script:
+
+\begin{minted}{python}
+    def hello():
+        '''An example function'''
+        print "Hello world"
+
+    hello()
+\end{minted}
+\end{document}
