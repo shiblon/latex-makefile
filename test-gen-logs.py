@@ -17,6 +17,12 @@ if len(sys.argv) == 2:
 else:
   initial_dir = "test"
 
+if not os.path.isdir(initial_dir):
+  print >>sys.stderr, "Directory %s does not exist - cannot generate logs" % initial_dir
+  sys.exit(1)
+
+print >>sys.stderr, "Generating logs in %s" % initial_dir
+
 last_dir = None
 
 for dirpath, dirnames, filenames in os.walk(initial_dir):
@@ -35,7 +41,9 @@ for dirpath, dirnames, filenames in os.walk(initial_dir):
     print("Building {0}".format(os.path.join(dirpath, name)))
 
     for command in commands:
-      print env["TEXINPUTS"]
+      texinputs = env.get("TEXINPUTS")
+      if texinputs:
+        print "TEXINPUTS=%s" % texinputs
       print "Running %r in %r" % (command, dirpath)
       ret = subprocess.call(args=(command,
                                   "-interaction=batchmode",

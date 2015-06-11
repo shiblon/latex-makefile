@@ -1,0 +1,11 @@
+PWD /Users/chris/chris/latex-makefile/test/runaway-caption
+INPUT /usr/local/texlive/2013/texmf.cnf
+INPUT /usr/local/texlive/2013/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2013/texmf-var/web2c/pdftex/latex.fmt
+INPUT test.tex
+OUTPUT test.log
+INPUT /usr/local/texlive/2013/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2013/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2013/texmf-dist/tex/latex/base/size10.clo
+INPUT /usr/local/texlive/2013/texmf-dist/tex/latex/base/size10.clo
+OUTPUT test.aux

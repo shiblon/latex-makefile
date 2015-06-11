@@ -1,5 +1,10 @@
 #(##defaults(color_error="<E>", color_reset="<R>")##)
 
+# Remove lonely ) - they are meaningful in some sense, but we don't parse the
+# log file hierarchically, so they're just a problem. They always appear by
+# themselves, and they always make a sensible place to break a paragraph.
+s/^)$//
+
 #(##include("paragraphs.sed")##)
 
 # File not found errors (e.g., for class and package files) require two more
@@ -39,13 +44,13 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 #
 # Type X to quit or <RETURN> to proceed,
 # or enter new name. (Default extension: cls)
-# 
-# Enter file name: 
+#
+# Enter file name:
 # ./test-missing-cls.tex:2: Emergency stop.
-# <read *> 
-#          
+# <read *>
+#
 # l.2 ^^M
-#        
+#
 # *** (cannot \read from terminal in nonstop modes)
 /^::0::! LaTeX Error: File .*/{
   # Request another paragraph if we run into the weird case where an error line
@@ -107,6 +112,14 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
   b error
 }
 
+# Runaway arguments are formatted a bit differently. They have have the /^! /
+# stuff on a later line, in the first paragraph. So we just handle them
+# specially here.
+/^Runaway argument?/{
+  s/I'll try to recover.*//
+  b error
+}
+
 # We deal with this one specially because it tends to be buried at the end of
 # long paragraphs of other stuff, so it requires interesting processing.
 # With the addition of the handy error prefix, though, we just need to delete
@@ -126,7 +139,7 @@ s/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/
 # LaTeX Font Info:    ... okay on input line 5.
 # ./test.tex:6: Undefined control sequence.
 # l.6 \halp
-#          
+#
 # The control sequence at the end of the top line
 # of your error message was never \def'ed. If you have
 # misspelled it (e.g., `\hobx'), type `I' and the correct
