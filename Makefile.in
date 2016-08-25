@@ -1705,7 +1705,7 @@ endef
 # $(call make-ps,<dvi file>,<ps file>,<log file>,[<paper size>],[<beamer info>])
 make-ps		= \
 	$(DVIPS) -z -o '$2' $(if $(strip $4),-t$(strip $4),) '$1' \
-		$(if $5,| $(enlarge_beamer)) > $3 2>&1
+		$(if $(strip $5),| $(enlarge_beamer)) > $3 2>&1
 
 # Convert Postscript to PDF
 # $(call make-pdf,<ps file>,<pdf file>,<log file>,<embed file>)
