@@ -359,6 +359,8 @@ escape-fname-regex	= $(subst /,\/,$(subst .,\.,$1))
 test-exists		= [ -e '$1' ]
 # $(call test-not-exists,file)
 test-not-exists   = [ ! -e '$1' ]
+# $(call test-non-empty,file)
+test-non-empty    = [ -s '$1' ]
 
 # $(call move-files,source,destination)
 move-if-exists		= $(call test-exists,$1) && $(MV) '$1' '$2'
@@ -1156,6 +1158,13 @@ define get-bibs
 $(SED) \
 -e 's!.*!$2: $$(call path-norm,&)!' | \
 $(SORT) | $(UNIQ)
+endef
+
+# Outputs bcf bibs to stdout. Arg 1 is the bcf file stem, arg 2 is the
+# list of targets for each dependency found.
+define get-bcf-bibs
+$(call test-non-empty,$1.bcf) && (##include_sed("$(SED)", "get-bcf-bibs.sed", "'$1'", target_files="$2")
+##) | $(SORT) | $(UNIQ)
 endef
 
 # Makes a an aux file that only has stuff relevant to the target in it
@@ -2221,6 +2230,7 @@ endif
 	$(call get-graphics,$*) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
+	$(call get-bcf-bibs,$*,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	$(EGREP) -q "# MISSING stem" $*.d && $(SLEEP) 1 && $(RM) $*.pdf; \
 	$(EGREP) -q "# MISSING format" $*.d && $(RM) $*.pdf; \
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \

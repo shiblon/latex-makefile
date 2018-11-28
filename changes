@@ -1,3 +1,5 @@
+Chris Monson (2018-11-28):
+* Add bcf datasource collection for biber - thanks to llbit on issue 126
 Chris Monson (2014-09-04):
 * Allow graphic dependencies in texmf directories (anything .fls knows about).
 Chris Monson (2014-02-14):
