@@ -1,4 +1,29 @@
-(##include_as_comment("copyright") ##)
+# Copyright 2004 Chris Monson (shiblon@gmail.com)
+# Latest version available at http://www.bouncingchairs.net/oss
+#
+#    This file is part of ``Chris Monson's Free Software''.
+#
+#    ``Chris Monson's Free Software'' is free software; you can redistribute it
+#    and/or modify it under the terms of the GNU General Public License as
+#    published by the Free Software Foundation, Version 2.
+#
+#    ``Chris Monson's Free Software'' is distributed in the hope that it will
+#    be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+#    Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with ``Chris Monson's Free Software''; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#    It is also available on the web at http://www.gnu.org/copyleft/gpl.html
+#
+#    Note that using this makefile to build your documents does NOT place them
+#    under the GPL unless you, the author, specifically do so.  In other words,
+#    I, Chris Monson, the copyright holder and author of this makefile,
+#    consider it impossible to ``link'' to this makefile in any way covered by
+#    the GPL.
+#
 #
 # TO OBTAIN INSTRUCTIONS FOR USING THIS FILE, RUN:
 #    make help
@@ -80,10 +105,636 @@ export LC_ALL		?= C
 # Makefile.
 #
 # KNOWN ISSUES:
-(##include_as_comment("known-issues") ##)
+# * The following occurs:
+#   file with: \usepackage{named}\bibliographystyle{named}
+#   Compile
+#   change to: \usepackage{apalike}\bibliographystyle{apalike}
+#   Compile again -- BARF!
+#
+#   The workaround: make clean-nographics; make
+#
+#   Note that we may not be able to fix this.  LaTeX itself barfs
+#   on this, not the makefile.  The very first invocation of LaTeX
+#   (when something like this has happened) reads the existing .aux
+#   file and discovers invalid commands like \citeauthoryear that
+#   are only valid in the package that was just removed.  It then
+#   tries to parse them and explodes.  It's not at all clear to me
+#   how to fix this.  I tried removing the .aux files on the first
+#   run of LaTeX, but that necessarily requires more subsequent
+#   rebuilds on common edits.  There does not appear to be a
+#   graceful solution to this issue.
+#
 #
 # CHANGES:
-(##include_as_comment("changes") ##)
+# Chris Monson (2018-11-28):
+# * Add bcf datasource collection for biber - thanks to llbit on issue 126
+# Chris Monson (2014-09-04):
+# * Allow graphic dependencies in texmf directories (anything .fls knows about).
+# Chris Monson (2014-02-14):
+# * Added dia support from issue 174 (thanks to johannes.zarl)
+# Chris Monson (2013-04-09):
+# * Fixed mess with _check_programs - works properly now.
+# Chris Monson (2012-11-23):
+# * Issue 166: Added clean-extra target and cleanextra user variable.
+# Chris Monson (2012-08-02):
+# * Added comments about LuaLaTeX.
+# Chris Monson (2012-06-25):
+# * Bumped version to 2.2.1-alpha9
+# * Built with Holger Dell's changes to fix multiple unnecessary compilations.
+# Chris Monson (2011-11-10):
+# * Issue 144: Help patch from girard.nicolas applied
+# Andrew McNabb (2011-09-30):
+# * Bumped version to 2.2.1-alpha8
+# * Issue 141: No font embedding for gnuplot when not doing pdf
+# * Syntax error fixed for gpi handling code
+# Chris Monson (2011-09-06):
+# * Issue 140: clean mlt*, mlf*, and mtc* files
+# * Issue 136: initial support for metapost files
+# Chris Monson (2011-08-09):
+# * Bumped version to 2.2.1-alpha7
+# * Issue 138: existing .eps files now included correctly
+# * Issue 139: added missing backslash to ps build rule
+# Chris Monson (2011-07-20):
+# * Added LATEX_OPTS
+# Chris Monson (2011-06-23):
+# * Bumped version to 2.2.1-alpha6
+# * Issue 133: Set jobname to fix .fls generation to always have the source name
+# * Removed unnecessary (?) double-invocation of cygpath
+# Chris Monson (2011-06-16):
+# * Added support for keeping .rst and .lhs tex intermediates around.
+# * Separated scripts from source generation files (rst and lhs)
+# * Fixed run-script problem for lhs2tex (was invoked incorrectly)
+# * Issue 133: Fixed typo from literate Haskell support
+# Chris Monson (2011-06-13):
+# * Bumped version to 2.2.1-alpha5
+# * Fixed problems with detecting graphics for very long source names.
+# Chris Monson (2011-06-13):
+# * Issue 134: name of self corrected for dependency graph
+# * Issue 133: Added literate Haskell support (lhs2tex)
+# Chris Monson (2011-05-31):
+# * Rewrote specials (%%COMMENTS) to be easier to extend and parse.
+# Chris Monson (2011-05-11):
+# * Bumped version to 2.2.1-alpha4
+# * Issue 129: nomenclature dependency fix
+# Chris Monson (2011-05-09):
+# * Bumped version to 2.2.1-alpha3
+# * Issue 112: Cygpath fixes
+# Chris Monson (2011-04-27):
+# * Bumped version to 2.2.1-alpha2
+# * Issue 126: Broken log parsing for latex pipeline
+# * Fixed month in recent changes (had May, should be April)
+# * Noticed problems with some existing parsing (colorizing errors, notably) and
+#     fixed them.
+# * New test case for specified graphic extensions.
+# * Added .bb generation for .eps files (when extensionless in latex pipeline)
+# Chris Monson (2011-04-22):
+# * Bumped version to 2.2.1-alpha1
+# * Issue 105: add support for format file detection and compilation
+# Chris Monson (2011-04-20):
+# * Bumped version to 2.2.0 (release!)
+# Chris Monson (2011-04-19):
+# * Bumped version to 2.2.0-rc15
+# * Issue 125: infinite recursion with nomenclature files
+# * Issue 125: removed .d as a target for .nls in get-log-index
+# * Cleaned up invocation of run-makeindex to take an optional .ist instead of flags.
+# Chris Monson (2011-04-06):
+# * Bumped version to 2.2.0-rc14
+# * Issue 121: Added Targets.ini and corresponding help text for it.
+# * Issue 121: Added Variables.ini (Makefile.ini still works, though).
+# * Issue 121: Added .DEFAULT_GOAL optional setting.
+# * Issue 120: xindy compatibility
+# Chris Monson (2011-03-16):
+# * Bumped version to 2.2.0-rc13
+# * Fixed a bug in kspewhich invocation - random characters and a missing pipe.
+# * Added font embedding to gnuplot output.
+# Chris Monson (2011-03-15):
+# * Bumped version to 2.2.0-rc12
+# * Issue 119: Annoying warning from which if Gnuplot not installed.
+# * Fixed catchall error output to show more info from the log.  Cutting off the
+#     first line is too jarring.
+# * Issue 118: Better glossary support
+# Chris Monson (2011-03-03):
+# * Bumped version to 2.2.0-rc11
+# * Issue 112: Fixed regression introduced by use of cygpath (ugly warnings)
+# Chris Monson (2011-02-03):
+# * Bumped version to 2.2.0-rc10
+# * Issue 112: Added path normalization for cygwin systems
+# * Fixed a bug in get-missing-inputs where we weren't specifying target files
+# Chris Monson (2011-01-24):
+# * Issue 111: Added .jpeg as a possible image extension
+# Chris Monson (2011-01-21):
+# * Issue 110: Long filenames not produced correctly in .d file
+# * Fixed problem with unknown control sequence error parsing
+# * Fixed problem with \r in fatal output (was interpreted as LF by echo)
+# * Removed a spurious "hi"
+# Chris Monson (2011-01-14):
+# * Bumped version to 2.2.0-rc8
+# * Issue 107: Removed comment with embedded newline, fixing MinGW on Windows 7.
+# Chris Monson (2011-01-07):
+# * Emit an error if .gpi.d files have dependencies with : in the name
+# Chris Monson (2011-01-05):
+# * Bumped version to 2.2.0-rc7
+# * Issue 106: existing graphic dependencies not generated correctly
+# Chris Monson (2011-01-04):
+# * Issue 106: not cleaning eps log files properly
+# * Issue 106: not rebuilding after creating .pdf graphics from .eps
+# * Issue 94: svg going unnecessarily through eps (can't reproduce)
+# Chris Monson (2010-12-31):
+# * Issue 100: make hanging because of faulty graphics detection (sed bug)
+# * Issue 108: do not ignore fatal errors from pdftex
+# Chris Monson (2010-12-23):
+# * Added gpi_global to gnuplot dependencies so that changes are detected
+# Chris Monson (2010-12-20):
+# * Updated build file to be smarter about Python version detection
+# * Created a bunch of test files and supporting scripts
+# * Issue 72: added apacite capaability (thanks to matkarat)
+# Chris Monson (2010-11-23):
+# * Changed to multi-part makefile build (split out sed scripts)
+# * Added build script and supporting infrastructure
+# * Updated test directory format
+# * Added notes about needed test cases
+# * Changed to use -file-line-error and fixed multiple inclusion/error bugs
+# * Added run_sed.py to allow easy testing of sed scripts outside of make
+# Chris Monson (2010-11-11):
+# * Bumped version to 2.2.0-rc7
+# * issue 92: broken hyperref driver detection fixed
+# * issue 101: Broken inkscape conversion
+# * issue 102: Broken specification of font size for gnuplot pdfcairo
+# * Added KEEP_TEMP so that we can avoid deleting useful temporaries for debugging
+# * Restructured gnuplot code to be easier to follow
+# * Fixed a bug in convert-gpi where we were using $< instead of $1
+# Chris Monson (2010-11-03):
+# * Bumped version to 2.2.0-rc6
+# * issue 96: Fix sed errors when using make variables in substitutions
+# Chris Monson (2010-07-28):
+# * Bumped version to 2.2.0-rc5 (rc4 is broken)
+# * Bail out when we find the use of the import.sty package
+# * Issue 90: Add -z to dvips invocation
+# * Issue 67: Add xelatex support (thanks to Nikolai Prokoschenko for the patch!)
+# * Issue 85: Add warning about make 3.80
+# Chris Monson (2010-06-20):
+# * Bumped version to 2.2.0-rc3
+# * Attempt to fix bug with ! error detection (issue 88)
+# * Added svg->pdf direct support (issue 89)
+# Chris Monson (2010-04-28):
+# * Bumped version to 2.2.0-rc2
+# * Fixed %._show target
+# Chris Monson (2010-04-08):
+# * Bumped version to 2.2.0-rc1
+# * Added back in the rst_style_file stuff that got broken when switching
+#     rst -> tex to use the script mechanism
+# Chris Monson (2010-03-23):
+# * Bumped version to 2.2.0-beta8
+# * Work on issue 76: bad backtick escape for some sed versions, failure
+#     to clear out the hold buffer when outputting MISSING comment.
+#     - Backed out 2>&1 to &> (doesn't work in sh)
+#     - Backed out using . to source variables
+# Chris Monson (2010-03-22):
+# * Bumped version to 2.2.0-beta7
+# * Issue 72: Fix latex/bibtex invocation order for annotated bib styles
+# * Fixed informational output to reflect which LaTeX run we're on
+# * Fixed graphic detection to include graphics that are already there in
+#     .d files
+# * Tightened up the .d file output to only make .d depend on graphic
+#     *source* files.  This means that building foo.d no longer
+#     builds all of the graphics files on which foo.tex depends.
+#     Had to use .SECONDEXPANSION trickery to make it work.
+# * Changed get-graphics to only accept a stem.
+# * Fixed build-once logic for scripted .tex to work better
+# * Made get-inputs sed script more maintainable.
+# * Moved Makefile.ini import up higher.
+# * Changed bare stems to not recursively invoke make
+# * Updated diff output to be more silent everywhere
+# * Added a MISSING comment to the .d file if stuff isn't found - forces
+#     removal of .1st.make file, which often forces it to try again.
+# * Fixed broken graphics-target function
+# * Added sleep to .d file generation when stuff is missing - if it
+#     builds too fast, make doesn't realize it needs to be reloaded,
+#     and thus never discovers some deeper dependencies (especially
+#     evident when graphics are included from scripted include
+#     files).
+# Chris Monson (2010-03-17):
+# * Bumped version to 2.2.0-beta6
+# * Fixed bareword builds to actually work (requires static patterns)
+# * Fixed colorization to work with new paragraph stuff
+# Chris Monson (2010-03-17):
+# * Bumped version to 2.2.0-beta5
+# * Fixed graphic detection to be much more focused - splits log file
+#     into paragraphs before doing pattern matching.
+# * Fixed make foo to work properly (recursively calls make foo.pdf)
+# * Fixed gpi -> pdf generation to not waste time building .eps *after*
+#     the pdf already exists.
+# * Changed log copies to include MAKE_RESTARTS as part of the name.
+# * Fixed missing include file detection (also makes use of the paragraph
+#     stuff) to detect missing scripted include files.
+# Chris Monson (2010-03-16):
+# * Bumped version to 2.2.0-beta4
+# * issue 70: .pdf not moved out of the way properly on first
+#     compilation, resulting in early error detection failure.
+# * issue 74: fixed broken error on missing .aux files: the
+#     implementation was masking real errors.
+# Chris Monson (2010-03-15):
+# * Bumped version to 2.2.0-beta3
+# * issue 71: Made the tput dependency optional
+# * issue 73: Made .tex targets not pull in .d files (building them from
+#     scripts should not require a .d)
+# * issue 74: Output a much saner error when a .aux file is not produced
+#     (e.g., when you are typing "make" without arguments in a
+#     directory with included .tex files that are not named with
+#     ._include_.)
+# Chris Monson (2010-03-11):
+# * Bumped version to 2.2.0-beta2
+# * Fixed clean-graphics to get rid of intermediate .eps files that may
+#     be hanging around
+# * Added an automatic setting to use eps terminals in pdflatex mode for
+#     gnuplot if it doesn't understand pdf.
+# * issue 66: Removed grayscale generation via magic suffix.  Grayscale
+#     generation is now only available via GRAY=1
+# * issue 68: Added explicit handling of LC_ALL for locale-aware tools
+#     like "sort"
+# Chris Monson (2010-03-10):
+# * Bumped version to 2.2.0-beta1
+# * Fixed success message to handle output message in different places
+# * Added name of produced file to success message
+# Chris Monson (2010-03-10):
+# * Bumped version to 2.2.0-alpha3
+# * Added meaningful error message for wrong hyperref options
+# * Added meaningful error message for incorrect graphics extensions
+# Chris Monson (2010-03-09):
+# * Bumped version to 2.2.0-alpha2
+# * Updated graphics handling (gnuplot and fig generate pdf natively)
+# * Changed xmgrace to output monochrome natively
+# Chris Monson (2010-03-09):
+# * Bumped version to 2.2.0-alpha1 - major change!
+# * Support pdflatex natively and by default (issue 6 - a long time coming)
+# * Add ability to have a single $HOME/.latex-makefile/Makefile.ini for
+#     all invocations
+# * Reworked graphic inclusion detection so that extensions need not be
+#     specified for either build strategy (e.g.,
+#     \includegraphics{test1.eps} -> \includegrahpics{test1})
+# * Changed log format to include filenames and line numbers
+# Chris Monson (2010-02-04):
+# * Bumped version to 2.1.43
+# * All of the following are for issue 63 (thanks to mojoh81):
+# * Added documentation about fixing Makefile.ini default target
+# * Added perl and python script targets
+# * Fixed run logic to allow included .tex files to be scripted (the
+#     run-again logic now detects missing .tex files, and the MV
+#     command has been switched out for a command that only invokes
+#     MV if the files exist)
+# * Changed scripted generation to only run once per make invocation
+# * Added dependency on expr
+# Chris Monson (2010-01-19):
+# * Bumped version to 2.1.42
+# * issue 62: Added .brf extension to cleanable files (backrefs)
+# Chris Monson (2010-01-07):
+# * Bumped version to 2.1.41
+# * issue 60: bad makeindex runs now error out on subsequent tries
+# Chris Monson (2009-12-01):
+# * Bumped version to 2.1.40
+# * issue 36: build all indices (for e.g., splitidx usage)
+# * issue 59: clean up all generated files (including indices)
+# Chris Monson (2009-11-23):
+# * Bumped version to 2.1.39
+# * issue 57: change ps2pdf invocations to just use gs directly
+# Chris Monson (2009-11-19):
+# * Bumped version to 2.1.38
+# * issue 57: Added some limited support for Cygwin (spaces in filenames)
+# Chris Monson (2009-11-15):
+# * Bumped version to 2.1.37
+# * Removed svninfo, since this is now managed by mercurial
+# * Fixed typo in changelist
+# * Issue 52: added jpg->eps conversion (thanks to brubakee)
+# * Issue 54: fix missing Overfull colorization due to lack of a blank
+#     line preceding the first error.
+# * Issue 51: remove head.tmp and body.tmp in make clean invocation
+# * Issue 56: maintain multiple versions of log files (for debugging)
+# Chris Monson (2009-11-14):
+# * Bumped version to 2.1.36
+# * Issues 53 and 49: added .brf, .mtc, and .maf to the cleanables
+# Chris Monson (2009-11-05):
+# * Bumped version to 2.1.35
+# * Added nomenclature support (see issue 48)
+# Chris Monson (2009-10-29):
+# * Bumped version to 2.1.34
+# * Fixed _out_ creation bug introduced in 2.1.33 (it was always created)
+# * Fixed erroneous help output for $HOME in BINARY_TARGET_DIR
+# * Changed contact email address - bring on the spam!
+# Chris Monson (2009-10-21):
+# * Bumped version to 2.1.33
+# * Fixed issue 46, adding support for dot2tex (thanks to fdemesmay)
+# * Made all_files.* settable in Makefile.ini (using ?= instead of :=)
+# * Fixed issue 47, thanks to fdemesmay: add binary copy directory, copy
+#     dvi, pdf, and ps if it exists
+# Chris Monson (2009-09-25):
+# * Bumped version to 2.1.32
+# * Fixed so that a changed lol file will cause a rebuild
+# * Added .lol files to the cleanable list
+# Chris Monson (2009-09-08):
+# * Bumped version to 2.1.31
+# * Closed issue 43: evince doesn't notice pdf change w/out touch
+# Chris Monson (2009-08-28):
+# * Bumped version to 2.1.30
+# * Closed issue 39: Capture multi-line log warnings/errors to output
+# Chris Monson (2009-08-26):
+# * Bumped version to 2.1.29
+# * Closed issue 42: add svg support using inkscape
+# Chris Monson (2009-08-17):
+# * Bumped version to 2.1.28
+# * Patch from paul.biggar for issue 38: package warnings are overlooked
+# Chris Monson (2009-08-07):
+# * Bumped version to 2.1.27
+# * Included patch for issue 37 - removes pdf/ps files before copying,
+#     allowing some broken viewers to see changes properly.
+# Chris Monson (2009-05-15):
+# * Bumped version to 2.1.26
+# * Included patch for issue 9 from favonia - detects .fig changes for
+#     pstex files during regular compilation, so long as the pstex
+#     has been built at least once with make all-pstex.
+# Chris Monson (2009-03-27):
+# * Bumped version to 2.1.25
+# * Cleaned up a bunch of variable setting stuff - more stuff is now
+#     settable from Makefile.ini
+# * Cleaned up documentation for various features, especially settable
+#     variables.
+# * issue 28: support for png -> eps conversion (it even looks good!)
+# * issue 29: support for "neverclean" files in Makefile.ini
+# * issue 30: make ps2pdf14 the default - fall back when not there
+# Chris Monson (2009-03-09):
+# * Bumped version to 2.1.24
+# * issue 27: xmgrace support (thanks to rolandschulzhd)
+# Chris Monson (2008-10-23):
+# * Bumped version to 2.1.23
+# * issue 23: fixed _check_programs to not use bash string subs
+# Chris Monson (2008-09-02):
+# * Bumped version to 2.1.22
+# * Appled patch from Holger <yllohy@googlemail.com> to add include
+#     sources and some documentation updates.
+# * Updated backup_patterns to be a bit more aggressive (also thanks to
+#     Holger)
+# Chris Monson (2008-08-30):
+# * Bumped version to 2.1.21
+# * Added ability to specify onlysources.* variables to indicate the only
+#     files that should *not* be considered includes.  Thanks to Holger
+#     <yllohy@googlemail.com> for this patch.
+# * Added an automatic include of Makefile.ini if it exists.  Allows
+#     settings to be made outside of this makefile.
+# Chris Monson (2008-05-21):
+# * Bumped version to 2.1.20
+# * Added manual pstex compilation support (run make all-pstex first)
+# * Removed all automatic pstex support.  It was totally breaking
+#     everything and is very hard to incorporate into the makefile
+#     concept because it requires LaTeX to *fail* before it can
+#     determine that it needs the files.
+# Chris Monson (2008-04-17):
+# * Bumped version to 2.1.19
+# * Changed the pstex build hack to be on by default
+# Chris Monson (2008-04-09):
+# * Bumped version to 2.1.18
+# * issue 16: fixed pstex build problems, seems nondeterministic.  Added
+#     gratuitious hack for testing: set PSTEX_BUILD_ALL_HACK=1.
+# Chris Monson (2008-04-09):
+# * Bumped version to 2.1.17
+# * issue 20: fixed accumulation of <pid>*.make files - wildcard was
+#     refusing to work on files that are very recently created.
+# Chris Monson (2008-04-02):
+# * Bumped version to 2.1.16
+# * issue 19: Removed the use of "type" to fix broken "echo" settings
+# Chris Monson (2008-03-27):
+# * Bumped version to 2.1.15
+# * issue 18: Favors binary echo over builtin, as binary understands -n
+# * issue 16: Fixed handling of missing pstex_t files in the log
+# * issue 9: Added .SECONDARY target for .pstex files
+# Chris Monson (2008-03-21):
+# * Bumped version to 2.1.14
+# * Fixed broken aux file flattening, which caused included bibs to be
+#     missed.
+# Chris Monson (2008-03-20):
+# * Bumped version to 2.1.13
+# * Changed error output colorization to show errors for missing files
+#     that are not graphics files.
+# Chris Monson (2008-03-20):
+# * Bumped version to 2.1.12
+# * Fixed a regression introduced in r28 that makes bibtex fail when
+#     there is no index file present
+# Chris Monson (2008-03-03):
+# * Bumped version to 2.1.11
+# * Fixed issue 11 (handle index files, reported by abachn)
+# * Cleaned up some comments and help text
+# Chris Monson (2008-01-24):
+# * Bumped version to 2.1.10
+# * Fixed to work when 'sh' is a POSIX shell like 'dash'
+# Chris Monson (2007-12-12):
+# * Bumped version to 2.1.9
+# * Fixed documentation and dependency graph for pstex files
+# Chris Monson (2007-12-12):
+# * Bumped version to 2.1.8
+# * Added basic pstex_t support for fig files (Issue 9 by favonia)
+#     I still suggest that psfrag be used instead.
+# Chris Monson (2007-10-16):
+# * Bumped version to 2.1.7
+# * Removed todo item: allow other comment directives for rst conversion
+# * Added ability to use global rst style file _rststyle_._include_.tex
+# * Added help text to that effect
+# Chris Monson (2007-05-20):
+# * Bumped version to 2.1.6
+# * Changed default paper size for rst files
+# * Added todo item: fix paper size for rst files
+# * Added todo item: allow other comment directives for rst conversion
+# Chris Monson (2007-04-02):
+# * Bumped version to 2.1.5
+# * Addressed Issue 7, incorrect .gpi.d generation in subdirectories
+# Chris Monson (2007-03-28):
+# * Bumped version to 2.1.4
+# * Fixed syntax error in dot output
+# Chris Monson (2007-03-01):
+# * Bumped version to 2.1.3
+# * Added reST to the included documentation
+# * Fixed graphics and script generation to be settable in the
+#     environment.
+# Chris Monson (2007-02-23):
+# * Bumped version to 2.1.2
+# * Added the ability to generate .tex files from .rst files
+# Chris Monson (2006-10-17):
+# * Bumped version to 2.1.1
+# * Fixed includes from subdirectories (sed-to-sed slash escape problem)
+# Chris Monson (2006-10-05):
+# * Bumped version to 2.1.0 (pretty serious new feature added)
+# * New feature: bib files can now be anywhere on the BIBINPUTS path
+# * New programs: kpsewhich (with tetex) and xargs (BSD)
+# Chris Monson (2006-09-28):
+# * Bumped version to 2.0.9
+# * Added ability to parse more than one bibliography
+# Chris Monson (2006-06-01):
+# * Bumped version to 2.0.8
+# * Added .vrb to the list of cleaned files
+# Chris Monson (2006-04-26):
+# * Bumped version to 2.0.7
+# * Fixed so that clean-nographics does not remove .gpi.d files
+# * Removed jpg -> eps hack (not working properly -- just pre-convert)
+# * Fixed so that postscript grayscale can be done with BSD sed
+# Chris Monson (2006-04-25):
+# * Bumped version to 2.0.6
+# * Fixed so that changed toc, lot, lof, or out causes a rebuild
+# Chris Monson (2006-04-17):
+# * Bumped version to 2.0.5
+# * Added jpg -> eps conversion target
+# Chris Monson (2006-04-12):
+# * Bumped version to 2.0.4
+# * Fixed BSD sed invocation to not use \| as a branch delimiter
+# * Added a comment section on what is and is not allowed in BSD sed
+# * Made paper size handling more robust while I was at it
+# * Fixed postscript RGB grayscale to use a weighted average
+# * Fixed postscript HSB grayscale to convert to RGB first
+# * Fixed a problem with rebuilding .bbl files
+# Chris Monson (2006-04-11):
+# * Bumped version to 2.0.3
+# * Fixed some BSD sed problems: can't use \n in substitutions
+# Chris Monson (2006-04-10):
+# * Bumped version to 2.0.2
+# * Once again removed ability to create .tex files from scripts
+# * \includeonly works again
+# Chris Monson (2006-04-09):
+# * Bumped version to 2.0.1
+# * Fixed grayscale postscript handling to be more robust
+# * Added ability to generate ._gray_. files from eps and eps.gz
+# * Added ability to clean ._gray_.eps files created from .eps files
+# Chris Monson (2006-04-07):
+# * Bumped version to 2.0.0
+# * Removed clunky ability to create included .tex files from scripts
+# * Added note in the help about included tex scripting not working
+# * Fixed the .eps generation to delete %.gpihead.make when finished
+# * Abandoned designs to use shell variables to create sed scripts
+# * Abandoned __default__.tex.sh idea: it causes recursion with %: .
+# * Removed web page to-do.  All items are now complete.
+# * Added better grayscale conversion for dot figures (direct ps fixup).
+# * Include files can now be scripted (at the expense of \includeonly).
+# * Updated dependency graph to contain better node names.
+# Chris Monson (2006-04-06):
+# * Bumped version to 2.0b3
+# * Top level includes now fail if there is no rule to build them
+# * A helpful message is printed when they do fail
+# * Grayscale has been changed to be ._gray_, other phonies use _ now, too
+# * Grayscale handling has been completed
+# * Changed _include_stems target to _includes target.
+# * Fixed _includes target to be useful by itself.
+# * Removed the ability to specify clean and build targets at once
+# * Verified that epsfig works fine with current code
+# * Fixed included scripts so that they are added to the dep files
+# * Fixed so that graphics includes don't happen if they aren't for gpi
+# * Fixed dot output to allow grayscale.
+# Chris Monson (2006-04-05):
+# * Bumped version to 2.0b2
+# * Removed automatic -gray output.  It needs fixing in a bad way.
+# * Revamped dependency creation completely.
+# * Fixed conditional inclusion to actually work (test.nobuild.d, test.d).
+# * Fixed clean target to remove log targets
+# * Added the 'monochrome' word for gray gpi output
+# * Added a _check_gpi_files target that checks for common problems
+# * Changed the _version target into the version target (no _)
+# * Added better handling of grayscale files.  Use the .gray.pdf target.
+# * Fixed testing for rebuilds
+# Chris Monson (2006-04-04):
+# * Bumped version to 2.0b1
+# * Changed colorization of output
+# * Made .auxbbl and .auxtex .make files secondary targets
+# * Shortened and simplified the final latex invocation loop
+# * Added version-specific output ($$i vs. $$$$i) in latex loop
+# * Added a build message for the first .dvi run (Building .dvi (0))
+# * Removed some build messages that most people don't care about.
+# * Simplified procedure for user-set colors -- simple text specification
+# * Fixed diff output to...not output.
+# * Fixed rerun bug -- detect not only when preceded with LaTeX Warning
+# * Sped up gpi plotting
+# * Added error handling and colorized output for gpi failure
+# * Documented color changing stuff.
+# * Now sort the flattened aux file to avoid false recompilation needs
+# * Added clean-nographics target
+# * Don't remove self.dvi file if self.aux is missing in the log
+# * Clarified some code.  Did some very minor adjusting.
+# Chris Monson (2006-04-03):
+# * Bumped version to 2.0a7
+# * Added .dvi and .ps files as secondary files.
+# * Fixed handling of multiple run detection when includeonly is in use.
+# * Added code to flatten .aux files.
+# * Added more files as .SECONDARY prerequisites to avoid recompilation.
+# * Fixed the inputs generation to be much simpler and to use pipes.
+# * Added the dependency graph directly into the makefile.
+# * Changed flatten-aux to remove \@writefile \relax \newlabel, etc.
+# * Undid pipe changes with sed usage (BSD sed doesn't know -f-).
+# * Added a _check_programs target that tells you what your system has.
+# * Fixed an error in colorization that made unnecessary errors appear
+# * Added view targets.
+# * Updated help text.
+# * Augmented cookies so that .aux can trigger .bbl and .dvi rebuilds
+# * Added more informative error handling for dvips and ps2pdf
+# Chris Monson (2006-04-02):
+# * Bumped version to 2.0a6
+# * Added indirection to .bbl dependencies to avoid rebuilding .bbl files
+# * Streamlined the diff invocation to eliminate an existence test
+# * Removed special shell quote escape variables
+# * Moved includes to a more prominent location
+# * Fixed .inputs.make to not contain .aux files
+# * Fixed embedding to use a file instead of always grepping.
+# * Added *.make.temp to the list of cleanable files
+# * Fixed Ruby.  It should now be supported properly.
+# * Now differentiate between all, default, and buildable files.
+# * Fixed to bail out on serious errors.
+# * Revised the handling of includable files.  Still working on it.
+# Chris Monson (2006-03-31):
+# * Bumped version to 2.0a5
+# * Fixed a bug with LaTeX error detection (there can be spaces)
+# * Added .bbl support, simplifying everything and making it more correct
+# * Refactored some tests that muddy the code
+# * Did a little cleanup of some shell loops that can safely be make loops
+# * Added support for graphviz .dot files
+# * Made _all_programs output easier to read
+# * Added the ruby support that has long been advertised
+# * Font embedding was screwed up for PostScript -- now implicit
+# * Changed the generation of -gray.gpi files to a single command
+# * Changed any make-generated file that is not included from .d to .make
+# Chris Monson (2006-03-30):
+# * Bumped version to 2.0a4
+# * Fixed a bug with very long graphics file names
+# * Added a todo entry for epsfig support
+# * Fixed a bug paper size bug: sometimes more than one entry appears
+# * Fixed DVI build echoing to display the number instead of process ID
+# * DVI files are now removed on first invocation if ANY file is missing
+# * Added a simple grayscale approach: if a file ends with -gray.gpi, it
+#     is created from the corresponding .gpi file with a special
+#     comment ##GRAY in its header, which causes coloring to be
+#     turned off.
+# * Fixed a bug in the handling of .tex.sh files.  For some reason I had
+#     neglected to define file stems for scripted output.
+# * Removed a trailing ; from the %.graphics dependencies
+# * Added dvips embedding (I think it works, anyway)
+# Chris Monson (2006-03-29):
+# * Bumped version to 2.0a3
+# * Fixed error in make 3.79 with MAKEFILE_LIST usage
+# * Added the presumed filename to the _version output
+# * Added a vim macro for converting sed scripts to make commands
+# * Added gpi dependency support (plotting external files and loading gpi)
+# * Allow .gpi files to be ignored if called .include.gpi or .nobuild.gpi
+# * Fixed sed invocations where \+ was used.  BSD sed uses \{1,\}.
+# Chris Monson (2006-03-28):
+# * Bumped version to 2.0a2
+# * Added SHELL_DEBUG and VERBOSE options
+# * Changed the default shell back to /bin/sh (unset, in other words)
+# * Moved .PHONY declarations closer to their targets
+# * Moved help text into its own define block to obtain better formatting
+# * Removed need for double-entry when adding a new program invocation
+# * Moved .SECONDARY declaration closer to its relevant occurrence
+# * Commented things more heavily
+# * Added help text about setting terminal and output in gnuplot
+# * Created more fine-grained clean targets
+# * Added a %.graphics target that generates all of %'s graphics
+# * Killed backward-compatible graphics generation (e.g., eps.gpi=gpi.eps)
+# * For now, we're just GPL 2, not 3.  Maybe it will change later
+# * Made the version and svninfo into variables
+# Chris Monson (2006-03-27):
+# * Bumped version to 2.0a1
+# * Huge, sweeping changes -- automatic dependencies
+#
 
 # IMPORTANT!
 #
@@ -950,20 +1601,103 @@ gpi_global	:= $(strip \
 #
 # $(call get-inputs,<parsed file>,<target files>)
 define get-inputs
-(##include_sed("$(SED)", "get-inputs.sed", "'$1'", target_files="$2")
-##) | $(SORT) | $(UNIQ)
+$(SED) \
+-e '/^INPUT/!d' \
+-e 's!^INPUT \(\./\)\{0,1\}!!' \
+-e 's/[[:space:]]/\\ /g' \
+-e 's/\(.*\)\.aux$$/\1.tex/' \
+-e '/\.tex$$/b addtargets' \
+-e '/\.cls$$/b addtargets' \
+-e '/\.sty$$/b addtargets' \
+-e '/\.pstex_t$$/b addtargets' \
+-e '/\.dot_t$$/b addtargets' \
+-e 'd' \
+-e ':addtargets' \
+-e 's!.*!$2: $$(call path-norm,&)!' \
+'$1' | $(SORT) | $(UNIQ)
 endef
 
 # $(call get-format,<tex file>,<target files>)
 define get-format
-(##include_sed("$(SED)", "get-format.sed", "'$1'", target_files="$2")
-##)
+$(SED) \
+-e '1!d' \
+-e '/^%&\([[:alnum:]]\{1,\}\)\( .*\)*$$/{' \
+-e '  s!!\1!' \
+-e '  h' \
+-e '  s/.*/# MISSING format "&.fmt" (comment forces rebuild of target file)/' \
+-e '  p' \
+-e '  g' \
+-e '  s!.*!$2: $$(call path-norm,&.fmt)!' \
+-e '  p' \
+-e '}' \
+-e 'd' \
+'$1'
 endef
 
 # $(call get-missing-inputs,<log file>,<target files>)
 define get-missing-inputs
-(##include_sed("$(SED)", "get-missing-inputs.sed", "'$1'", target_files="$2")
-##) | $(SORT) | $(UNIQ)
+$(SED) \
+-e '$${' \
+-e '  /^$$/!{' \
+-e '    H' \
+-e '    s/.*//' \
+-e '  }' \
+-e '}' \
+-e '/^$$/!{' \
+-e '  H' \
+-e '  d' \
+-e '}' \
+-e '/^$$/{' \
+-e '  x' \
+-e '  s/^\(\n\)\(.*\)/\2\1/' \
+-e '}' \
+-e '/^::P\(P\{1,\}\)::/{' \
+-e '  s//::\1::/' \
+-e '  G' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e '/^::P::/{' \
+-e '  s//::0::/' \
+-e '  G' \
+-e '}' \
+-e 'b start' \
+-e ':needonemore' \
+-e 's/^/::P::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needtwomore' \
+-e 's/^/::PP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needthreemore' \
+-e 's/^/::PPP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':start' \
+-e '/^! LaTeX Error: File `/{' \
+-e '  b needtwomore' \
+-e '}' \
+-e '/^::0::\(.*\)/{' \
+-e '  s//\1/' \
+-e '  /Default extension: /!d' \
+-e '  s/.*File `\([^'"'"']*\)'"'"' not found.*/\1/' \
+-e '  s/[[:cntrl:]]//' \
+-e '  /\.tex/!s/$$/.tex/' \
+-e '  s/[[:space:]]/\\ /g' \
+-e '  h' \
+-e '  s/.*/# MISSING input "&" - (presence of comment affects build)/' \
+-e '  p' \
+-e '  s/.*//' \
+-e '  x' \
+-e '  s!^.*!$2: $$(call path-norm,&)!' \
+-e '  p' \
+-e '}' \
+-e 'd' \
+'$1' | $(SORT) | $(UNIQ)
 endef
 
 # Get source file for specified graphics stem.
@@ -1039,10 +1773,99 @@ endef
 #
 # $(call get-graphics,<target file stem>)
 define get-graphics
-(##include_sed("$(SED)", "get-graphics.sed", "$1.log",
-	       stem="$1",
-	       build_target_extension="$(build_target_extension)")
-##)
+$(SED) \
+-e '/^File: \(.*\) Graphic file (type [^)]*)/{' \
+-e '  s//\1/' \
+-e '  s/\.e\{0,1\}ps$$//' \
+-e '  b addtargets' \
+-e '}' \
+-e '$${' \
+-e '  /^$$/!{' \
+-e '    H' \
+-e '    s/.*//' \
+-e '  }' \
+-e '}' \
+-e '/^$$/!{' \
+-e '  H' \
+-e '  d' \
+-e '}' \
+-e '/^$$/{' \
+-e '  x' \
+-e '  s/^\(\n\)\(.*\)/\2\1/' \
+-e '}' \
+-e '/^::P\(P\{1,\}\)::/{' \
+-e '  s//::\1::/' \
+-e '  G' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e '/^::P::/{' \
+-e '  s//::0::/' \
+-e '  G' \
+-e '}' \
+-e 'b start' \
+-e ':needonemore' \
+-e 's/^/::P::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needtwomore' \
+-e 's/^/::PP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needthreemore' \
+-e 's/^/::PPP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':start' \
+-e '/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:[[:space:][:cntrl:]]*LaTeX[[:space:][:cntrl:]]*Error:[[:space:][:cntrl:]]*File `/{' \
+-e '  s/\n//g' \
+-e '  b needonemore' \
+-e '}' \
+-e '/^::0::.*: LaTeX Error: File `/{' \
+-e '  /\n\n$$/{' \
+-e '    s/^::0:://' \
+-e '    b needonemore' \
+-e '  }' \
+-e '  s/\n\{1,\}/ /g' \
+-e '  s/[[:space:]]\{1,\}/ /g' \
+-e '  s/^.*File `//' \
+-e '  /extensions: /{' \
+-e '    s/'"'"' not found\..*extensions: \([^[:space:]]*\).*/::::\1/' \
+-e '    b fileparsed' \
+-e '  }' \
+-e '  s/'"'"' not found\..*/::::/' \
+-e '  :fileparsed' \
+-e '  /\(\.e\{0,1\}ps\)::::$$/{' \
+-e '    s//::::\1/' \
+-e '    b psext' \
+-e '  }' \
+-e '  s/\(\.[^.]*\)::::$$/:::: UNKNOWN=\1/' \
+-e '  :psext' \
+-e '  h' \
+-e '  s/\(.*\)::::\(.*\)/# MISSING stem "\1" - allowed extensions: \2/' \
+-e '  p' \
+-e '  g' \
+-e '  s/::::.*//' \
+-e '  b addtargets' \
+-e '}' \
+-e 'd' \
+-e ':addtargets' \
+-e 's/[[:space:]]/\\\\\\&/g' \
+-e 'h' \
+-e 's/.*/-include &.gpi.d/' \
+-e 'p' \
+-e 'g' \
+-e 's!.*!$1.d: $$$$(call graphics-source,&,$1)!' \
+-e 'p' \
+-e 's/.*//' \
+-e 'x' \
+-e 's!.*!$1.$(build_target_extension) $1._graphics: $$$$(call graphics-target,&,$1)!' \
+-e 'p' \
+-e 'd' \
+$1.log
 endef
 
 # Get some special comments out of the source file (e.g., paper size, beamer
@@ -1050,7 +1873,51 @@ endef
 #
 # $(call get-source-specials,<source file name>,<output file>)
 define get-source-specials
-(##include_sed("$(SED)", "get-source-specials.sed", "$1")##) > '$2'
+$(SED) \
+-e '/^%%[[:space:]]*\([^%].*\)[[:space:]]*$$/{' \
+-e '  s//\1/' \
+-e '  s/[[:space:]]//g' \
+-e '  /BEAMER/{' \
+-e '    /BEAMERLARGE/!d' \
+-e '    s/.*/BEAMER/' \
+-e '  }' \
+-e '  p' \
+-e '  d' \
+-e '}' \
+-e '/\\documentclass[^{]*{.*}/b procclass' \
+-e '/\\documentclass/,/}/{' \
+-e '  s/%.*//' \
+-e '  H' \
+-e '  /}/{' \
+-e '    s/.*//' \
+-e '    x' \
+-e '    b procclass' \
+-e '  }' \
+-e '  d' \
+-e '}' \
+-e 'd' \
+-e ':procclass' \
+-e 's/\\documentclass//' \
+-e 's/[][]//g' \
+-e 's/{.*}//' \
+-e 's/[[:cntrl:][:space:]]*//g' \
+-e 's/,/ /g' \
+-e 's/^/ /' \
+-e 's/$$/ /' \
+-e '/.* \([[:alnum:]]\{1,\}\)paper .*/{' \
+-e '  h' \
+-e '  s//PAPERSIZE=\1/' \
+-e '  p' \
+-e '  g' \
+-e '}' \
+-e '/.* landscape .*/{' \
+-e '  h' \
+-e '  s//ORIENTATION=landscape/' \
+-e '  p' \
+-e '  g' \
+-e '}' \
+-e 'd' \
+$1 > '$2'
 endef
 
 
@@ -1065,8 +1932,13 @@ endef
 #
 # $(call fls-path-cmd,<base file name>,<recorder file stem (without .fls)>)
 define fls-path-cmd
-(##include_sed("$(SED)", "get-fls-fullpath.sed", "$2.fls",
-		name="$(subst /,\/,$(subst .,\.,$1))")##)
+$(SED) \
+-e '/^INPUT \(.*\/\)$(subst /,\/,$(subst .,\.,$1))$$/{' \
+-e '  s//\1/' \
+-e '  q' \
+-e '}' \
+-e 'd' \
+$2.fls
 endef
 
 # Get the full path to a file from the recorder file.
@@ -1131,9 +2003,18 @@ endef
 #
 # $(call get-log-index,<log file stem>,<target files>)
 define get-log-index
-(##include_sed("$(SED)", "get-log-index.sed", "'$1.log'",
-	       stem="$1", target_files="$2")
-##) | $(SORT) | $(UNIQ)
+$(SED) \
+-e 's/^No file \(.*\.ind\)\.$$/TARGETS=\1/' \
+-e 's/^No file \(.*\.[gn]ls\)\.$$/TARGETS=\1/' \
+-e 's/[[:space:]]/\\&/g' \
+-e '/^TARGETS=/{' \
+-e '  h' \
+-e '  s!^TARGETS=!$2: !p' \
+-e '  g' \
+-e '  s!^TARGETS=\(.*\)!\1: $1.tex!p' \
+-e '}' \
+-e 'd' \
+'$1.log' | $(SORT) | $(UNIQ)
 endef
 
 
@@ -1153,8 +2034,15 @@ endef
 #
 # $(call get-bibs,<aux file>,<targets>)
 define get-bibs
-(##include_sed("$(SED)", "get-bibs.sed", "'$1'", target_files="$2")
-##) | $(XARGS) $(KPSEWHICH) '#######' | \
+$(SED) \
+-e '/^\\bibdata/!d' \
+-e 's/\\bibdata{\([^}]*\)}/\1,/' \
+-e 's/[^,]\{1,\}-blx//' \
+-e 's/,\{2,\}/,/g' \
+-e 's/[[:space:]]/\\&/g' \
+-e 's/,/.bib /g' \
+-e 's/ \{1,\}$$//' \
+'$1' | $(XARGS) $(KPSEWHICH) '#######' | \
 $(SED) \
 -e 's!.*!$2: $$(call path-norm,&)!' | \
 $(SORT) | $(UNIQ)
@@ -1164,8 +2052,13 @@ endef
 # list of targets for each dependency found.
 define get-bcf-bibs
 if $(call test-non-empty,$1.bcf); then \
-  (##include_sed("$(SED)", "get-bcf-bibs.sed", "'$1'", target_files="$2")
-##) | $(SORT) | $(UNIQ); \
+  $(SED) \
+-e '/datasource/!d' \
+-e 's/^[^>]*>//g' \
+-e 's/<.*$$//g' \
+-e '/\.bib$$/!s/$$/.bib/' \
+-e 's!^!$2: !' \
+'$1' | $(SORT) | $(UNIQ); \
 fi
 endef
 
@@ -1208,7 +2101,26 @@ endef
 #
 # $(call get-gpi-deps,<gpi file>,<targets>)
 define get-gpi-deps
-(##include_sed("$(SED)", "gpi-deps.sed", "'$1'", targets="$2")##)
+$(SED) \
+-e '/^[[:space:]]*s\{0,1\}plot/,/[^\\]$$/{' \
+-e ' H' \
+-e ' /[^\\]$$/{' \
+-e '  s/.*//' \
+-e '  x' \
+-e '  s/\\\{0,1\}\n//g' \
+-e '  s/^[[:space:]]*s\{0,1\}plot[[:space:]]*\(\[[^]]*\][[:space:]]*\)*/,/' \
+-e '  s/[[:space:]]*\(['"'"'\'"'"''"'"'"][^'"'"'\'"'"''"'"'"]*['"'"'\'"'"''"'"'"]\)\{0,1\}[^,]*/\1/g' \
+-e '  s/,['"'"'\'"'"''"'"'"]-\{0,1\}['"'"'\'"'"''"'"'"]//g' \
+-e '  s/[,'"'"'\'"'"''"'"'"]\{1,\}/ /g' \
+-e '  s/.*:.*/$$(error Error: Filenames with colons are not allowed: &)/' \
+-e '  s!.*!$2: &!' \
+-e '  p' \
+-e ' }' \
+-e ' d' \
+-e '}' \
+-e 's/^[[:space:]]*load[[:space:]]*['"'"'\'"'"''"'"'"]\([^'"'"'\'"'"''"'"'"]*\.gpi\)['"'"'\'"'"''"'"'"].*$$/-include \1.d/p' \
+-e 'd' \
+'$1'
 endef
 
 # Colorizes real, honest-to-goodness LaTeX errors that can't be overcome with
@@ -1225,20 +2137,124 @@ endef
 #
 # $(call colorize-latex-errors,<log file>)
 define colorize-latex-errors
-(##include_sed("$(SED)", "colorize-latex-errors.sed", "'$1'",
-	       driver_pattern="$(hyperref_driver_pattern)",
-	       driver_error="$(hyperref_driver_error)",
-	       color_error="$(C_ERROR)",
-	       color_reset="$(C_RESET)")
-##) | $(SED) -e 's/\\\\/\\\\\\\\/g'
+$(SED) \
+-e 's/^)$$//' \
+-e '$${' \
+-e '  /^$$/!{' \
+-e '    H' \
+-e '    s/.*//' \
+-e '  }' \
+-e '}' \
+-e '/^$$/!{' \
+-e '  H' \
+-e '  d' \
+-e '}' \
+-e '/^$$/{' \
+-e '  x' \
+-e '  s/^\(\n\)\(.*\)/\2\1/' \
+-e '}' \
+-e '/^::P\(P\{1,\}\)::/{' \
+-e '  s//::\1::/' \
+-e '  G' \
+-e '  h' \
+-e '  d' \
+-e '}' \
+-e '/^::P::/{' \
+-e '  s//::0::/' \
+-e '  G' \
+-e '}' \
+-e 'b start' \
+-e ':needonemore' \
+-e 's/^/::P::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needtwomore' \
+-e 's/^/::PP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':needthreemore' \
+-e 's/^/::PPP::/' \
+-e 'G' \
+-e 'h' \
+-e 'd' \
+-e ':start' \
+-e '/^! LaTeX Error: File /{' \
+-e '  s/\n//g' \
+-e '  b needtwomore' \
+-e '}' \
+-e 's/^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:/!!! &/' \
+-e 's/^\(.*\n\)\([^[:cntrl:]:]*:[[:digit:]]\{1,\}: .*\)/\1!!! \2/' \
+-e '/^!!! .*[[:space:][:cntrl:]]LaTeX[[:space:][:cntrl:]]Error:[[:space:][:cntrl:]]*File /{' \
+-e '  s/\n//g' \
+-e '  b needonemore' \
+-e '}' \
+-e '/^::0::! LaTeX Error: File .*/{' \
+-e '  /\n\n$$/{' \
+-e '    s/^::0:://' \
+-e '    b needonemore' \
+-e '  }' \
+-e '  s/^::0::! //' \
+-e '  s/^\(.*not found.\).*Enter file name:.*\n\(.*[[:digit:]]\{1,\}\): Emergency stop.*/\2: \1/' \
+-e '  b error' \
+-e '}' \
+-e '/^::0::!!! .*LaTeX Error: File .*/{' \
+-e '  /\n\n$$/{' \
+-e '    s/^::0:://' \
+-e '    b needonemore' \
+-e '  }' \
+-e '  s/::0::!!! //' \
+-e '  /File .*\.e\{0,1\}ps'"'"' not found/b skip' \
+-e '  /could not locate.*any of these extensions:/{' \
+-e '    b skip' \
+-e '  }' \
+-e '  s/\(not found\.\).*/\1/' \
+-e '  s/^/!!! /' \
+-e '  b error' \
+-e '}' \
+-e '/^\(.* LaTeX Error: Missing .begin.document.\.\).*/{' \
+-e '  s//\1 --- Are you trying to build an include file?/' \
+-e '  b error' \
+-e '}' \
+-e '/^Runaway argument?/{' \
+-e '  s/I'"'"'ll try to recover.*//' \
+-e '  b error' \
+-e '}' \
+-e '/.*\(!!! .*Undefined control sequence\)[^[:cntrl:]]*\(.*\)/{' \
+-e '  s//\1: \2/' \
+-e '  s/\nl\.[[:digit:]][^[:cntrl:]]*\(\\[^\\[:cntrl:]]*\).*/\1/' \
+-e '  b error' \
+-e '}' \
+-e '/^\(!pdfTeX error:.*\)s*/{' \
+-e '  b error' \
+-e '}' \
+-e '/.*\(!!! .*\)/{' \
+-e '  s//\1/' \
+-e '  s/[[:cntrl:]]//' \
+-e '  s/[[:cntrl:]]$$//' \
+-e '  /Cannot determine size of graphic .*(no BoundingBox)/b skip' \
+-e '  b error' \
+-e '}' \
+-e ':skip' \
+-e 'd' \
+-e ':error' \
+-e 's/^!\(!! \)\{0,1\}\(.*\)/$(C_ERROR)\2$(C_RESET)/' \
+-e 'p' \
+-e 'd' \
+'$1' | $(SED) -e 's/\\\\/\\\\\\\\/g'
 endef
 
 # Colorize Makeindex errors
 define colorize-makeindex-errors
-(##include_sed("$(SED)", "colorize-makeindex-errors.sed", "'$1'",
-	       color_error="$(C_ERROR)",
-	       color_reset="$(C_RESET)")
-##)
+$(SED) \
+-e '/^!! /{' \
+-e '  N' \
+-e '  s/^.*$$/$(C_ERROR)&$(C_RESET)/' \
+-e '  p' \
+-e '}' \
+-e 'd' \
+'$1'
 endef
 
 # Colorize xindy errors
@@ -1254,31 +2270,60 @@ endef
 #
 # $(call colorize-epstopdf-errors,<log file>)
 define colorize-epstopdf-errors
-(##include_sed("$(SED)", "colorize-epstopdf-errors.sed", "'$1'",
-	       color_error="$(C_ERROR)",
-	       color_reset="$(C_RESET)")
-##)
+$(SED) \
+-e '/^Error:/,/^Execution stack:/{' \
+-e '  /^Execution stack:/d' \
+-e '  s/.*/$(C_ERROR)&$(C_RESET)/' \
+-e '  p' \
+-e '}' \
+-e 'd' \
+'$1'
 endef
 
 # Colorize GNUplot errors
 #
 # $(call colorize-gnuplot-errors,<log file>)
 define colorize-gnuplot-errors
-(##include_sed("$(SED)", "colorize-gnuplot-errors.sed", "$1",
-	       color_error="$(C_ERROR)",
-	       color_reset="$(C_RESET)")
-##)
+$(SED) \
+-e '/, line [0-9]*:/!{' \
+-e '  H' \
+-e '  x' \
+-e '  s/.*\n\(.*\n.*\)$$/\1/' \
+-e '  x' \
+-e '}' \
+-e '/, line [0-9]*:/{' \
+-e '  H' \
+-e '  /unknown.*terminal type/{' \
+-e '    s/.*/--- Try changing the GNUPLOT_OUTPUT_EXTENSION variable to '"'"'eps'"'"'./' \
+-e '    H' \
+-e '  }' \
+-e '  /gpihead/{' \
+-e '    s/.*/--- This could be a Makefile bug - contact the maintainer./' \
+-e '    H' \
+-e '  }' \
+-e '  g' \
+-e '  s/.*/$(C_ERROR)&$(C_RESET)/' \
+-e '  p' \
+-e '}' \
+-e '/^gnuplot>/,/^$$/{' \
+-e '  s/^gnuplot.*/$(C_ERROR)&/' \
+-e '  s/^$$/$(C_RESET)/' \
+-e '  p' \
+-e '}' \
+-e 'd' \
+$1
 endef
 
 # Colorize GraphViz errors
 #
 # $(call colorize-dot-errors,<log file>)
 define colorize-dot-errors
-(##include_sed("$(SED)", "colorize-dot-errors.sed", "'$1'",
-	       color_error="$(C_ERROR)",
-	       color_warning="$(C_WARNING)",
-	       color_reset="$(C_RESET)")
-##)
+$(SED) \
+-e 's/.*not found.*/$(C_ERROR)&$(C_RESET)/p' \
+-e '/^Error:/,/context:/s/.*/$(C_ERROR)&$(C_RESET)/p' \
+-e 's/^Warning:.*/$(C_WARNING)&$(C_RESET)/p' \
+-e 'd' \
+'$1'
 endef
 
 # Get all important .aux files from the top-level .aux file and merges them all
@@ -1290,10 +2335,27 @@ endef
 #
 # $(call flatten-aux,<toplevel aux>,<output file>)
 define flatten-aux
-(##include_sed("$(SED)", "flatten-aux-script.sed")##) \
+$(SED) \
+-e '/\\@input{\(.*\)}/{' \
+-e '  s//\1/' \
+-e '  s![.:]!\\&!g' \
+-e '  h' \
+-e '  s!.*!\\:\\\\@input{&}:{!' \
+-e '  p' \
+-e '  x' \
+-e '  s/\\././g' \
+-e '  s/.*/r &/p' \
+-e '  s/.*/d/p' \
+-e '  s/.*/}/p' \
+-e '  d' \
+-e '}' \
+-e 'd' \
 '$1' > "$1.$$$$.sed.make"; \
 $(SED) -f "$1.$$$$.sed.make" '$1' > "$1.$$$$.make"; \
-(##include_sed("$(SED)", "flat-aux-clean.sed")##) \
+$(SED) \
+-e '/^\\relax/d' \
+-e '/^\\bibcite/d' \
+-e 's/^\(\\newlabel{[^}]\{1,\}}\).*/\1/' \
 "$1.$$$$.make" | $(SORT) > '$2'; \
 $(call remove-temporary-files,$1.$$$$.make $1.$$$$.sed.make)
 endef
@@ -1320,23 +2382,71 @@ endef
 
 # Colorize LaTeX output.
 color_tex := \
-(##include_sed("$(SED)", "color-tex.sed",
-	       color_reset="$(C_RESET)",
-	       color_success="$(C_SUCCESS)",
-	       color_pages="$(C_PAGES)",
-	       color_error="$(C_ERROR)",
-	       color_warning="$(C_WARNING)",
-	       color_overfull="$(C_OVERFULL)",
-	       color_underfull="$(C_UNDERFULL)")
-##)
+$(SED) \
+-e '$${' \
+-e '  /^$$/!{' \
+-e '    H' \
+-e '    s/.*//' \
+-e '  }' \
+-e '}' \
+-e '/^$$/!{' \
+-e '  H' \
+-e '  d' \
+-e '}' \
+-e '/^$$/{' \
+-e '  x' \
+-e '  s/^\n//' \
+-e '  /Output written on /{' \
+-e '    s/.*Output written on \([^(]*\) (\([^)]\{1,\}\)).*/Success!  Wrote \2 to \1/' \
+-e '    s/[[:digit:]]\{1,\}/$(C_PAGES)&$(C_RESET)/g' \
+-e '    s/Success!/$(C_SUCCESS)&$(C_RESET)/g' \
+-e '    s/to \(.*\)$$/to $(C_SUCCESS)\1$(C_RESET)/' \
+-e '    b end' \
+-e '  }' \
+-e '  / *LaTeX Error:.*/{' \
+-e '    s/.*\( *LaTeX Error:.*\)/\1/' \
+-e '    b error' \
+-e '  }' \
+-e '  /^[^[:cntrl:]:]*:[[:digit:]]\{1,\}:/b error' \
+-e '  /.*Warning:.*/{' \
+-e '    s//$(C_WARNING)&$(C_RESET)/' \
+-e '    b end' \
+-e '  }' \
+-e '  /Underfull.*/{' \
+-e '    s/.*\(Underfull.*\)/$(C_UNDERFULL)\1$(C_RESET)/' \
+-e '    b end' \
+-e '  }' \
+-e '  /Overfull.*/{' \
+-e '    s/.*\(Overfull.*\)/$(C_OVERFULL)\1$(C_RESET)/' \
+-e '    b end' \
+-e '  }' \
+-e '  d' \
+-e '  :error' \
+-e '  s/.*/$(C_ERROR)&$(C_RESET)/' \
+-e '  b end' \
+-e '  :end' \
+-e '  G' \
+-e '}'
 
 # Colorize BibTeX output.
 color_bib := \
-(##include_sed("$(SED)", "color-bib.sed",
-	       color_warning="$(C_WARNING)",
-	       color_error="$(C_ERROR)",
-	       color_reset="$(C_RESET)")
-##)
+$(SED) \
+-e 's/^Warning--.*/$(C_WARNING)&$(C_RESET)/' \
+-e 't' \
+-e '/---/,/^.[^:]/{' \
+-e '  H' \
+-e '  /^.[^:]/{' \
+-e '    x' \
+-e '    s/\n\(.*\)/$(C_ERROR)\1$(C_RESET)/' \
+-e '    p' \
+-e '    s/.*//' \
+-e '    h' \
+-e '    d' \
+-e '  }' \
+-e '  d' \
+-e '}' \
+-e '/(.*error.*)/s//$(C_ERROR)&$(C_RESET)/' \
+-e 'd'
 
 # Make beamer output big enough to print on a full page.  Landscape doesn't
 # seem to work correctly.
@@ -1582,7 +2692,17 @@ convert-epsgz	= $(GUNZIP) -c '$1' $(if $3,| $(call kill-ps-color)) > '$2'
 #
 # $(call eps-bb,<eps file>,<eps.bb file>)
 define eps-bb
-(##include_sed("$(SED)", "eps-bb.sed", "$1",) ##) > "$2"
+$(SED) \
+-e '/^%%Title:/p' \
+-e '/^%%Creator:/p' \
+-e '/^%%BoundingBox:/p' \
+-e '/^%%CreationDate:/p' \
+-e '/^%%EndComments/{' \
+-e '  d' \
+-e '  q' \
+-e '}' \
+-e 'd' \
+$1 > "$2"
 endef
 
 # Converts .eps files into .eps files (usually a no-op, but can make grayscale)
@@ -2467,13 +3587,675 @@ version:
 #
 
 define help_text
-(##include_as_comment("help") ##)
+# $(fileinfo) Version $(version)
+#
+# by $(author)
+#
+# Generates a number of possible output files from a LaTeX document and its
+# various dependencies.  Handles .bib files, \include and \input, and .eps
+# graphics.  All dependencies are handled automatically by running LaTeX over
+# the source.
+#
+# USAGE:
+#
+#    make [GRAY=1] [VERBOSE=1] [SHELL_DEBUG=1] <target(s)>
+#
+# STANDARD OPTIONS:
+#    GRAY:
+#        Setting this variable forces all recompiled graphics to be grayscale.
+#        It is useful when creating a document for printing.  The default is
+#        to allow colors.  Note that it only changes graphics that need to be
+#        rebuilt!  It is usually a good idea to do a 'make clean' first.
+#
+#    VERBOSE:
+#        This turns off all @ prefixes for commands invoked by make.  Thus,
+#        you get to see all of the gory details of what is going on.
+#
+#    SHELL_DEBUG:
+#        This enables the -x option for sh, meaning that everything it does is
+#        echoed to stderr.  This is particularly useful for debugging
+#        what is going on in $$(shell ...) invocations.  One of my favorite
+#        debugging tricks is to do this:
+#
+#        make -d SHELL_DEBUG=1 VERBOSE=1 2>&1 | less
+#
+#    KEEP_TEMP:
+#        When set, this allows .make and other temporary files to stick around
+#        long enough to do some debugging.  This can be useful when trying to
+#        figure out why gnuplot is not doing the right things, for example
+#        (e.g., look for *head.make).
+#
+# STANDARD AUXILIARY FILES:
+#
+#      Variables.ini (formerly Makefile.ini, which still works)
+#
+#          This file can contain variable declarations that override various
+#          aspects of the makefile.  For example, one might specify
+#
+#          neverclean := *.pdf *.ps
+#          onlysources.tex := main.tex
+#          LATEX_COLOR_WARNING := 'bold red uline'
+#          PDFLATEX := lualatex
+#
+#          And this would override the neverclean setting to ensure that pdf
+#          and ps files always remain behind, set the makefile to treat all
+#          .tex files that are not "main.tex" as includes (and therefore not
+#          default targets).  It also changes the LaTeX warning output to be
+#          red, bold, and underlined.  Finally, it specifies that you want to
+#          allow Lua scripting by invoking lualatex instead of pdflatex.
+#
+#          There are numerous variables in this file that can be overridden in
+#          this way.  Search for '?=' to find them all.
+#
+#          The Variables.ini is imported before *anything else* is done, so go
+#          wild with your ideas for changes to this makefile in there.  It
+#          makes it easy to test them before submitting patches.
+#
+#          If you're adding rules or targets, however, see Targets.ini below.
+#
+#      Targets.ini
+#
+#          This is included much later in the makefile, after all variables and
+#          targets are defined.  This is where you would put new make rules,
+#          e.g.,
+#
+#          generated.tex: generating_script.weird_lang depA depB
+#             ./generating_script.weird_lang > $$@
+#
+#          In this file, you have access to all of the variables that the
+#          makefile creates, like $$(onlysources.tex).  While accessing those can
+#          be somewhat brittle (they are implementation details and may change),
+#          it is a great way to test your ideas when submitting feature requests.
+#
+# STANDARD ENVIRONMENT VARIABLES:
+#
+#      LATEX_COLOR_WARNING        '$(LATEX_COLOR_WARNING)'
+#      LATEX_COLOR_ERROR          '$(LATEX_COLOR_ERROR)'
+#      LATEX_COLOR_UNDERFULL      '$(LATEX_COLOR_UNDERFULL)'
+#      LATEX_COLOR_OVERFULL       '$(LATEX_COLOR_OVERFULL)'
+#      LATEX_COLOR_PAGES          '$(LATEX_COLOR_PAGES)'
+#      LATEX_COLOR_BUILD          '$(LATEX_COLOR_BUILD)'
+#      LATEX_COLOR_GRAPHIC        '$(LATEX_COLOR_GRAPHIC)'
+#      LATEX_COLOR_DEP            '$(LATEX_COLOR_DEP)'
+#      LATEX_COLOR_SUCCESS        '$(LATEX_COLOR_SUCCESS)'
+#      LATEX_COLOR_FAILURE        '$(LATEX_COLOR_FAILURE)'
+#
+#   These may be redefined in your environment to be any of the following:
+#
+#      black
+#      red
+#      green
+#      yellow
+#      blue
+#      magenta
+#      cyan
+#      white
+#
+#   Bold or underline may be used, as well, either alone or in combination
+#   with colors:
+#
+#      bold
+#      uline
+#
+#   Order is not important.  You may want, for example, to specify:
+#
+#   export LATEX_COLOR_SUCCESS='bold blue uline'
+#
+#   in your .bashrc file.  I don't know why, but you may want to.
+#
+# STANDARD TARGETS:
+#
+#    all:
+#        Make all possible documents in this directory.  The documents are
+#        determined by scanning for .tex and .tex.sh (described in more detail
+#        later) and omitting any file that ends in ._include_.tex or
+#        ._nobuild_.tex.  The output is a set of .pdf files.
+#
+#        If you wish to omit files without naming them with the special
+#        underscore names, set the following near the top of the Makefile,
+#        or (this is recommended) within a Makefile.ini in the same directory:
+#
+#         includes.tex := file1.tex file2.tex
+#
+#        This will cause the files listed to be considered as include files.
+#
+#        If you have only few source files, you can set
+#
+#         onlysources.tex := main.tex
+#
+#        This will cause only the source files listed to be considered in
+#        dependency detection.  All other .tex files will be considered as
+#        include files.  Note that these options work for *any* source type,
+#        so you could do something similar with includes.gpi, for example.
+#        Note that this works for *any valid source* target.  All of the
+#        onlysources.* variables are commented out in the shipping version of
+#        this file, so it does the right thing when they simply don't exist.
+#        The comments are purely documentation.  If you know, for example, that
+#        file.mycoolformat is supported by this Makefile, but don't see the
+#        "onlysources.mycoolformat" declared in the comments, that doesn't mean
+#        you can't use it.  Go ahead and set "onlysources.mycoolformat" and it
+#        should do the right thing.
+#
+#    show:
+#        Builds and displays all documents in this directory.  It uses the
+#        environment-overridable value of VIEW_PDF (currently $(VIEW_PDF)) to
+#        do its work.
+#
+#    all-graphics:
+#        Make all of the graphics in this directory.
+#
+#    all-pstex (only for BUILD_STRATEGY=latex):
+#        Build all fig files into pstex and pstex_t files.  Gray DOES NOT WORK.
+#
+#    all-gray-pstex (only for BUILD_STRATEGY=latex):
+#          Build all fig files into grayscale pstex and pstex_t files.
+#
+#    all-dot2tex:
+#          Build all dot files into tex files.
+#
+#    show-graphics:
+#        Builds and displays all graphics in this directory.  Uses the
+#        environment-overridable value of VIEW_GRAPHICS (currently
+#        $(VIEW_GRAPHICS)) to do its work.
+#
+#    clean:
+#        Remove ALL generated files, leaving only source intact.
+#        This will *always* skip files mentioned in the "neverclean" variable,
+#        either in this file or specified in Makefile.ini:
+#
+#         neverclean := *.pdf *.ps
+#
+#       The neverclean variable works on all "clean" targets below, as well.
+#
+#    clean-graphics:
+#        Remove all generated graphics files.
+#
+#    clean-backups:
+#        Remove all backup files: $(backup_patterns)
+#        (XFig and other editors have a nasty habit of leaving them around)
+#        Also removes Makefile-generated .temp files
+#
+#    clean-tex:
+#        Remove all files generated from LaTeX invocations except dependency
+#        information.  Leaves graphics alone.
+#
+#    clean-deps:
+#        Removes all auto-generated dependency information.
+#
+#    clean-auxiliary:
+#        Removes extra files created by various targets (like the dependency
+#        graph output).
+#
+#    clean-nographics:
+#        Cleans everything *except* the graphics files.
+#
+#    help:
+#        This help text.
+#
+#    version:
+#        Version information about this LaTeX makefile.
+#
+# DEBUG TARGETS:
+#
+#    _all_programs:
+#        A list of the programs used by this makefile.
+#
+#    _check_programs:
+#        Checks your system for the needed software and reports what it finds.
+#
+#    _check_gpi_files:
+#        Checks the .gpi files in the current directory for common errors, such
+#        as specification of the terminal or output file inside of the gpi file
+#        itself.
+#
+#    _dependency_graph:
+#        Outputs a .dot file to stdout that represents a graph of LaTeX
+#        dependencies.  To see it, use the _show_dependency_graph target or
+#        direct the output to a file, run dot on it, and view the output, e.g.:
+#
+#        make _dependency_graph > graph.dot
+#        dot -T ps -o graph.eps graph.dot
+#        gv graph.eps
+#
+#    _show_dependency_graph:
+#        Makes viewing the graph simple: extracts, builds and displays the
+#        dependency graph given in the _dependency_graph target using the value
+#        of the environment-overridable VIEW_POSTSCRIPT variable (currently set
+#        to $(VIEW_POSTSCRIPT)).  The postscript viewer is used because it
+#        makes it easier to zoom in on the graph, a critical ability for
+#        something so dense and mysterious.
+#
+#    _all_sources:
+#        List all .tex files in this directory.
+#
+#    _sources:
+#        Print out a list of all compilable sources in this directory.  This is
+#        useful for determining what make thinks it will be using as the
+#        primary source for 'make all'.
+#
+#    _scripts:
+#        Print out a list of scripts that make knows can be used to generate
+#        .tex files (described later).
+#
+#    _all_stems:
+#        Print a list of stems.  These represent bare targets that can be
+#        executed.  Listing <stem> as a bare target will produce <stem>.pdf.
+#
+#    _includes:
+#        A list of .d files that would be included in this run if _includes
+#        weren't specified.  This target may be used alone or in conjunction
+#        with other targets.
+#
+#    _graphic_outputs:
+#        A list of all generated .eps files
+#
+#    _env:
+#        A list of environment variables and their values.  If supported by
+#        your version of make, also a list of variables known to make.
+#
+# FILE TARGETS:
+#
+#    %, %.pdf:
+#        Build a PDF file from the corresponding %.tex file.
+#
+#        If BUILD_STRATEGY=pdflatex, then this builds the pdf directly.
+#        Otherwise, it uses this old-school but effective approach:
+#
+#            latex -> dvips -> ps2pdf
+#
+#        The BUILD_STRATEGY can be overridden in Makefile.ini in the same
+#        directory.  The default is pdflatex.
+#
+#        Reasons for using latex -> dvips include the "psfrag" package, and the
+#        generation of postscript instead of PDF.  Arguments for using pdflatex
+#        include "new and shiny" and "better supported."  I can't argue with
+#        either of those, and supporting them both didn't turn out to be that
+#        difficult, so there you have it.  Choices.
+#
+#    %._show:
+#        A phony target that builds the pdf file and then displays it using the
+#        environment-overridable value of VIEW_PDF ($(VIEW_PDF)).
+#
+#    %._graphics:
+#        A phony target that generates all graphics on which %.pdf (or %.dvi)
+#        depends.
+#
+#    %.ps (only for BUILD_STRATEGY=latex):
+#        Build a Postscript file from the corresponding %.tex file.
+#        This is done using dvips.  Paper size is automatically
+#        extracted from the declaration
+#
+#        \documentclass[<something>paper]
+#
+#        or it is the system default.
+#
+#        If using beamer (an excellent presentation class), the paper
+#        size is ignored.  More on this later.
+#
+#    %.dvi (only for BUILD_STRATEGY=latex):
+#        Build the DVI file from the corresponding %.tex file.
+#
+#    %.ind:
+#        Build the index for this %.tex file.
+#
+#    %.gls:
+#        Build the nomenclature glossary for this %.tex file.
+#
+#    %.nls:
+#        Build the (newer) nomenclature file for this %.tex file.
+#
+#    %.eps:
+#        Build an eps file from one of the following file types:
+#
+#       .dot    : graphviz
+#       .gpi    : gnuplot
+#       .fig    : xfig
+#       .xvg    : xmgrace
+#       .svg    : scalable vector graphics (goes through inkscape)
+#       .png    : png (goes through NetPBM)
+#       .jpg      : jpeg (goes through ImageMagick)
+#       .eps.gz : gzipped eps
+#
+#       The behavior of this makefile with each type is described in
+#       its own section below.
+#
+#    %.pstex{,_t} (only for BUILD_STRATEGY=latex):
+#       Build a .pstex_t file from a .fig file.
+#
+# FEATURES:
+#
+#    Optional Binary Directory:
+#        If you create the _out_ directory in the same place as the makefile,
+#        it will automatically be used as a dumping ground for .pdf (or .dvi,
+#        .ps, and .pdf) output files.
+#
+#        Alternatively, you can set the BINARY_TARGET_DIR variable, either as a
+#        make argument or in Makefile.ini, to point to your directory of
+#        choice.  Note that no pathname wildcard expansion is done in the
+#        makefile, so make sure that the path is complete before going in
+#        there.  E.g., if you want to specify something in your home directory,
+#        use $$HOME/ instead of ~/ so that the shell expands it before it gets
+#        to the makefile.
+#
+#    External Program Dependencies:
+#        Every external program used by the makefile is represented by an
+#        ALLCAPS variable at the top of this file.  This should allow you to
+#        make judgments about whether your system supports the use of this
+#        makefile.  The list is available in the ALL_PROGRAMS variable and,
+#        provided that you are using GNU make 3.80 or later (or you haven't
+#        renamed this file to something weird like "mylatexmakefile" and like
+#        invoking it with make -f) can be viewed using
+#
+#        make _all_programs
+#
+#        Additionally, the availability of these programs can be checked
+#        automatically for you by running
+#
+#        make _check_programs
+#
+#        The programs are categorized according to how important they are and
+#        what function they perform to help you decide which ones you really
+#        need.
+#
+#    Colorized Output:
+#        The output of commands is colorized to highlight things that are often
+#        important to developers.  This includes {underfull,overfull}
+#        {h,v}boxes, general LaTeX Errors, each stage of document building, and
+#        the number of pages in the final document.  The colors are obtained
+#        using 'tput', so colorization should work pretty well on any terminal.
+#
+#        The colors can be customized very simply by setting any of the
+#        LATEX_COLOR_<CONTEXT> variables in your environment (see above).
+#
+#    Predecessors to TeX Files:
+#        Given a target <target>, if no <target>.tex file exists but a
+#        corresponding script or predecessor file exists, then appropriate
+#        action will be taken to generate the tex file.
+#
+#        Currently supported script or predecessor languages are:
+#
+#        sh:     %.tex.sh
+#        perl:   %.tex.pl
+#        python: %.tex.py
+#
+#           Calls the script using the appropriate interpreter, assuming that
+#           its output is a .tex file.
+#
+#           The script is called thus:
+#
+#              <interpreter> <script file name> <target tex file>
+#
+#           and therefore sees exactly one parameter: the name of the .tex
+#           file that it is to create.
+#
+#           Why does this feature exist?  I ran into this while working on
+#           my paper dissertation.  I wrote a huge bash script that used a
+#           lot of sed to bring together existing papers in LaTeX.  It
+#           would have been nice had I had something like this to make my
+#           life easier, since as it stands I have to run the script and
+#           then build the document with make.  This feature provides hooks
+#           for complicated stuff that you may want to do, but that I have
+#           not considered.  It should work fine with included dependencies,
+#           too.
+#
+#           Scripts are run every time make is invoked.  Some trickery is
+#           employed to make sure that multiple restarts of make don't cause
+#           them to be run again.
+#
+#        reST: %.rst
+#
+#           Runs the reST to LaTeX converter to generate a .tex file
+#           If it finds a file names _rststyle_._include_.tex, uses it as
+#           the "stylesheet" option to rst2latex.
+#
+#           Note that this does not track sub-dependencies in rst files.  It
+#           assumes that the top-level rst file will change if you want a
+#           rebuild.
+#
+#       literate Haskell: %.lhs
+#
+#           Runs the lhs2tex program to generate a .tex file.
+#
+#    Dependencies:
+#
+#        In general, dependencies are extracted directly from LaTeX output on
+#        your document.  This includes
+#
+#        *    Bibliography information
+#        *    \include or \input files (honoring \includeonly, too)
+#        *    Graphics files inserted by the graphicx package
+#
+#        Where possible, all of these are built correctly and automatically.
+#        In the case of graphics files, these are generated from the following
+#        file types:
+#
+#        GraphViz:      .dot
+#        GNUPlot:       .gpi
+#        XFig:          .fig
+#        XMgrace:       .xvg
+#        SVG:           .svg
+#        PNG:           .png
+#        JPEG:          .jpg
+#        GZipped EPS:   .eps.gz
+#
+#        If the file exists as a .eps already, it is merely used (and will not
+#        be deleted by 'clean'!).
+#
+#        LaTeX and BibTeX are invoked correctly and the "Rerun to get
+#        cross-references right" warning is heeded a reasonable number of
+#        times.  In my experience this is enough for even the most troublesome
+#        documents, but it can be easily changed (if LaTeX has to be run after
+#        BibTeX more than three times, it is likely that something is moving
+#        back and forth between pages, and no amount of LaTeXing will fix
+#        that).
+#
+#        \includeonly is honored by this system, so files that are not
+#        specified there will not trigger a rebuild when changed.
+#
+#    Beamer:
+#        A special TeX source comment is recognized by this makefile (only when
+#        BUILD_STRATEGY=latex, since this invokes psnup):
+#
+#        %%[[:space:]]*BEAMER[[:space:]]*LARGE
+#
+#        The presence of this comment forces the output of dvips through psnup
+#        to enlarge beamer slides to take up an entire letter-sized page.  This
+#        is particularly useful when printing transparencies or paper versions
+#        of the slides.  For some reason landscape orientation doesn't appear
+#        to work, though.
+#
+#        If you want to put multiple slides on a page, use this option and then
+#        print using mpage, a2ps, or psnup to consolidate slides.  My personal
+#        favorite is a2ps, but your mileage may vary.
+#
+#        When beamer is the document class, dvips does NOT receive a paper size
+#        command line attribute, since beamer does special things with sizes.
+#
+#    GNUPlot Graphics:
+#        When creating a .gpi file, DO NOT INCLUDE the "set terminal" or "set
+#        output" commands!  The makefile will include terminal information for
+#        you.  Besides being unnecessary and potentially harmful, including the
+#        terminal definition in the .gpi file makes it harder for you, the one
+#        writing the document, to preview your graphics, e.g., with
+#
+#           gnuplot -persist myfile.gpi
+#
+#        so don't do specify a terminal or an output file in your .gpi files.
+#
+#        When building a gpi file into an eps file, there are several features
+#        available to the document designer:
+#
+#        Global Header:
+#            The makefile searches for the files in the variable GNUPLOT_GLOBAL
+#            in order:
+#
+#            ($(GNUPLOT_GLOBAL))
+#
+#            Only the first found is used.  All .gpi files in the directory are
+#            treated as though the contents of GNUPLOT_GLOBAL were directly
+#            included at the top of the file.
+#
+#            NOTE: This includes special comments! (see below)
+#
+#        Font Size:
+#            A special comment in a .gpi file (or a globally included file) of
+#            the form
+#
+#            ## FONTSIZE=<number>
+#
+#            will change the font size of the GPI output.  If font size is
+#            specified in both the global file and the GPI file, the
+#            specification in the individual GPI file is used.
+#
+#        Grayscale Output:
+#            GNUplot files also support a special comment to force them to be
+#            output in grayscale *no matter what*:
+#
+#            ## GRAY
+#
+#            This is not generally advisable, since you can always create a
+#            grayscale document using the forms mentioned above.  But, if your
+#            plot simply must be grayscale even in a document that allows
+#            colors, this is how you do it.
+#
+#    XFig Graphics:
+#            No special handling is done with XFig, except when a global
+#            grayscale method is used, e.g.
+#
+#                make GRAY=1 document
+#
+#            In these cases the .eps files is created using the -N switch to
+#            fig2dev to turn off color output.  (Only works with eps, not pstex
+#            output)
+#
+#    GraphVis Graphics:
+#            Color settings are simply ignored here.  The 'dot' program is used
+#            to transform a .dot file into a .eps file.
+#
+#            If you want, you can use the dot2tex program to convert dot files
+#            to tex graphics.  The default is to just call dot2tex with no
+#            arguments, but you can change the DOT2TEX definition to include
+#            options as needed (in your Makefile.ini).
+#
+#            Note that, as with pstex, the makefile cannot use latex's own
+#            output to discover all missing dot_t (output) files, since anytime
+#            TeX includes TeX, it has to bail when it can't find the include
+#            file.  It can therefore only stop on the first missing file it
+#            discovers, and we can't get a large list of them out easily.
+#
+#            So, the makefile errors out if it's missing an included dot_t
+#            file, then prompts the user to run this command manually:
+#
+#                make all-dot2tex
+#
+#    GZipped EPS Graphics:
+#
+#        A .eps.gz file is sometimes a nice thing to have.  EPS files can get
+#        very large, especially when created from bitmaps (don't do this if you
+#        don't have to).  This makefile will unzip them (not in place) to
+#        create the appropriate EPS file.
+#
+#
 endef
 
 #
 # DEPENDENCY CHART:
 #
-(##include_as_comment("dependency-chart.dot") ##)
+# digraph "g" {
+#     rankdir=TB
+#     size="9,9"
+#     edge [fontsize=12 weight=10]
+#     node [shape=box fontsize=14 style=rounded]
+#
+#     eps [
+#         shape=Mrecord
+#         label="{{<gpi> GNUplot|<epsgz> GZip|<dot> Dot|<fig> XFig}|<eps> eps}"
+#         ]
+#     pstex [label="%.pstex"]
+#     pstex_t [label="%.pstex_t"]
+#     tex_outputs [shape=point]
+#     extra_tex_files [shape=point]
+#     gpi_data [label="<data>"]
+#     gpi_includes [label="_include_.gpi"]
+#     aux [label="%.aux"]
+#     fls [label="%.fls"]
+#     idx [label="%.idx"]
+#     glo [label="%.glo"]
+#     ind [label="%.ind"]
+#     log [label="%.log"]
+#     tex_sh [label="%.tex.sh"]
+#     rst [label="%.rst"]
+#     tex [
+#         shape=record
+#         label="<tex> %.tex|<include> _include_.tex"
+#         ]
+#     include_aux [label="_include_.aux"]
+#     file_bib [label=".bib"]
+#     bbl [label="%.bbl"]
+#     dvi [label="%.dvi"]
+#     ps [label="%.ps"]
+#     pdf [label="%.pdf"]
+#     fig [label=".fig"]
+#     dot [label=".dot"]
+#     gpi [label=".gpi"]
+#     eps_gz [label=".eps.gz"]
+#
+#     gpi_files [shape=point]
+#
+#     rst -> tex:tex [label="reST"]
+#     tex_sh -> tex:tex [label="sh"]
+#     tex_pl -> tex:tex [label="perl"]
+#     tex_py -> tex:tex [label="python"]
+#     tex -> tex_outputs [label="latex"]
+#     tex_outputs -> dvi
+#     tex_outputs -> aux
+#     tex_outputs -> log
+#     tex_outputs -> fls
+#     tex_outputs -> idx
+#     tex_outputs -> include_aux
+#     aux -> bbl [label="bibtex"]
+#     file_bib -> bbl [label="bibtex"]
+#     idx -> ind [label="makeindex"]
+#     glo -> gls [label="makeindex"]
+#     nlo -> nls [label="makeindex"]
+#     gls -> extra_tex_files
+#     nls -> extra_tex_files
+#     ind -> extra_tex_files
+#     bbl -> extra_tex_files
+#     eps -> extra_tex_files
+#     extra_tex_files -> dvi [label="latex"]
+#     gpi_files -> eps:gpi [label="gnuplot"]
+#     gpi -> gpi_files
+#     gpi_data -> gpi_files
+#     gpi_includes -> gpi_files
+#     eps_gz -> eps:epsgz [label="gunzip"]
+#     fig -> eps:fig [label="fig2dev"]
+#     fig -> pstex [label="fig2dev"]
+#     fig -> pstex_t [label="fig2dev"]
+#     pstex -> pstex_t [label="fig2dev"]
+#     dot -> eps:dot [label="dot"]
+#     dvi -> ps [label="dvips"]
+#     include_aux -> bbl [label="bibtex"]
+#     ps -> pdf [label="ps2pdf"]
+#
+#     edge [ color=blue label="" style=dotted weight=1 fontcolor=blue]
+#     fls -> tex:include [label="INPUT: *.tex"]
+#     fls -> file_bib [label="INPUT: *.aux"]
+#     aux -> file_bib [label="\\bibdata{...}"]
+#     include_aux -> file_bib [label="\\bibdata{...}"]
+#     log -> gpi [label="Graphic file"]
+#     log -> fig [label="Graphic file"]
+#     log -> eps_gz [label="Graphic file"]
+#     log -> dot [label="Graphic file"]
+#     log -> idx [label="No file *.ind"]
+#     log -> glo [label="No file *.gls"]
+#     log -> nlo [label="No file *.nls"]
+#     gpi -> gpi_data [label="plot '...'"]
+#     gpi -> gpi_includes [label="load '...'"]
+#     tex:tex -> ps [label="paper"]
+#     tex:tex -> pdf [label="embedding"]
+# }
+#
 
 #
 # DEPENDENCY CHART SCRIPT
@@ -2497,3 +4279,4 @@ endef
 -include $(HOME)/.latex-makefile/Targets.ini
 #
 # vim: noet sts=0 sw=8 ts=8
+
