@@ -30,7 +30,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha10
+version		:= 2.2.1
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -126,6 +126,8 @@ export LC_ALL		?= C
 #
 #
 # CHANGES:
+# Chris Monson (2020-12-11):
+# * Fix bcf datasource collection, add some tests, thanks to k4rtik on issue 126
 # Chris Monson (2018-11-28):
 # * Add bcf datasource collection for biber - thanks to llbit on issue 126
 # Chris Monson (2014-09-04):

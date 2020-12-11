@@ -5,7 +5,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1-alpha10
+version		:= 2.2.1
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,

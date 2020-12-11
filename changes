@@ -1,3 +1,5 @@
+Chris Monson (2020-12-11):
+* Fix bcf datasource collection, add some tests, thanks to k4rtik on issue 126
 Chris Monson (2018-11-28):
 * Add bcf datasource collection for biber - thanks to llbit on issue 126
 Chris Monson (2014-09-04):
