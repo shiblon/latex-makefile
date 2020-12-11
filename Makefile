@@ -2051,7 +2051,7 @@ endef
 # Outputs bcf bibs to stdout. Arg 1 is the bcf file stem, arg 2 is the
 # list of targets for each dependency found.
 define get-bcf-bibs
-if $(call test-non-empty,$1.bcf); then \
+if $(call test-non-empty,$1); then \
   $(SED) \
 -e '/datasource/!d' \
 -e 's/^[^>]*>//g' \
@@ -3352,7 +3352,7 @@ endif
 	$(call get-graphics,$*) >> $*.d; \
 	$(call get-log-index,$*,$(addprefix $*.,aux aux.make)) >> $*.d; \
 	$(call get-bibs,$*.aux.make,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
-	$(call get-bcf-bibs,$*,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
+	$(call get-bcf-bibs,$*.bcf,$(addprefix $*.,bbl aux aux.make)) >> $*.d; \
 	$(EGREP) -q "# MISSING stem" $*.d && $(SLEEP) 1 && $(RM) $*.pdf; \
 	$(EGREP) -q "# MISSING format" $*.d && $(RM) $*.pdf; \
 	$(call move-if-exists,$*.$(build_target_extension),$*.$(build_target_extension).1st.make); \
