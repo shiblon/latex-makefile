@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2
 
 """Run sed from a script, but do it as though it is being used in a Makefile.
 
