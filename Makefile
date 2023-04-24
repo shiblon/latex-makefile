@@ -30,7 +30,7 @@
 #
 fileinfo	:= LaTeX Makefile
 author		:= Chris Monson
-version		:= 2.2.1
+version		:= 2.2.2
 #
 .DEFAULT_GOAL	:= all
 # Note that the user-global version is imported *after* the source directory,
@@ -126,6 +126,8 @@ export LC_ALL		?= C
 #
 #
 # CHANGES:
+# Chris Monson (2023-04-24):
+# * Add VSCode Latex-Workshop clean targets under clean-vscode, thanks to codingdave on issue 192
 # Chris Monson (2020-12-11):
 # * Fix bcf datasource collection, add some tests, thanks to k4rtik on issue 126
 # Chris Monson (2018-11-28):
@@ -3563,12 +3565,16 @@ clean-auxiliary:
 .PHONY: clean-nographics
 clean-nographics: clean-tex clean-deps clean-backups clean-auxiliary ;
 
+.PHONY: clean-vscode
+clean-vscode:
+	$(QUIET)$(call clean-files,*.fdb_latexmk *.synctex.gz)
+
 .PHONY: clean-extra
 clean-extra:
 	$(QUIET)$(call clean-files,$(cleanextra))
 
 .PHONY: clean
-clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary clean-extra ;
+clean: clean-generated clean-tex clean-graphics clean-deps clean-backups clean-auxiliary clean-extra clean-vscode;
 
 #
 # HELP TARGETS
