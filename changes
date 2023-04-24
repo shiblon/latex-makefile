@@ -1,3 +1,5 @@
+Chris Monson (2023-04-24):
+* Add VSCode Latex-Workshop clean targets under clean-vscode, thanks to codingdave on issue 192
 Chris Monson (2020-12-11):
 * Fix bcf datasource collection, add some tests, thanks to k4rtik on issue 126
 Chris Monson (2018-11-28):
